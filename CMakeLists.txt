@@ -3,8 +3,10 @@ message("hello world")
 cmake_minimum_required(VERSION 3.10)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON) # For clang-tidy.
 set(BUILD_SHARED_LIBS OFF) # We expect external libraries to be linked statically.
-set(CMAKE_CXX_STANDARD 17) # Compile as C++17.
-set(CMAKE_CXX_STANDARD_REQUIRED ON) # Require C++17 support.
+set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_C_COMPILER clang)
+set(CMAKE_CXX_COMPILER clang++)
 
 project(GavinDB
         VERSION 2024.03
@@ -31,7 +33,7 @@ message("Build mode: ${CMAKE_BUILD_TYPE}")
 # Compiler flags.
 set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -Wall -Wextra -Werror")
 set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -Wno-unused-parameter -Wno-attributes") # TODO: remove
-set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -O0 -ggdb -fsanitize=${BUSTUB_SANITIZER} -fno-omit-frame-pointer -fno-optimize-sibling-calls")
+set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -O0 -ggdb -fno-omit-frame-pointer -fno-optimize-sibling-calls")
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
 message(STATUS "CMAKE_CXX_FLAGS: ${CMAKE_CXX_FLAGS}")
@@ -44,6 +46,17 @@ set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 
 
-set(SOURCE_FILES src/main.cpp) 
+set(SOURCE_FILES 
+    src/common/db_instance.cpp
+    )
 
-add_executable(GavinDB ${SOURCE_FILES})
+add_library(gavindb ${SOURCE_FILES})
+
+add_executable(gavindb_executable 
+        src/main.cpp
+)
+
+target_link_libraries(gavindb_executable gavindb)
+
+set(SRC_INCLUDE_DIR ${PROJECT_SOURCE_DIR}/src/include)
+include_directories(${SRC_INCLUDE_DIR})
