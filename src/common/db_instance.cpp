@@ -1,4 +1,4 @@
-#include "common/db_instance.h"
+#include "common/db_instance.hpp"
 #include <iostream>
 
 namespace db {

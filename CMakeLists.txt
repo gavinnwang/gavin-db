@@ -32,7 +32,7 @@ message("Build mode: ${CMAKE_BUILD_TYPE}")
 
 # Compiler flags.
 set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -Wall -Wextra -Werror")
-set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -Wno-unused-parameter -Wno-attributes") # TODO: remove
+set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -Wno-unused-parameter -Wno-attributes")
 set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -O0 -ggdb -fno-omit-frame-pointer -fno-optimize-sibling-calls")
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
@@ -45,18 +45,16 @@ set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 
-
+# Core
 set(SOURCE_FILES 
     src/common/db_instance.cpp
     )
-
 add_library(gavindb ${SOURCE_FILES})
 
-add_executable(gavindb_executable 
-        src/main.cpp
-)
+# Shell
+add_executable(gavindb_shell src/shell.cpp)
+target_link_libraries(gavindb_shell gavindb)
 
-target_link_libraries(gavindb_executable gavindb)
-
+# Include
 set(SRC_INCLUDE_DIR ${PROJECT_SOURCE_DIR}/src/include)
 include_directories(${SRC_INCLUDE_DIR})
