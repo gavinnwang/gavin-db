@@ -9,6 +9,7 @@ class Page {
     data_ = new char[PAGE_SIZE];
     ResetMemory();
   }
+  ~Page() { delete[] data_; }
 
   inline auto GetData() -> char * { return data_; }
   inline auto GetPageId() -> page_id_t { return page_id_; }
