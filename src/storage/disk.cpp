@@ -42,7 +42,7 @@ void DiskManager::ReadPage(page_id_t page_id, char *page_data) {
       std::cout << "failed to open db file";
       exit(0);
     }
-    // if file ends before reading BUSTUB_PAGE_SIZE
+    // if file ends before reading PAGE_SIZE
     int gcount = db_io_.gcount();
     if (gcount < PAGE_SIZE) {
       std::cout << "io read less than a page";
