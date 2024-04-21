@@ -10,6 +10,9 @@ class Page {
     ResetMemory();
   }
 
+  inline auto GetData() -> char * { return data_; }
+  inline auto GetPageId() -> page_id_t { return page_id_; }
+
 private:
   static constexpr size_t OFFSET_PAGE_START = 0;
   inline void ResetMemory() { memset(data_, OFFSET_PAGE_START, PAGE_SIZE); }
