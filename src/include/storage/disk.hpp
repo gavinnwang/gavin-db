@@ -15,6 +15,5 @@ private:
   auto GetFileSize(const std::string &file_name) -> int;
   std::string file_name_;
   std::fstream db_io_;
-
 };
 }
