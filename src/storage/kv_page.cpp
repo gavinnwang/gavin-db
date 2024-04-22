@@ -23,7 +23,9 @@ auto KVPage::Get(const std::string& key, std::string* value) const -> bool{
       std::vector<char> val_buf (size - meta.key_size_);
       memmove(val_buf.data(), page_start_ + offset + meta.key_size_, size - meta.key_size_);
       std::string val_str(val_buf.begin(), val_buf.end());
-      *value = val_str;
+      if (value != nullptr) {
+        *value = val_str;
+      }
       return true;
     }
   }
@@ -40,6 +42,10 @@ auto KVPage::Put(const std::string& key, const std::string& value) -> bool {
     std::cout << "not allowed to have a key greater than max uint16" << std::endl;
     return false;
   } 
+  if (Get(key, nullptr)) {
+    std::cout << "key already exists" << std::endl;
+    return false;
+  }
   auto meta = KVMeta{false, static_cast<uint16_t>(key.size())};
   kv_info_[num_keys_] = std::make_tuple(*offset, kv_size, meta);
   num_keys_++;

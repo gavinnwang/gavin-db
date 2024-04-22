@@ -7,6 +7,9 @@ namespace db {
 class DBInstance {
 public:
   explicit DBInstance(const std::string &db_file_name);
+
+  auto ExecuteQuery(const std::string &query, std::string* output) -> bool;
+
 private:
   std::unique_ptr<DiskManager> disk_manager_;
 };
