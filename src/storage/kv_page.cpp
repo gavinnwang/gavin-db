@@ -1,5 +1,4 @@
 #include "storage/kv_page.hpp"
-#include "common/macros.hpp"
 #include "storage/disk.hpp"
 #include <cstddef>
 #include <cstdint>
@@ -122,9 +121,9 @@ void KVPage::Compact() {
   if (num_keys_ + deleted_keys == 0) {
     std::cout << "no kv in page, no need to compress";;
   }
-  const  auto& [offset, first_key_size, first_val_size, _] = kv_info_[0];
+  const  auto& [first_offset, first_key_size, first_val_size, _] = kv_info_[0];
   // have last offset as the start of the last kv, default is end of page
-  uint16_t last_offset = offset + first_key_size + first_val_size;
+  uint16_t last_offset = first_offset + first_key_size + first_val_size;
   // pointer for moving kv info array
   uint16_t last_inserted = 0;
   for (uint16_t cur_i = 0; cur_i < num_keys_ + deleted_keys; cur_i++) {
@@ -133,7 +132,7 @@ void KVPage::Compact() {
       continue;
     }
     uint16_t kv_size = key_size + val_size; 
-    memcpy(page_start_ + last_offset - kv_size, page_start_ + offset, kv_size);
+    memcpy(page_start_ + last_offset - kv_size, page_start_ + cur_offset, kv_size);
     // set last offset to the start of the moved kv
     last_offset -= kv_size;
     // set the offset to the new offset

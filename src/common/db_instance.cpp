@@ -44,6 +44,7 @@ auto DBInstance::ExecuteQuery(const std::string &query, std::string* output) -> 
       disk_manager_->ReadPage(0, new_page.GetData());
       auto kv_page = new_page.AsMut<KVPage>();
       kv_page->Compact();
+      disk_manager_->WritePage(0, new_page.GetData());
       return true;
     }
    if (parsed[0] == "get") {
