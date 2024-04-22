@@ -12,8 +12,21 @@ void KVPage::Init(){
   num_keys_ = 0; 
 }
 
-void KVPage::Get(const std::string& key, std::string* value) const {
-  return;  
+bool KVPage::Get(const std::string& key, std::string* value) const {
+  for (int i = 0; i < num_keys_; i++) {
+    const auto& [offset, size, meta] = kv_info_[i];
+    std::vector<char> key_buf (meta.key_size_);
+    memmove(key_buf.data(), page_start_ + offset, meta.key_size_);
+    std::string key_str(key_buf.begin(), key_buf.end()); 
+    if (key_str == key) {
+      std::vector<char> val_buf (size - meta.key_size_);
+      memmove(val_buf.data(), page_start_ + offset + meta.key_size_, size - meta.key_size_);
+      std::string val_str(val_buf.begin(), val_buf.end());
+      *value = val_str;
+      return true;
+    }
+  }
+  return false;  
 }
 
   

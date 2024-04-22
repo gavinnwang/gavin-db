@@ -2,7 +2,11 @@
 #include <iostream>
 
 int main() {
-  std::cout << "Starting shell" << std::endl;
   db::DBInstance("test.db");
+  std::cout << "Welcome to the gavin db!" << std::endl << std::endl;
+  while(true) {
+    std::string query;
+
+  }
 }
 
