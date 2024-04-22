@@ -2,7 +2,6 @@
 #include "storage/disk.hpp"
 #include "storage/kv_page.hpp"
 #include "storage/page.hpp"
-#include <iostream>
 #include <memory>
 #include <sstream>
 
@@ -33,17 +32,33 @@ auto DBInstance::ExecuteQuery(const std::string &query, std::string* output) -> 
     if (!lastStr.empty()) {
       lastStr.pop_back();
     }
+    if (parsed[0] == "print") {
+      auto new_page = Page();
+      disk_manager_->ReadPage(0, new_page.GetData());
+      auto kv_page = new_page.As<KVPage>();
+      kv_page->PrintContent();
+      return true;
+    }
+    if (parsed[0] == "compact") {
+      auto new_page = Page();
+      disk_manager_->ReadPage(0, new_page.GetData());
+      auto kv_page = new_page.AsMut<KVPage>();
+      kv_page->Compact();
+      return true;
+    }
    if (parsed[0] == "get") {
       if (parsed.size() != 2) {
+        *output = "parse error";
         return false;
       }
       auto new_page = Page();
       disk_manager_->ReadPage(0, new_page.GetData());
-      auto kv_page = new_page.AsMut<KVPage>();
+      auto kv_page = new_page.As<KVPage>();
       return kv_page->Get(parsed[1], output);
     }
    if (parsed[0] == "put") {
      if (parsed.size() != 3) {
+        *output = "parse error";
         return false;
       }
       auto new_page = Page();
@@ -56,7 +71,23 @@ auto DBInstance::ExecuteQuery(const std::string &query, std::string* output) -> 
       }
       return res;
     }
+   if (parsed[0] == "delete") {
+     if (parsed.size() != 2) {
+        *output = "parse error";
+        return false;
+      }
+      auto new_page = Page();
+      disk_manager_->ReadPage(0, new_page.GetData());
+      auto kv_page = new_page.AsMut<KVPage>();
+      auto res = kv_page->Delete(parsed[1]);  
+      disk_manager_->WritePage(0, new_page.GetData());
+      if (res) {
+        *output = "delete success";
+      }
+      return res;
+    }
   }
+  *output = "parse error";
   return false;
 }
 }

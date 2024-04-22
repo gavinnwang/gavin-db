@@ -15,8 +15,8 @@ class Page {
   inline auto GetPageId() -> page_id_t { return page_id_; }
 
   template <class T>
-  auto As() -> const T& {
-    return *reinterpret_cast<const T *>(GetData());
+  auto As() -> const T* {
+    return reinterpret_cast<const T *>(GetData());
   }
 
   auto GetDataMut() -> char * {

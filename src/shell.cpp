@@ -1,5 +1,6 @@
 #include <common/db_instance.hpp>
 #include <iostream>
+
 auto EndsWith(const std::string &str, const std::string &suffix) -> bool {
   if (suffix.size() > str.size()) {
     return false;
@@ -29,7 +30,7 @@ int main() {
     if (db.ExecuteQuery(query, &output)) {
       std::cout << output << std::endl;
     } else {
-      std::cout << "something went wrong" << std::endl;
+      std::cerr << output << std::endl;
     }
   }
 }
