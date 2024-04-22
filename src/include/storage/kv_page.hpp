@@ -16,8 +16,8 @@ class KVPage {
 public:
   void Init();
   auto GetNumKeys() const -> uint32_t {return num_keys_;}
-  void Get(const std::string& key,std::string* value) const;
-  void Put(const std::string& key, const std::string& value);
+  auto Get(const std::string& key,std::string* value) const ->bool; 
+  auto Put(const std::string& key, const std::string& value) -> bool; 
   auto GetNextTupleOffset(const std::string& key, const std::string& value) const -> std::optional<uint16_t>;
   void PrintContent() const;
 private:
