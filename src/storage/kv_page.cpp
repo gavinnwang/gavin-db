@@ -1,4 +1,3 @@
-#pragma once
 #include "storage/kv_page.hpp"
 #include "storage/disk.hpp"
 #include <cstddef>
@@ -14,7 +13,6 @@ void KVPage::Init(){
 }
 
 void KVPage::Get(const std::string& key, std::string* value) const {
-  
   return;  
 }
 
@@ -33,7 +31,7 @@ void KVPage::Put(const std::string& key, const std::string& value) {
   kv_info_[num_keys_] = std::make_tuple(*offset, kv_size, meta);
   num_keys_++;
   memcpy(page_start_ + *offset, key.data(), key.size());
-  memcpy(page_start_ + *offset + key.size(), key.data(), key.size());
+  memcpy(page_start_ + *offset + key.size(), value.data(), value.size());
 }
 
 auto KVPage::GetNextTupleOffset(const std::string& key, const std::string& value) const -> std::optional<uint16_t> {
@@ -55,12 +53,22 @@ auto KVPage::GetNextTupleOffset(const std::string& key, const std::string& value
 }
 
 void KVPage::PrintContent() const {
-  for (const auto& [offset, size, meta] : kv_info_) {
-    std::vector<char> data;
-    std::cout<< "[" << offset << ", " << size << ", " << meta.key_size_ << "]" << std::endl;
-    memmove(data.data(), page_start_ + offset, size);
-    std::string str(data.begin(), data.end()); 
-    std:: cout << str << std::endl;
+  for (int i = 0; i < num_keys_; i++) {
+  const auto& [offset, size, meta] = kv_info_[i];
+  // for (const auto& [offset, size, meta] : kv_info_) {
+    // std::vector<char> data (size);
+    // char key_buf[meta.key_size_];
+    // char val_buf[size - meta.key_size_];
+    std::vector<char> key_buf (meta.key_size_);
+    std::vector<char> val_buf (size - meta.key_size_);
+    // std::cout<< "[" << offset << ", " << size << ", " << meta.key_size_ << "]" << std::endl;
+    memmove(key_buf.data(), page_start_ + offset, meta.key_size_);
+    memmove(val_buf.data(), page_start_ + offset + meta.key_size_, size - meta.key_size_);
+    std::string key_str(key_buf.begin(), key_buf.end()); 
+    std::string val_str(val_buf.begin(), val_buf.end());
+    // std:: cout << key_str << std::endl;
+    // std:: cout << val_str << std::endl;
+    std::cout << "(" + key_str + ": " + val_str + ")" <<std::endl;
   }
 }
 }

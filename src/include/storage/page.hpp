@@ -14,6 +14,20 @@ class Page {
   inline auto GetData() -> char * { return data_; }
   inline auto GetPageId() -> page_id_t { return page_id_; }
 
+  template <class T>
+  auto As() -> const T& {
+    return *reinterpret_cast<const T *>(GetData());
+  }
+
+  auto GetDataMut() -> char * {
+    return GetData();
+  }
+
+  template <class T>
+  auto AsMut() -> T * {
+    return reinterpret_cast<T*>(GetDataMut());
+  }
+
 private:
   static constexpr size_t OFFSET_PAGE_START = 0;
   inline void ResetMemory() { memset(data_, OFFSET_PAGE_START, PAGE_SIZE); }

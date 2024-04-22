@@ -24,8 +24,9 @@ private:
   // offset + size
   using KVInfo = std::tuple<uint16_t, uint16_t, KVMeta>;
   char page_start_[0];
-  KVInfo kv_info_[0];
+  // nums_keys must be before the kv info array because kv info array will grow and nums keys will get overwritten by kv info array if you have it after.
   uint16_t num_keys_;
+  KVInfo kv_info_[0];
   
   static constexpr uint16_t KV_INFO_SIZE = 2 + KV_PAGE_HEADER_SIZE + KV_META_SIZE;
   static_assert(sizeof(KVInfo) == KV_INFO_SIZE);

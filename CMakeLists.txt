@@ -48,7 +48,9 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 set(SOURCE_FILES 
     src/common/db_instance.cpp
     src/storage/disk.cpp
-    )
+    src/storage/kv_page.cpp
+        src/include/storage/page.hpp
+)
 add_library(gavindb ${SOURCE_FILES})
 
 # Shell
