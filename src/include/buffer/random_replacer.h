@@ -13,7 +13,6 @@ class RandomBogoReplacer : public Replacer {
     void Pin(frame_id_t frame_id);
     void Unpin(frame_id_t frame_id);
   private:
-    // frame id, pinned state
-    std::unordered_map<frame_id_t, bool> used_frames_; 
+    std::unordered_map<frame_id_t, bool> frame_store_; 
 };
 }
