@@ -14,6 +14,9 @@ class BufferPoolManager {
     ~BufferPoolManager();
     auto NewPage(page_id_t *page_id) -> Page *;
     auto FetchPage(page_id_t page_id) -> Page *;
+    auto UnpinPage(page_id_t page_id, bool is_dirty) -> bool;
+    auto FlushPage(page_id_t page_id) -> bool;
+    auto DeletePage(page_id_t page_id) -> bool;
 
   private:
     auto AllocatePage() -> page_id_t;

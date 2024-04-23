@@ -73,6 +73,7 @@ auto KVPage::Delete(const std::string& key) -> bool {
       return true;
     }
   }
+  std::cout << "key not found"; 
   return false;  
 }
 
