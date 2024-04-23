@@ -118,9 +118,11 @@ void KVPage::PrintContent() const {
 }
 
 void KVPage::Compact() {
-  if (num_keys_ + deleted_keys == 0) {
-    std::cout << "no kv in page, no need to do compaction";
+  if (deleted_keys == 0) {
+    std::cout << "no deleted kv in page, no need to do compaction";
+    return;
   }
+
   const  auto& [first_offset, first_key_size, first_val_size, _] = kv_info_[0];
   // have last offset as the start of the last kv, default is end of page
   uint16_t last_offset = first_offset + first_key_size + first_val_size;

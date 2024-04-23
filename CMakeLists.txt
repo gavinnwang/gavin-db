@@ -48,7 +48,7 @@ set(SOURCE_FILES
     src/common/db_instance.cpp
     src/storage/disk.cpp
     src/storage/kv_page.cpp
-        src/include/storage/page.hpp
+    src/buffer/buffer_pool_manager.cpp
 )
 add_library(gavindb ${SOURCE_FILES})
 
