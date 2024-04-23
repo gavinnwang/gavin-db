@@ -2,7 +2,7 @@
 namespace db{
   RandomBogoReplacer::RandomBogoReplacer(size_t num_frames) {}
 
-  auto RandomBogoReplacer::Evict(frame_id_t *frame_id) -> bool {
+  auto RandomBogoReplacer::Evict(frame_id_t& frame_id) -> bool {
     for (const auto& it : frame_store_) {
       if (it.second) {
         *frame_id = it.first;

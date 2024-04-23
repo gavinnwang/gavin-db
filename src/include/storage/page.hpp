@@ -32,9 +32,10 @@ class Page {
 private:
   static constexpr size_t OFFSET_PAGE_START = 0;
   inline void ResetMemory() { memset(data_, OFFSET_PAGE_START, PAGE_SIZE); }
-  char * data_;
   page_id_t page_id_ = INVALID_PAGE_ID;
+  bool is_dirty_ = false;
+  uint16_t pin_count_= 0;
 
-  bool is_dirty_{false};
+  char * data_;
 };
 }
