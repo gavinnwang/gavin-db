@@ -1,5 +1,6 @@
 #pragma once
 
+#include "common/rwlatch.hpp"
 #include "storage/disk.hpp"
 namespace db {
 class Page {
@@ -32,6 +33,7 @@ private:
   page_id_t page_id_ = INVALID_PAGE_ID;
   bool is_dirty_ = false;
   uint16_t pin_count_ = 0;
+  ReaderWriterLatch rwlatch_;
 
   char *data_;
 };

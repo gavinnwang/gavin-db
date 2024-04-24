@@ -8,7 +8,7 @@
 namespace db {
 class RandomBogoReplacer : public Replacer {
 public:
-  explicit RandomBogoReplacer(size_t num_frames);
+  explicit RandomBogoReplacer();
   ~RandomBogoReplacer() = default;
   auto Evict(frame_id_t *frame_id) -> bool;
   void Pin(frame_id_t frame_id);

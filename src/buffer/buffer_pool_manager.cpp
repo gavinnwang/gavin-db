@@ -7,8 +7,7 @@
 namespace db {
 BufferPoolManager::BufferPoolManager(size_t pool_size,
                                      DiskManager *disk_manager)
-    : pool_size_(pool_size),
-      replacer_(std::make_unique<RandomBogoReplacer>(10)),
+    : pool_size_(pool_size), replacer_(std::make_unique<RandomBogoReplacer>()),
       disk_manager_(disk_manager) {
   pages_ = new Page[pool_size_];
   std::vector<bool> free_frame_tracker_(pool_size_, true);

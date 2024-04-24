@@ -49,6 +49,7 @@ set(SOURCE_FILES
     src/storage/disk.cpp
     src/storage/kv_page.cpp
     src/buffer/buffer_pool_manager.cpp
+    src/buffer/random_replacer.cpp
 )
 add_library(gavindb ${SOURCE_FILES})
 

@@ -1,6 +1,6 @@
 #include "buffer/random_replacer.h"
 namespace db {
-RandomBogoReplacer::RandomBogoReplacer(size_t num_frames) {}
+RandomBogoReplacer::RandomBogoReplacer() {}
 auto RandomBogoReplacer::Evict(frame_id_t *frame_id) -> bool {
   for (const auto &it : frame_store_) {
     if (it.second) {
