@@ -1,7 +1,8 @@
 #pragma once
 
+#include "common/config.hpp"
 #include "common/rwlatch.hpp"
-#include "storage/disk.hpp"
+
 namespace db {
 class Page {
   friend class BufferPoolManager;
@@ -26,6 +27,10 @@ public:
   template <class T> auto AsMut() -> T * {
     return reinterpret_cast<T *>(GetDataMut());
   }
+  inline void WLatch() { rwlatch_.WLock(); }
+  inline void WUnlatch() { rwlatch_.WUnlock(); }
+  inline void RLatch() { rwlatch_.RLock(); }
+  inline void RUnlatch() { rwlatch_.RUnlock(); }
 
 private:
   static constexpr size_t OFFSET_PAGE_START = 0;

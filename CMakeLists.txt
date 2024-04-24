@@ -48,6 +48,7 @@ set(SOURCE_FILES
     src/common/db_instance.cpp
     src/storage/disk.cpp
     src/storage/kv_page.cpp
+    src/storage/page_guard.cpp
     src/buffer/buffer_pool_manager.cpp
     src/buffer/random_replacer.cpp
 )
