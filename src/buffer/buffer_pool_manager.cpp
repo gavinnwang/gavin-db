@@ -12,8 +12,8 @@ BufferPoolManager::BufferPoolManager(size_t pool_size,
       disk_manager_(disk_manager) {
   pages_ = new Page[pool_size_];
   std::vector<bool> free_frame_tracker_(pool_size_, true);
-  for (size_t i = 0; i < pool_size_; ++i) {
-    free_list_.emplace_back(static_cast<int>(i));
+  for (frame_id_t i = 0; i < pool_size_; ++i) {
+    free_list_.emplace_back(i);
   }
 }
 BufferPoolManager::~BufferPoolManager() { delete[] pages_; }
@@ -118,6 +118,12 @@ auto BufferPoolManager::FlushPage(page_id_t page_id) -> bool {
   disk_manager_->WritePage(page_id, page.data_);
   page.is_dirty_ = false;
   return true;
+}
+
+void BufferPoolManager::FlushAllPages() {
+  for (frame_id_t i = 0; i < pool_size_; i++) {
+    FlushPage(pages_[i].page_id_);
+  }
 }
 
 auto BufferPoolManager::DeletePage(page_id_t page_id) -> bool {

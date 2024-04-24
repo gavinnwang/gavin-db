@@ -1,6 +1,7 @@
 #pragma once
 
 #include "buffer/replacer.hpp"
+#include "common/config.hpp"
 #include "storage/disk.hpp"
 #include "storage/page.hpp"
 #include "storage/page_guard.hpp"
@@ -16,6 +17,7 @@ public:
   auto FetchPage(page_id_t page_id) -> Page *;
   auto UnpinPage(page_id_t page_id, bool is_dirty) -> bool;
   auto FlushPage(page_id_t page_id) -> bool;
+  void FlushAllPages();
   auto DeletePage(page_id_t page_id) -> bool;
   auto FetchPageBasic(page_id_t page_id) -> BasicPageGuard;
   auto FetchPageRead(page_id_t page_id) -> ReadPageGuard;
@@ -26,7 +28,7 @@ private:
   auto AllocatePage() -> page_id_t;
   auto AllocateFrame(frame_id_t *frame_id) -> bool;
 
-  const size_t pool_size_;
+  const frame_id_t pool_size_;
   std::atomic<page_id_t> next_page_id_ = 0;
   std::unique_ptr<Replacer> replacer_;
   std::unique_ptr<DiskManager> disk_manager_;

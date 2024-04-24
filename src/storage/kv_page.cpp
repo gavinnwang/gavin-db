@@ -105,10 +105,10 @@ void KVPage::PrintContent() const {
     // std::vector<char> data (size);
     // char key_buf[meta.key_size_];
     // char val_buf[val_size];
-    std::vector<char> key_buf(key_size);
-    std::vector<char> val_buf(val_size);
     // std::cout<< "[" << offset << ", " << size << ", " << meta.key_size_ <<
     // "]" << std::endl;
+    std::vector<char> key_buf(key_size);
+    std::vector<char> val_buf(val_size);
     memmove(key_buf.data(), page_start_ + offset, key_size);
     memmove(val_buf.data(), page_start_ + offset + key_size, val_size);
     std::string key_str(key_buf.begin(), key_buf.end());
@@ -116,7 +116,7 @@ void KVPage::PrintContent() const {
     if (i) {
       std::cout << std::endl;
     }
-    std::cout << offset << "(" + key_str + " : " + val_str + ")";
+    std::cout << "(" + key_str + " : " + val_str + ")";
     if (meta.is_deleted_) {
       std::cout << " deleted";
     }

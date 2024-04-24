@@ -24,7 +24,10 @@ DBInstance::DBInstance(const std::string &db_file_name) {
       DEFAULT_POOL_SIZE, disk_manager_.get());
 };
 
-DBInstance::~DBInstance() { disk_manager_->ShutDown(); }
+DBInstance::~DBInstance() {
+  buffer_pool_manager_->FlushAllPages();
+  disk_manager_->ShutDown();
+}
 
 auto DBInstance::ExecuteQuery(const std::string &query,
                               std::string *output) -> bool {
@@ -34,10 +37,11 @@ auto DBInstance::ExecuteQuery(const std::string &query,
     if (!lastStr.empty()) {
       lastStr.pop_back();
     }
+    if (parsed[0] == "flush") {
+      buffer_pool_manager_->FlushAllPages();
+      return true;
+    }
     if (parsed[0] == "print") {
-      // auto new_page = Page();
-      // disk_manager_->ReadPage(0, new_page.GetData());
-      // auto kv_page = new_page.As<KVPage>();
       auto page_guard = buffer_pool_manager_->FetchPageRead(0);
       auto kv_page = page_guard.As<KVPage>();
       kv_page->PrintContent();
