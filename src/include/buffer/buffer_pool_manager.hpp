@@ -3,6 +3,7 @@
 #include "buffer/replacer.hpp"
 #include "storage/disk.hpp"
 #include "storage/page.hpp"
+#include "storage/page_gaurd.hpp"
 #include <list>
 #include <memory>
 namespace db {
@@ -16,6 +17,10 @@ public:
   auto UnpinPage(page_id_t page_id, bool is_dirty) -> bool;
   auto FlushPage(page_id_t page_id) -> bool;
   auto DeletePage(page_id_t page_id) -> bool;
+  auto FetchPageBasic(page_id_t page_id) -> BasicPageGuard;
+  auto FetchPageRead(page_id_t page_id) -> ReadPageGuard;
+  auto FetchPageWrite(page_id_t page_id) -> WritePageGuard;
+  auto NewPageGuarded(page_id_t *page_id) -> BasicPageGuard;
 
 private:
   auto AllocatePage() -> page_id_t;

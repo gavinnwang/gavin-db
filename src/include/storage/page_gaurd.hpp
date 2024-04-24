@@ -9,6 +9,7 @@ class BasicPageGuard {
   friend class ReadPageGuard;
   friend class WritePageGuard;
 
+public:
   BasicPageGuard() = default;
   BasicPageGuard(BufferPoolManager *bpm, Page *page) : bpm_(bpm), page_(page) {}
   // copy constructor is disabled

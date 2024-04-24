@@ -2,6 +2,7 @@
 #include "buffer/random_replacer.h"
 #include "common/config.hpp"
 #include "common/macros.hpp"
+#include "storage/page_gaurd.hpp"
 #include <memory>
 #include <vector>
 namespace db {
@@ -137,5 +138,27 @@ auto BufferPoolManager::DeletePage(page_id_t page_id) -> bool {
   page.pin_count_ = 0;
   page.is_dirty_ = false;
   return true;
+}
+
+auto BufferPoolManager::FetchPageBasic(page_id_t page_id) -> BasicPageGuard {
+  Page *page = FetchPage(page_id);
+  return {this, page};
+}
+
+auto BufferPoolManager::FetchPageRead(page_id_t page_id) -> ReadPageGuard {
+  Page *page = FetchPage(page_id);
+  page->RLatch();
+  return {this, page};
+}
+
+auto BufferPoolManager::FetchPageWrite(page_id_t page_id) -> WritePageGuard {
+  Page *page = FetchPage(page_id);
+  page->WLatch();
+  return {this, page};
+}
+
+auto BufferPoolManager::NewPageGuarded(page_id_t *page_id) -> BasicPageGuard {
+  Page *page = NewPage(page_id);
+  return {this, page};
 }
 } // namespace db
