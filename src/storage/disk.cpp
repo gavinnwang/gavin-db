@@ -1,14 +1,15 @@
 #include "storage/disk.hpp"
-#include <sys/stat.h>
 #include <cstdlib>
 #include <iostream>
+#include <sys/stat.h>
 namespace db {
-DiskManager::DiskManager(const std::string &db_file): file_name_(db_file) {
+DiskManager::DiskManager(const std::string &db_file) : file_name_(db_file) {
   db_io_.open(db_file, std::ios::binary | std::ios::in | std::ios::out);
   if (!db_io_.is_open()) {
     db_io_.clear();
     // create a new file
-    db_io_.open(db_file, std::ios::binary | std::ios::trunc | std::ios::out | std::ios::in);
+    db_io_.open(db_file, std::ios::binary | std::ios::trunc | std::ios::out |
+                             std::ios::in);
     if (!db_io_.is_open()) {
       std::cout << "failed to open db file";
       exit(0);
@@ -43,22 +44,19 @@ void DiskManager::ReadPage(page_id_t page_id, char *page_data) {
     // if file ends before reading PAGE_SIZE
     int gcount = db_io_.gcount();
     if (gcount < PAGE_SIZE) {
-      std::cout << "io read less than a page, read " << gcount << " rather than " << PAGE_SIZE;
+      std::cout << "io read less than a page, read " << gcount
+                << " rather than " << PAGE_SIZE;
       db_io_.clear();
       memset(page_data + gcount, 0, PAGE_SIZE - gcount);
     }
   }
 }
 
-void DiskManager::ShutDown() {
-    db_io_.close();
-}
+void DiskManager::ShutDown() { db_io_.close(); }
 
 auto DiskManager::GetFileSize(const std::string &file_name) -> int {
   struct stat stat_buf;
   int rc = stat(file_name.c_str(), &stat_buf);
   return rc == 0 ? static_cast<int>(stat_buf.st_size) : -1;
 }
-}
-
-
+} // namespace db

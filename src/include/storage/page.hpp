@@ -1,10 +1,11 @@
 #pragma once
 
 #include "storage/disk.hpp"
-namespace db{
+namespace db {
 class Page {
   friend class BufferPoolManager;
- public:
+
+public:
   /** Constructor. Zeros out the page data. */
   Page() {
     data_ = new char[PAGE_SIZE];
@@ -15,18 +16,14 @@ class Page {
   inline auto GetData() -> char * { return data_; }
   inline auto GetPageId() -> page_id_t { return page_id_; }
 
-  template <class T>
-  auto As() -> const T* {
+  template <class T> auto As() -> const T * {
     return reinterpret_cast<const T *>(GetData());
   }
 
-  auto GetDataMut() -> char * {
-    return GetData();
-  }
+  auto GetDataMut() -> char * { return GetData(); }
 
-  template <class T>
-  auto AsMut() -> T * {
-    return reinterpret_cast<T*>(GetDataMut());
+  template <class T> auto AsMut() -> T * {
+    return reinterpret_cast<T *>(GetDataMut());
   }
 
 private:
@@ -34,8 +31,8 @@ private:
   inline void ResetMemory() { memset(data_, OFFSET_PAGE_START, PAGE_SIZE); }
   page_id_t page_id_ = INVALID_PAGE_ID;
   bool is_dirty_ = false;
-  uint16_t pin_count_= 0;
+  uint16_t pin_count_ = 0;
 
-  char * data_;
+  char *data_;
 };
-}
+} // namespace db

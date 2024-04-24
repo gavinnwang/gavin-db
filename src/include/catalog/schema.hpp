@@ -8,10 +8,10 @@ class Schema;
 using SchemaRef = std::shared_ptr<const Schema>;
 
 class Schema {
-  public: 
+public:
   explicit Schema(const std::vector<Column> &columns) : columns_(columns) {}
 
-  private:
+private:
   std::vector<Column> columns_;
 };
-}
+} // namespace db
