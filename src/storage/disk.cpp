@@ -1,4 +1,5 @@
 #include "storage/disk.hpp"
+#include "common/config.hpp"
 #include <cstdlib>
 #include <iostream>
 #include <sys/stat.h>
@@ -45,9 +46,11 @@ void DiskManager::ReadPage(page_id_t page_id, char *page_data) {
     int gcount = db_io_.gcount();
     if (gcount < PAGE_SIZE) {
       std::cout << "io read less than a page, read " << gcount
-                << " rather than " << PAGE_SIZE;
+                << " rather than " << PAGE_SIZE << std::endl;
       db_io_.clear();
       memset(page_data + gcount, 0, PAGE_SIZE - gcount);
+      db_io_.seekp(offset);
+      db_io_.write(page_data, PAGE_SIZE);
     }
   }
 }

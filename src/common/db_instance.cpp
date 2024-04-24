@@ -35,18 +35,18 @@ auto DBInstance::ExecuteQuery(const std::string &query,
       lastStr.pop_back();
     }
     if (parsed[0] == "print") {
-      auto new_page = Page();
-      disk_manager_->ReadPage(0, new_page.GetData());
-      auto kv_page = new_page.As<KVPage>();
+      // auto new_page = Page();
+      // disk_manager_->ReadPage(0, new_page.GetData());
+      // auto kv_page = new_page.As<KVPage>();
+      auto page_guard = buffer_pool_manager_->FetchPageRead(0);
+      auto kv_page = page_guard.As<KVPage>();
       kv_page->PrintContent();
       return true;
     }
     if (parsed[0] == "compact") {
-      auto new_page = Page();
-      disk_manager_->ReadPage(0, new_page.GetData());
-      auto kv_page = new_page.AsMut<KVPage>();
+      auto page_guard = buffer_pool_manager_->FetchPageWrite(0);
+      auto kv_page = page_guard.AsMut<KVPage>();
       kv_page->Compact();
-      disk_manager_->WritePage(0, new_page.GetData());
       return true;
     }
     if (parsed[0] == "get") {
@@ -54,9 +54,8 @@ auto DBInstance::ExecuteQuery(const std::string &query,
         *output = "parse error";
         return false;
       }
-      auto new_page = Page();
-      disk_manager_->ReadPage(0, new_page.GetData());
-      auto kv_page = new_page.As<KVPage>();
+      auto page_guard = buffer_pool_manager_->FetchPageRead(0);
+      auto kv_page = page_guard.As<KVPage>();
       return kv_page->Get(parsed[1], output);
     }
     if (parsed[0] == "put") {
@@ -64,11 +63,9 @@ auto DBInstance::ExecuteQuery(const std::string &query,
         *output = "parse error";
         return false;
       }
-      auto new_page = Page();
-      disk_manager_->ReadPage(0, new_page.GetData());
-      auto kv_page = new_page.AsMut<KVPage>();
+      auto page_guard = buffer_pool_manager_->FetchPageWrite(0);
+      auto kv_page = page_guard.AsMut<KVPage>();
       auto res = kv_page->Put(parsed[1], parsed[2]);
-      disk_manager_->WritePage(0, new_page.GetData());
       if (res) {
         *output = "put success";
       }
@@ -79,11 +76,9 @@ auto DBInstance::ExecuteQuery(const std::string &query,
         *output = "parse error";
         return false;
       }
-      auto new_page = Page();
-      disk_manager_->ReadPage(0, new_page.GetData());
-      auto kv_page = new_page.AsMut<KVPage>();
+      auto page_guard = buffer_pool_manager_->FetchPageWrite(0);
+      auto kv_page = page_guard.AsMut<KVPage>();
       auto res = kv_page->Delete(parsed[1]);
-      disk_manager_->WritePage(0, new_page.GetData());
       if (res) {
         *output = "delete success";
       }

@@ -3,7 +3,7 @@
 #include "buffer/replacer.hpp"
 #include "storage/disk.hpp"
 #include "storage/page.hpp"
-#include "storage/page_gaurd.hpp"
+#include "storage/page_guard.hpp"
 #include <list>
 #include <memory>
 namespace db {

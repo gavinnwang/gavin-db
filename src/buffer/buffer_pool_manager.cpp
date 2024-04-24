@@ -2,7 +2,7 @@
 #include "buffer/random_replacer.h"
 #include "common/config.hpp"
 #include "common/macros.hpp"
-#include "storage/page_gaurd.hpp"
+#include "storage/page_guard.hpp"
 #include <memory>
 #include <vector>
 namespace db {
