@@ -1,12 +1,10 @@
 #include "storage/kv_page.hpp"
-#include "storage/disk.hpp"
-#include <cstddef>
+#include "storage/disk_manager.hpp"
 #include <cstdint>
 #include <cstring>
 #include <iostream>
 #include <optional>
 #include <string>
-#include <vector>
 namespace db {
 
 void KVPage::Init() {
@@ -20,13 +18,9 @@ auto KVPage::Get(const std::string &key, std::string *value) const -> bool {
     if (meta.is_deleted_) {
       continue;
     }
-    std::vector<char> key_buf(key_size);
-    memmove(key_buf.data(), page_start_ + offset, key_size);
-    std::string key_str(key_buf.begin(), key_buf.end());
+    std::string key_str(page_start_ + offset, key_size);
     if (key_str == key) {
-      std::vector<char> val_buf(val_size);
-      memmove(val_buf.data(), page_start_ + offset + key_size, val_size);
-      std::string val_str(val_buf.begin(), val_buf.end());
+      std::string val_str(page_start_ + offset + key_size, val_size);
       *value = val_str;
       return true;
     }
@@ -65,9 +59,7 @@ auto KVPage::Delete(const std::string &key) -> bool {
     if (meta.is_deleted_) {
       continue;
     }
-    std::vector<char> key_buf(key_size);
-    memmove(key_buf.data(), page_start_ + offset, key_size);
-    std::string key_str(key_buf.begin(), key_buf.end());
+    std::string key_str(page_start_ + offset, key_size);
     if (key_str == key) {
       meta.is_deleted_ = true;
       // num_keys_--;
@@ -101,18 +93,8 @@ auto KVPage::GetNextTupleOffset(const std::string &key,
 void KVPage::PrintContent() const {
   for (int i = 0; i < num_keys_; i++) {
     const auto &[offset, key_size, val_size, meta] = kv_info_[i];
-    // for (const auto& [offset, size, meta] : kv_info_) {
-    // std::vector<char> data (size);
-    // char key_buf[meta.key_size_];
-    // char val_buf[val_size];
-    // std::cout<< "[" << offset << ", " << size << ", " << meta.key_size_ <<
-    // "]" << std::endl;
-    std::vector<char> key_buf(key_size);
-    std::vector<char> val_buf(val_size);
-    memmove(key_buf.data(), page_start_ + offset, key_size);
-    memmove(val_buf.data(), page_start_ + offset + key_size, val_size);
-    std::string key_str(key_buf.begin(), key_buf.end());
-    std::string val_str(val_buf.begin(), val_buf.end());
+    std::string key_str(page_start_ + offset, key_size);
+    std::string val_str(page_start_ + offset + key_size, val_size);
     if (i) {
       std::cout << std::endl;
     }

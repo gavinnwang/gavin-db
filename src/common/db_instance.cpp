@@ -1,6 +1,6 @@
 #include "common/db_instance.hpp"
 #include "buffer/buffer_pool_manager.hpp"
-#include "storage/disk.hpp"
+#include "storage/disk_manager.hpp"
 #include "storage/kv_page.hpp"
 #include "storage/page.hpp"
 #include <memory>

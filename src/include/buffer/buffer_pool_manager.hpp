@@ -2,7 +2,7 @@
 
 #include "buffer/replacer.hpp"
 #include "common/config.hpp"
-#include "storage/disk.hpp"
+#include "storage/disk_manager.hpp"
 #include "storage/page.hpp"
 #include "storage/page_guard.hpp"
 #include <list>

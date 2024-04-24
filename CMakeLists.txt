@@ -46,7 +46,7 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 # Core
 set(SOURCE_FILES 
     src/common/db_instance.cpp
-    src/storage/disk.cpp
+    src/storage/disk_manager.cpp
     src/storage/kv_page.cpp
     src/storage/page_guard.cpp
     src/buffer/buffer_pool_manager.cpp
