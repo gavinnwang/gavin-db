@@ -3,7 +3,7 @@
 #include <string>
 
 #include "common/macros.hpp"
-#include "type/type_id.hpp"
+#include "common/type.hpp"
 
 namespace db {
 class Column {
@@ -28,14 +28,10 @@ private:
   static auto TypeSize(TypeId type) -> uint8_t {
     switch (type) {
     case TypeId::BOOLEAN:
-    case TypeId::TINYINT:
       return 1;
-    case TypeId::SMALLINT:
       return 2;
     case TypeId::INTEGER:
       return 4;
-    case TypeId::BIGINT:
-    case TypeId::DECIMAL:
     case TypeId::TIMESTAMP:
     case TypeId::VARCHAR:
       return 8;

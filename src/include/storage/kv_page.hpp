@@ -18,8 +18,7 @@ public:
   auto Get(const std::string &key, std::string *value) const -> bool;
   auto Put(const std::string &key, const std::string &value) -> bool;
   auto Delete(const std::string &key) -> bool;
-  auto
-  GetNextTupleOffset(const std::string &key,
+  auto GetNextTupleOffset(const std::string &key,
                      const std::string &value) const -> std::optional<uint16_t>;
   void PrintContent() const;
   void Compact();
