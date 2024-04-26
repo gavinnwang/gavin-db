@@ -1,7 +1,6 @@
 #pragma once
 
 #include "common/type.hpp"
-#include "common/type.hpp"
 #include <cstdint>
 namespace db {
 class Value {
