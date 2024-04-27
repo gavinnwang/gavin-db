@@ -21,7 +21,10 @@ Tuple::Tuple(std::vector<Value> values, const Schema *schema) {
   for (uint32_t i = 0; i < column_count; i++) {
     const auto &col = schema->GetColumn(i);
     if (!col.IsInlined()) {
+      // serialize the relative offset
       *reinterpret_cast<uint32_t *>(data_.data() + col.GetOffset()) = offset;
+      // serialize actual varchar value, in place (size | data)
+      values[i].SerializeTo(data_.data() + offset);
     }
   }
 }
