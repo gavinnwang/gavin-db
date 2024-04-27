@@ -3,7 +3,25 @@
 #include "common/rid.hpp"
 #include "common/value.hpp"
 namespace db {
+
+static constexpr size_t TUPLE_META_SIZE = 1;
+
+struct TupleMeta {
+  bool is_deleted_;
+
+  friend auto operator==(const TupleMeta &a, const TupleMeta &b) {
+    return a.is_deleted_ == b.is_deleted_;
+  }
+
+  friend auto operator!=(const TupleMeta &a, const TupleMeta &b) {
+    return !(a == b);
+  }
+};
+
+static_assert(sizeof(TupleMeta) == TUPLE_META_SIZE);
 class Tuple {
+
+  friend class TablePage;
 
 public:
   // Default constructor (to create a dummy tuple)
