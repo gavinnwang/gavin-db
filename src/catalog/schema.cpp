@@ -14,9 +14,12 @@ Schema::Schema(const std::vector<Column> &columns) : columns_(columns) {
     if (column.IsInlined()) {
       curr_offset += column.GetStorageSize();
     } else {
+      // if not inlined we will store a offset pointer that will point to the
+      // varlen at the end of tuple
       curr_offset += sizeof(uint32_t);
     }
     columns_[index] = column;
   }
+  inline_storage_size_ = curr_offset;
 }
 } // namespace db
