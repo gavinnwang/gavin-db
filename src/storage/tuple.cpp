@@ -28,4 +28,16 @@ Tuple::Tuple(std::vector<Value> values, const Schema *schema) {
     }
   }
 }
+
+void Tuple::SerializeTo(char *storage) const {
+  int32_t size = data_.size();
+  memcpy(storage, &size, sizeof(int32_t));
+  memcpy(storage + sizeof(int32_t), data_.data(), size);
+}
+
+void Tuple::DeserializeFrom(const char *storage) {
+  uint32_t size = *reinterpret_cast<const uint32_t *>(storage);
+  this->data_.resize(size);
+  memcpy(this->data_.data(), storage + sizeof(int32_t), size);
+}
 } // namespace db

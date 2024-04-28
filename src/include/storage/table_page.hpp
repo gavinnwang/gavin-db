@@ -4,14 +4,14 @@
 #include <cstdint>
 #include <tuple>
 namespace db {
+static constexpr uint64_t TABLE_PAGE_HEADER_SIZE = 8;
 class TablePage {
 public:
   void Init();
   auto GetNumTuples() const -> uint32_t { return num_tuples_; }
   auto GetNextPageId() const -> page_id_t { return next_page_id_; }
   void SetNextPageId(page_id_t next_page_id) { next_page_id_ = next_page_id; }
-  auto GetNextTupleOffset(const TupleMeta &meta,
-                          const Tuple &tuple) const -> std::optional<uint16_t>;
+  auto GetNextTupleOffset(const Tuple &tuple) const -> std::optional<uint16_t>;
   auto InsertTuple(const TupleMeta &meta,
                    const Tuple &tuple) -> std::optional<uint16_t>;
   void UpdateTupleMeta(const TupleMeta &meta, const RID &rid);
@@ -34,4 +34,5 @@ private:
   static_assert(sizeof(TupleInfo) == TUPLE_INFO_SIZE);
   static_assert(sizeof(page_id_t) == 4);
 };
+static_assert(sizeof(TablePage) == TABLE_PAGE_HEADER_SIZE);
 } // namespace db
