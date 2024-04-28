@@ -52,5 +52,28 @@ void TablePage::UpdateTupleMeta(const TupleMeta &meta, const RID &rid) {
   }
   tuple_info_[tuple_id] = std::make_tuple(offset, size, meta);
 }
+
+auto TablePage::GetTuple(const RID &rid) const -> std::pair<TupleMeta, Tuple> {
+  auto tuple_id = rid.GetSlotNum();
+  if (tuple_id >= num_tuples_) {
+    throw Exception("Tuple ID out of range");
+  }
+  auto &[offset, size, meta] = tuple_info_[tuple_id];
+  Tuple tuple;
+  tuple.data_.resize(size);
+  memmove(tuple.data_.data(), page_start_ + offset, size);
+  tuple.rid_ = rid;
+  return std::make_pair(meta, std::move(tuple));
+}
+
+auto TablePage::GetTupleMeta(const RID &rid) const -> TupleMeta {
+  auto tuple_id = rid.GetSlotNum();
+  if (tuple_id >= num_tuples_) {
+    throw Exception("Tuple ID out of range");
+  }
+  auto &[_1, _2, meta] = tuple_info_[tuple_id];
+  return meta;
+}
+
 } // namespace db
 //

@@ -15,6 +15,7 @@ public:
   auto InsertTuple(const TupleMeta &meta,
                    const Tuple &tuple) -> std::optional<uint16_t>;
   void UpdateTupleMeta(const TupleMeta &meta, const RID &rid);
+  auto GetTupleMeta(const RID &rid) const -> TupleMeta;
   auto GetTuple(const RID &rid) const -> std::pair<TupleMeta, Tuple>;
   void UpdateTupleInPlaceUnsafe(const TupleMeta &meta, const Tuple &tuple,
                                 RID rid);
