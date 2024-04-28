@@ -44,15 +44,8 @@ set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 
 # Core
-set(SOURCE_FILES 
-    src/common/db_instance.cpp
-    src/catalog/schema.cpp
-    src/storage/disk_manager.cpp
-    src/storage/kv_page.cpp
-    src/storage/page_guard.cpp
-    src/buffer/buffer_pool_manager.cpp
-    src/buffer/random_replacer.cpp
-)
+file(GLOB_RECURSE SOURCE_FILES "${PROJECT_SOURCE_DIR}/src/*/*.cpp")
+
 add_library(gavindb ${SOURCE_FILES})
 
 # Shell
@@ -62,3 +55,19 @@ target_link_libraries(gavindb_shell gavindb)
 # Include
 set(SRC_INCLUDE_DIR ${PROJECT_SOURCE_DIR}/src/include)
 include_directories(${SRC_INCLUDE_DIR})
+
+
+# set(gtest_force_shared_crt ON CACHE BOOL "" FORCE) # don't override our compiler/linker options when building gtest
+include(FetchContent)
+FetchContent_Declare(
+  googletest
+  GIT_REPOSITORY https://github.com/google/googletest.git
+  GIT_TAG v1.14.0
+)
+FetchContent_MakeAvailable(googletest)
+
+include_directories(
+  ${googletest_SOURCE_DIR}/googletest/include
+  ${googletest_SOURCE_DIR}/googlemock/include
+)
+
