@@ -7,9 +7,10 @@
 #include <vector>
 namespace db {
 BufferPoolManager::BufferPoolManager(size_t pool_size,
-                                     DiskManager *disk_manager)
+                                     DiskManager *disk_manager,
+                                     page_id_t next_page_id)
     : pool_size_(pool_size), replacer_(std::make_unique<RandomBogoReplacer>()),
-      disk_manager_(disk_manager) {
+      disk_manager_(disk_manager), next_page_id_(next_page_id) {
   pages_ = new Page[pool_size_];
   std::vector<bool> free_frame_tracker_(pool_size_, true);
   for (frame_id_t i = 0; i < pool_size_; ++i) {

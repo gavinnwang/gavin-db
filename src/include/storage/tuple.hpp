@@ -22,6 +22,7 @@ static_assert(sizeof(TupleMeta) == TUPLE_META_SIZE);
 class Tuple {
 
   friend class TablePage;
+  friend class TableHeap;
 
 public:
   // Default constructor (to create a dummy tuple)

@@ -40,7 +40,6 @@ private:
   uint16_t pin_count_ = 0;
   ReaderWriterLatch rwlatch_;
 
-  // todo: change this to vector<std::byte>
   char *data_;
 };
 } // namespace db

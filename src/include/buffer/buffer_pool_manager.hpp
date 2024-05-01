@@ -11,7 +11,8 @@ namespace db {
 
 class BufferPoolManager {
 public:
-  BufferPoolManager(size_t pool_size, DiskManager *disk_manager);
+  BufferPoolManager(size_t pool_size, DiskManager *disk_manager,
+                    page_id_t next_page_id);
   ~BufferPoolManager();
   auto NewPage(page_id_t *page_id) -> Page *;
   auto FetchPage(page_id_t page_id) -> Page *;
@@ -29,7 +30,7 @@ private:
   auto AllocateFrame(frame_id_t *frame_id) -> bool;
 
   const frame_id_t pool_size_;
-  std::atomic<page_id_t> next_page_id_ = 0;
+  std::atomic<page_id_t> next_page_id_;
   std::unique_ptr<Replacer> replacer_;
   std::unique_ptr<DiskManager> disk_manager_;
   std::mutex latch_;
