@@ -1,6 +1,7 @@
 #pragma once
 
 #include "catalog/column.hpp"
+#include <cstdint>
 #include <memory>
 namespace db {
 
@@ -35,10 +36,14 @@ public:
   inline auto GetInlinedStorageSize() const -> uint32_t {
     return inline_storage_size_;
   }
+  void SerializeTo(char *storage) const;
+  void DeserializeFrom(const char *storage);
+  auto GetSerializationSize() const -> uint32_t;
 
 private:
   std::vector<Column> columns_;
   std::vector<uint32_t> uninlined_columns_;
   uint32_t inline_storage_size_;
+  uint32_t storage_size_;
 };
 } // namespace db

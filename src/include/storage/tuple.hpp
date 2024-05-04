@@ -41,10 +41,8 @@ public:
   // deserialize tuple data(deep copy)
   void DeserializeFrom(const char *storage);
 
-  // return RID of current tuple
   inline auto SetRid(RID rid) { rid_ = rid; }
 
-  // Get the address of this tuple in the table's backing store
   inline auto GetData() const -> const char * { return data_.data(); }
 
   // Get length of the tuple, including varchar length

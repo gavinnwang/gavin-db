@@ -1,6 +1,7 @@
 
 #include "catalog/schema.hpp"
 #include "catalog/column.hpp"
+#include <cstdint>
 namespace db {
 Schema::Schema(const std::vector<Column> &columns) : columns_(columns) {
   uint32_t curr_offset = 0;
@@ -21,5 +22,25 @@ Schema::Schema(const std::vector<Column> &columns) : columns_(columns) {
     columns_[index] = column;
   }
   inline_storage_size_ = curr_offset;
+}
+
+void Schema::SerializeTo(char *storage) const {
+  uint32_t sz = columns_.size();
+  memcpy(storage, &sz, sizeof(uint32_t));
+  uint32_t offset = sizeof(uint32_t);
+  for (const auto &col : columns_) {
+    col.SerializeTo(storage + offset);
+    offset += col.GetSerializationSize();
+  }
+}
+
+void Schema::DeserializeFrom(const char *storage) {
+  uint32_t size = *reinterpret_cast<const uint32_t *>(storage);
+  this->columns_.resize(size, Column());
+  uint32_t offset = sizeof(uint32_t);
+  for (uint32_t i = 0; i < size; i++) {
+    columns_[i].DeserializeFrom(storage + offset);
+    offset += columns_[i].GetSerializationSize();
+  }
 }
 } // namespace db

@@ -9,6 +9,8 @@ class Column {
   friend class Schema;
 
 public:
+  // to creat a dummy column
+  Column() = default;
   // fixed length col
   Column(std::string column_name, TypeId type)
       : column_name_(std::move(column_name)), column_type_(type),
@@ -28,8 +30,10 @@ public:
   auto GetOffset() const -> uint32_t { return column_offset_; }
   auto GetType() const -> TypeId { return column_type_; }
   auto IsInlined() const -> bool { return column_type_ != TypeId::VARCHAR; }
-
   auto ToString(bool simplified = true) const -> std::string;
+  void SerializeTo(char *storage) const;
+  void DeserializeFrom(const char *storage);
+  auto GetSerializationSize() const -> uint32_t;
 
 private:
   std::string column_name_;

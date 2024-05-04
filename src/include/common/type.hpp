@@ -3,7 +3,8 @@
 #include "common/macros.hpp"
 #include <string>
 namespace db {
-enum TypeId { INVALID = 0, BOOLEAN, INTEGER, TIMESTAMP, VARCHAR };
+enum TypeId : uint8_t { INVALID = 0, BOOLEAN, INTEGER, TIMESTAMP, VARCHAR };
+
 class Type {
 public:
   static auto TypeSize(TypeId type_id, uint32_t length = 0) -> uint8_t {
