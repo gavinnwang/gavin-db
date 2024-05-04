@@ -25,21 +25,24 @@ auto Column::ToString(bool simplified) const -> std::string {
 
 void Column::SerializeTo(char *storage) const {
   // serialize the type id
+  uint32_t offset = 0;
   memcpy(storage, &column_type_, sizeof(column_type_));
-  storage += sizeof(column_type_);
+  offset += sizeof(column_type_);
   // serialize the col name size
   uint32_t col_name_size = column_name_.size();
-  memcpy(storage, &col_name_size, sizeof(uint32_t));
-  storage += sizeof(uint32_t);
+  memcpy(storage + offset, &col_name_size, sizeof(uint32_t));
+  offset += sizeof(uint32_t);
   // serialize the actual column name
-  memcpy(storage, column_name_.data(), column_name_.size());
+  memcpy(storage + offset, column_name_.data(), column_name_.size());
 }
 void Column::DeserializeFrom(const char *storage) {
+  uint32_t offset = 0;
   column_type_ = *reinterpret_cast<const TypeId *>(storage);
-  storage += sizeof(column_type_);
-  uint32_t col_name_size = *reinterpret_cast<const uint32_t *>(storage);
-  storage += sizeof(col_name_size);
-  column_name_.assign(storage, col_name_size);
+  offset += sizeof(column_type_);
+  uint32_t col_name_size =
+      *reinterpret_cast<const uint32_t *>(storage + offset);
+  offset += sizeof(uint32_t);
+  column_name_.assign(storage + offset, col_name_size);
 }
 
 auto Column::GetSerializationSize() const -> uint32_t {

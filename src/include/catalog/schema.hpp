@@ -10,6 +10,7 @@ using SchemaRef = std::shared_ptr<const Schema>;
 
 class Schema {
 public:
+  Schema() = default;
   explicit Schema(const std::vector<Column> &columns);
   auto GetColumns() const -> const std::vector<Column> & { return columns_; }
   auto GetColumn(const uint32_t col_idx) const -> const Column & {
