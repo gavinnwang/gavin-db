@@ -10,7 +10,8 @@ BufferPoolManager::BufferPoolManager(size_t pool_size,
                                      DiskManager *disk_manager,
                                      page_id_t next_page_id)
     : pool_size_(pool_size), next_page_id_(next_page_id),
-      replacer_(std::make_unique<RandomBogoReplacer>()), disk_manager_(disk_manager) {
+      replacer_(std::make_unique<RandomBogoReplacer>()),
+      disk_manager_(disk_manager) {
   pages_ = new Page[pool_size_];
   std::vector<bool> free_frame_tracker_(pool_size_, true);
   for (frame_id_t i = 0; i < pool_size_; ++i) {
@@ -29,7 +30,7 @@ auto BufferPoolManager::AllocateFrame(frame_id_t *frame_id) -> bool {
     }
     if (pages_[*frame_id].is_dirty_) {
       auto &evict_page = pages_[*frame_id];
-      disk_manager_->WritePage(evict_page.page_id_, evict_page.data_);
+      disk_manager_->WritePage(evict_page.page_id_, evict_page.GetData());
     }
   }
   *frame_id = free_list_.front();
@@ -84,7 +85,7 @@ auto BufferPoolManager::FetchPage(page_id_t page_id) -> Page * {
   page->page_id_ = page_id;
   page->pin_count_++;
   page->is_dirty_ = false;
-  disk_manager_->ReadPage(page_id, page->data_);
+  disk_manager_->ReadPage(page_id, page->GetData());
 
   return page;
 }
@@ -116,7 +117,7 @@ auto BufferPoolManager::FlushPage(page_id_t page_id) -> bool {
   }
   frame_id_t frame_id = page_table_[page_id];
   Page &page = pages_[frame_id];
-  disk_manager_->WritePage(page_id, page.data_);
+  disk_manager_->WritePage(page_id, page.GetData());
   page.is_dirty_ = false;
   return true;
 }

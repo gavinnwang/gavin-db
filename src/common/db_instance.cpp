@@ -21,7 +21,7 @@ std::vector<std::string> split(const std::string &str, char delimiter) {
 DBInstance::DBInstance(const std::string &db_file_name) {
   disk_manager_ = std::make_unique<DiskManager>(db_file_name);
   buffer_pool_manager_ = std::make_unique<BufferPoolManager>(
-      DEFAULT_POOL_SIZE, disk_manager_.get());
+      DEFAULT_POOL_SIZE, disk_manager_.get(), 0);
 };
 
 DBInstance::~DBInstance() {

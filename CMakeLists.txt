@@ -57,7 +57,6 @@ set(SRC_INCLUDE_DIR ${PROJECT_SOURCE_DIR}/src/include)
 include_directories(${SRC_INCLUDE_DIR})
 
 
-# set(gtest_force_shared_crt ON CACHE BOOL "" FORCE) # don't override our compiler/linker options when building gtest
 include(FetchContent)
 FetchContent_Declare(
   googletest
@@ -71,3 +70,5 @@ include_directories(
   ${googletest_SOURCE_DIR}/googlemock/include
 )
 
+
+add_subdirectory(test)

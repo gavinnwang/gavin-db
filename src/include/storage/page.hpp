@@ -31,7 +31,7 @@ public:
 
 private:
   static constexpr size_t OFFSET_PAGE_START = 0;
-  // inline void ResetMemory() { memset(data_, OFFSET_PAGE_START, PAGE_SIZE); }
+  inline void ResetMemory() { std::fill(data_.begin(), data_.end(), 0); }
   page_id_t page_id_ = INVALID_PAGE_ID;
   bool is_dirty_ = false;
   uint16_t pin_count_ = 0;

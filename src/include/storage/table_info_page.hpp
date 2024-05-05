@@ -9,6 +9,10 @@ struct TableInfo {
   const std::string name_;
   const table_oid_t table_oid_;
 
+  TableInfo(Schema schema, std::string name, table_oid_t table_oid)
+      : schema_{std::move(schema)}, name_{std::move(name)},
+        table_oid_{table_oid} {}
+
   void SerializeTo(char *storage) const {
     uint32_t offset = 0;
     schema_.SerializeTo(storage + offset);
@@ -36,7 +40,7 @@ public:
   void UpdateTableSchema(const Schema &schema);
 
 private:
-  void StoreTableInfo(const TableInfo& table_info);
+  void StoreTableInfo(const TableInfo &table_info);
   char page_start_[0];
   page_id_t first_table_page_id_;
   uint32_t table_info_offset_{0};
