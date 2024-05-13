@@ -2,6 +2,7 @@
 #include "catalog/schema.hpp"
 #include "common/rid.hpp"
 #include "common/value.hpp"
+#include <string>
 namespace db {
 
 static constexpr size_t TUPLE_META_SIZE = 1;
@@ -47,6 +48,10 @@ public:
 
   // Get length of the tuple, including varchar length
   inline auto GetStorageSize() const -> uint32_t { return data_.size(); }
+
+  auto GetValue(const Schema &schema, uint32_t column_idx) const -> Value;
+
+  auto ToString(const Schema &schema) const -> std::string;
 
 private:
   // Get the starting storage address of specific column

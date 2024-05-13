@@ -34,17 +34,17 @@ public:
   auto GetUnlinedColumnCount() const -> uint32_t {
     return static_cast<uint32_t>(uninlined_columns_.size());
   }
-  inline auto GetInlinedStorageSize() const -> uint32_t {
-    return inline_storage_size_;
+  inline auto GetTupleInlinePartStorageSize() const -> uint32_t {
+    return tuple_inline_part_storage_size_;
   }
   void SerializeTo(char *storage) const;
   void DeserializeFrom(const char *storage);
   auto GetSerializationSize() const -> uint32_t;
-
 private:
   std::vector<Column> columns_;
   std::vector<uint32_t> uninlined_columns_;
-  uint32_t inline_storage_size_;
+  // the inline poortion of the tuple, consist of fixed length columns and the pointer for var len columns
+  uint32_t tuple_inline_part_storage_size_;
   uint32_t storage_size_;
 };
 } // namespace db

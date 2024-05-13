@@ -21,7 +21,7 @@ Schema::Schema(const std::vector<Column> &columns) : columns_(columns) {
     }
     columns_[index] = column;
   }
-  inline_storage_size_ = curr_offset;
+  storage_size_ = curr_offset;
 }
 
 void Schema::SerializeTo(char *storage) const {
