@@ -23,19 +23,25 @@ auto TableHeap::InsertTuple(const TupleMeta &meta,
     // tuple page is empty and still cannot insert
     ENSURE(page->GetNumTuples() != 0, "tuple is too large");
 
+    // allocate a new page for the tuple because the current page is full
     page_id_t next_page_id = INVALID_PAGE_ID;
     auto npg = bpm_->NewPage(&next_page_id);
     ENSURE(next_page_id != INVALID_PAGE_ID, "cannot allocate page");
 
+    // construct the linked list
     page->SetNextPageId(next_page_id);
 
+    // initialize the next page
     auto next_page = reinterpret_cast<TablePage *>(npg->GetData());
     next_page->Init();
 
+    // drop the current page
     page_guard.Drop();
 
+    // fetch the next page
     auto next_page_guard = WritePageGuard{bpm_, npg};
 
+    // update the last page id
     last_page_id_ = next_page_id;
     page_guard = std::move(next_page_guard);
   }
