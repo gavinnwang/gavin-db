@@ -1,10 +1,7 @@
 #include "buffer/buffer_pool_manager.hpp"
-#include "common/debug.hpp"
-#include "common/macros.hpp"
 #include "storage/table_heap.hpp"
 #include "storage/tuple.hpp"
 #include "gtest/gtest.h"
-#include <iostream>
 
 TEST(StorageTest, SimpleTablePageTest) {
   const size_t buffer_pool_size = 10;
@@ -33,7 +30,6 @@ TEST(StorageTest, SimpleTablePageTest) {
   auto [meta1, tuple1] = table_heap->GetTuple(*rid1);
   auto [meta2, tuple2] = table_heap->GetTuple(*rid2);
 
-  // assett that the tuple is the same as the inserted tuple
   ASSERT_EQ(tuple.ToString(schema), "(239, hihihi)");
   ASSERT_EQ(tuple.ToString(schema), tuple1.ToString(schema));
   ASSERT_EQ(tuple.ToString(schema), tuple2.ToString(schema));

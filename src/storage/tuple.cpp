@@ -1,4 +1,5 @@
 #include "storage/tuple.hpp"
+#include "common/exception.hpp"
 #include <cassert>
 #include <sstream>
 namespace db {
@@ -12,6 +13,14 @@ Tuple::Tuple(std::vector<Value> values, const Schema &schema) {
   ASSERT(tuple_size < PAGE_SIZE, "Tuple size must be less than PAGE_SIZE");
   for (auto &i : schema.GetUnlinedColumns()) {
     auto len = values[i].GetStorageSize();
+    // if the length of the value is greater than the schema max length for that
+    // column, error
+    if (len > schema.GetColumn(i).GetStorageSize()) {
+      throw Exception("Value length exceeds schema max length for column " +
+                      schema.GetColumn(i).GetName() + " (max: " +
+                      std::to_string(schema.GetColumn(i).GetStorageSize()) +
+                      ", actual: " + std::to_string(len) + ")");
+    }
     // size of uint32_t is the size info
     tuple_size += sizeof(uint32_t) + len;
   }
