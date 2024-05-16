@@ -16,6 +16,7 @@ target_link_libraries(
 
 target_link_libraries(
   table_page_test
+  gavindb
   GTest::gtest_main
 )
 

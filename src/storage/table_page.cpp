@@ -1,6 +1,8 @@
 #include "storage/table_page.hpp"
 #include "common/config.hpp"
+#include "common/debug.hpp"
 #include "common/exception.hpp"
+#include "common/macros.hpp"
 
 namespace db {
 void TablePage::Init() {
@@ -17,7 +19,13 @@ auto TablePage::GetNextTupleOffset(const Tuple &tuple) const
   } else {
     slot_end_offset = PAGE_SIZE;
   }
+  ENSURE(slot_end_offset >= TABLE_PAGE_HEADER_SIZE, "invalid slot end offset");
+  ENSURE(tuple.GetStorageSize() <= PAGE_SIZE - TABLE_PAGE_HEADER_SIZE,
+         "tuple is too large");
   auto tuple_offset = slot_end_offset - tuple.GetStorageSize();
+  ENSURE(tuple_offset >= TABLE_PAGE_HEADER_SIZE && tuple_offset < PAGE_SIZE,
+         "invalid tuple offset");
+
   auto offset_size =
       TABLE_PAGE_HEADER_SIZE + TUPLE_INFO_SIZE * (num_tuples_ + 1);
   if (tuple_offset < offset_size) {
@@ -36,8 +44,12 @@ auto TablePage::InsertTuple(const TupleMeta &meta,
   tuple_info_[tuple_id] =
       std::make_tuple(*tuple_offset, tuple.GetStorageSize(), meta);
   num_tuples_++;
+  ASSERT(*tuple_offset + tuple.GetStorageSize() <= PAGE_SIZE,
+         "tuple out of range");
+  // print data of the page_start_
   memcpy(page_start_ + *tuple_offset, tuple.data_.data(),
          tuple.GetStorageSize());
+  // printData(page_start_, PAGE_SIZE);
   return tuple_id;
 }
 
@@ -61,8 +73,10 @@ auto TablePage::GetTuple(const RID &rid) const -> std::pair<TupleMeta, Tuple> {
   auto &[offset, size, meta] = tuple_info_[tuple_id];
   Tuple tuple;
   tuple.data_.resize(size);
+  ASSERT(offset + size <= PAGE_SIZE, "tuple out of range");
   memmove(tuple.data_.data(), page_start_ + offset, size);
   tuple.rid_ = rid;
+  // printData(page_start_, PAGE_SIZE);
   return std::make_pair(meta, std::move(tuple));
 }
 

@@ -40,11 +40,14 @@ public:
   void SerializeTo(char *storage) const;
   void DeserializeFrom(const char *storage);
   auto GetSerializationSize() const -> uint32_t;
+
 private:
   std::vector<Column> columns_;
   std::vector<uint32_t> uninlined_columns_;
-  // the inline poortion of the tuple, consist of fixed length columns and the pointer for var len columns
+  // the inline poortion of the tuple, consist of fixed length columns and the
+  // pointer for var len columns
   uint32_t tuple_inline_part_storage_size_;
-  uint32_t storage_size_;
+  // // storage size of the schema
+  // uint32_t storage_size_;
 };
 } // namespace db

@@ -1,5 +1,6 @@
 #pragma once
 
+#include "common/config.hpp"
 #include "common/macros.hpp"
 #include "common/type.hpp"
 #include <cstdint>
@@ -53,6 +54,8 @@ public:
 
   void SerializeTo(char *storage) const;
 
+  auto ToString() const -> std::string;
+
   static auto DeserializeFrom(const char *storage,
                               const TypeId type_id) -> Value {
     switch (type_id) {
@@ -71,6 +74,7 @@ public:
     }
     case TypeId::VARCHAR: {
       uint32_t var_len = *reinterpret_cast<const uint32_t *>(storage);
+      ASSERT(var_len < PAGE_SIZE, "Invalid varchar length");
       return {type_id, storage + sizeof(uint32_t), var_len, true};
     }
     case TypeId::INVALID: {
@@ -94,5 +98,7 @@ private:
     char *varlen_;
     const char *const_varlen_;
   } value_;
+
+  // TODO look into variant
 };
 } // namespace db

@@ -5,11 +5,11 @@
 namespace db {
 Value::Value(TypeId type_id, const char *data, uint32_t var_len,
              bool manage_data) {
+  type_id_ = type_id;
   switch (type_id) {
   case TypeId::VARCHAR:
     manage_data_ = manage_data;
     if (manage_data_) {
-      assert(var_len < 50);
       value_.varlen_ = new char[var_len];
       assert(value_.varlen_ != nullptr);
       var_len_ = var_len;
@@ -83,6 +83,22 @@ void Value::SerializeTo(char *storage) const {
     UNREACHABLE("Cannot serialize invalid type valye");
     return;
   }
+  }
+}
+
+auto Value::ToString() const -> std::string {
+  switch (type_id_) {
+  case TypeId::BOOLEAN:
+    return std::to_string(value_.boolean_);
+  case TypeId::INTEGER:
+    return std::to_string(value_.integer_);
+  case TypeId::TIMESTAMP:
+    return std::to_string(value_.integer_);
+  case TypeId::VARCHAR:
+    return std::string(value_.const_varlen_, var_len_);
+  case TypeId::INVALID:
+    UNREACHABLE("Cannot convert invalid type value to string");
+    return "";
   }
 }
 } // namespace db

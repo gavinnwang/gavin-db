@@ -21,7 +21,7 @@ Schema::Schema(const std::vector<Column> &columns) : columns_(columns) {
     }
     columns_[index] = column;
   }
-  storage_size_ = curr_offset;
+  tuple_inline_part_storage_size_ = curr_offset;
 }
 
 void Schema::SerializeTo(char *storage) const {
@@ -42,5 +42,13 @@ void Schema::DeserializeFrom(const char *storage) {
     columns_[i].DeserializeFrom(storage + offset);
     offset += columns_[i].GetSerializationSize();
   }
+}
+
+auto Schema::GetSerializationSize() const -> uint32_t {
+  uint32_t size = sizeof(uint32_t);
+  for (const auto &col : columns_) {
+    size += col.GetSerializationSize();
+  }
+  return size;
 }
 } // namespace db

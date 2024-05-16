@@ -30,7 +30,7 @@ public:
   Tuple() = default;
 
   // construct a tuple using input values
-  Tuple(std::vector<Value> values, const Schema *schema);
+  Tuple(std::vector<Value> values, const Schema &schema);
 
   Tuple(const Tuple &other) = default;
   // move constructor
