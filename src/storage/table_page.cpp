@@ -49,7 +49,7 @@ auto TablePage::InsertTuple(const TupleMeta &meta,
   // print data of the page_start_
   memcpy(page_start_ + *tuple_offset, tuple.data_.data(),
          tuple.GetStorageSize());
-  // printData(page_start_, PAGE_SIZE);
+  printData(page_start_, PAGE_SIZE);
   return tuple_id;
 }
 

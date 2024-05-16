@@ -1,11 +1,12 @@
 #include "buffer/buffer_pool_manager.hpp"
 #include "common/debug.hpp"
+#include "common/macros.hpp"
 #include "storage/table_heap.hpp"
 #include "storage/tuple.hpp"
 #include "gtest/gtest.h"
 #include <iostream>
 
-TEST(StorageTest, TablePageTest) {
+TEST(StorageTest, SimpleTablePageTest) {
   const size_t buffer_pool_size = 10;
   auto *dm = new db::DiskManager("test.db");
   auto *bpm = new db::BufferPoolManager(buffer_pool_size, dm, 0);
@@ -21,10 +22,19 @@ TEST(StorageTest, TablePageTest) {
   // std::cout << tuple.ToString(schema) << std::endl;
 
   auto meta = db::TupleMeta{false};
-  auto rid = table_heap->InsertTuple(meta, tuple);
-  auto [meta2, tuple2] = table_heap->GetTuple(*rid);
-  // std::cout << tuple2.ToString(schema) << std::endl;
+  auto rid1 = table_heap->InsertTuple(meta, tuple);
+  auto rid2 = table_heap->InsertTuple(meta, tuple);
+  auto rid3 = table_heap->InsertTuple(meta, tuple);
+
+  ASSERT_EQ(rid1.has_value(), true);
+  ASSERT_EQ(rid2.has_value(), true);
+  ASSERT_EQ(rid3.has_value(), true);
+
+  auto [meta1, tuple1] = table_heap->GetTuple(*rid1);
+  auto [meta2, tuple2] = table_heap->GetTuple(*rid2);
 
   // assett that the tuple is the same as the inserted tuple
+  ASSERT_EQ(tuple.ToString(schema), "(239, hihihi)");
+  ASSERT_EQ(tuple.ToString(schema), tuple1.ToString(schema));
   ASSERT_EQ(tuple.ToString(schema), tuple2.ToString(schema));
 }

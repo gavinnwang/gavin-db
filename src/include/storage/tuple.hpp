@@ -37,10 +37,10 @@ public:
   Tuple(Tuple &&other) noexcept = default;
   // assign operator, deep copy
   auto operator=(const Tuple &other) -> Tuple & = default;
-  // serialize tuple data
-  void SerializeTo(char *storage) const;
-  // deserialize tuple data(deep copy)
-  void DeserializeFrom(const char *storage);
+  // // serialize tuple data
+  // void SerializeTo(char *storage) const;
+  // // deserialize tuple data(deep copy)
+  // void DeserializeFrom(const char *storage);
 
   inline auto SetRid(RID rid) { rid_ = rid; }
 
