@@ -25,6 +25,21 @@ struct TableInfo {
     offset += table_name_size;
     memcpy(storage + offset, &table_oid_, sizeof(uint32_t));
   }
+
+  static auto DeserializeFrom(const char *storage) -> TableInfo {
+    auto schema = Schema();
+    uint32_t offset = 0;
+    schema.DeserializeFrom(storage + offset);
+    offset += schema.GetSerializationSize();
+    uint32_t table_name_size =
+        *reinterpret_cast<const uint32_t *>(storage + offset);
+    offset += sizeof(uint32_t);
+    std::string table_name(storage + offset, table_name_size);
+    offset += table_name_size;
+    uint32_t table_oid = *reinterpret_cast<const uint32_t *>(storage + offset);
+
+    return {schema, table_name, table_oid};
+  }
 };
 
 static constexpr uint64_t TABLE_INFO_PAGE_HEADER_SIZE = 8;

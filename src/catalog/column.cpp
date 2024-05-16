@@ -28,6 +28,9 @@ void Column::SerializeTo(char *storage) const {
   uint32_t offset = 0;
   memcpy(storage, &column_type_, sizeof(column_type_));
   offset += sizeof(column_type_);
+  // serialize the length
+  memcpy(storage + offset, &length_, sizeof(length_));
+  offset += sizeof(length_);
   // serialize the col name size
   uint32_t col_name_size = column_name_.size();
   memcpy(storage + offset, &col_name_size, sizeof(uint32_t));
@@ -39,14 +42,20 @@ void Column::DeserializeFrom(const char *storage) {
   uint32_t offset = 0;
   column_type_ = *reinterpret_cast<const TypeId *>(storage);
   offset += sizeof(column_type_);
+  length_ = *reinterpret_cast<const uint32_t *>(storage + offset);
+  offset += sizeof(uint32_t);
   uint32_t col_name_size =
       *reinterpret_cast<const uint32_t *>(storage + offset);
   offset += sizeof(uint32_t);
   column_name_.assign(storage + offset, col_name_size);
+  ASSERT(column_name_.size() == col_name_size, "Column name size mismatch");
+  ASSERT(length_ != 0, "Column length is not set");
+  ASSERT(column_type_ != INVALID, "Column type is not set");
 }
 
 auto Column::GetSerializationSize() const -> uint32_t {
-  return sizeof(TypeId) + sizeof(uint32_t) + column_name_.size();
+  return sizeof(TypeId) + sizeof(uint32_t) + column_name_.size() +
+         sizeof(length_);
 }
 
 } // namespace db

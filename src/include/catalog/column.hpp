@@ -11,11 +11,21 @@ class Column {
 public:
   // to creat a dummy column
   Column() = default;
+
+  // Explicitly default the copy operations
+  Column(const Column &) = default;
+  Column &operator=(const Column &) = default;
+
+  // Explicitly default move operations
+  Column(Column &&) noexcept = default; // Ensure it's noexcept
+  Column &operator=(Column &&) noexcept = default;
+
   // fixed length col
   Column(std::string column_name, TypeId type)
       : column_name_(std::move(column_name)), column_type_(type),
         length_(Type::TypeSize(type)) {
     ASSERT(type != TypeId::VARCHAR, "Wrong constructor for VARCHAR type.");
+    ASSERT(length_ > 0, "Invalid column length");
   }
 
   // variable length col
@@ -23,6 +33,7 @@ public:
       : column_name_(std::move(column_name)), column_type_(type),
         length_(Type::TypeSize(type, length)) {
     ASSERT(type == TypeId::VARCHAR, "Wrong constructor for non-VARCHAR type.");
+    ASSERT(length_ > 0, "Invalid column length");
   }
 
   auto GetName() const -> std::string { return column_name_; }

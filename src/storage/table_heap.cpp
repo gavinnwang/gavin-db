@@ -4,7 +4,8 @@
 #include "storage/table_page.hpp"
 namespace db {
 
-TableHeap::TableHeap(BufferPoolManager *bpm) : bpm_(bpm) {
+TableHeap::TableHeap(BufferPoolManager *bpm, page_id_t table_info_page_id)
+    : bpm_(bpm), table_info_page_id_(table_info_page_id) {
   auto guard = bpm->NewPageGuarded(&first_page_id_);
   last_page_id_ = first_page_id_;
   auto first_page = guard.AsMut<TablePage>();

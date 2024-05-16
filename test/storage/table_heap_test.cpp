@@ -3,12 +3,12 @@
 #include "storage/tuple.hpp"
 #include "gtest/gtest.h"
 
-TEST(StorageTest, SimpleTablePageTest) {
+TEST(StorageTest, SimpleTableHeapTest) {
   const size_t buffer_pool_size = 10;
   auto *dm = new db::DiskManager("test.db");
   auto *bpm = new db::BufferPoolManager(buffer_pool_size, dm, 0);
 
-  auto table_heap = new db::TableHeap(bpm);
+  auto table_heap = new db::TableHeap(bpm, 0);
   auto c1 = db::Column("user_id", db::TypeId::INTEGER);
   auto c2 = db::Column("user_name", db::TypeId::VARCHAR, 256);
   auto schema = db::Schema({c1, c2});

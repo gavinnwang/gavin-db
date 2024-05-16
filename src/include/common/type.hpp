@@ -7,7 +7,7 @@ enum TypeId : uint8_t { INVALID = 0, BOOLEAN, INTEGER, TIMESTAMP, VARCHAR };
 
 class Type {
 public:
-  static auto TypeSize(TypeId type_id, uint32_t length = 0) -> uint8_t {
+  static auto TypeSize(TypeId type_id, uint32_t length = 0) -> uint32_t {
     switch (type_id) {
     case TypeId::BOOLEAN:
       return 1;

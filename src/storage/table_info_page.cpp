@@ -15,20 +15,9 @@ void TableInfoPage::Init(const std::string name, const Schema &schema,
 auto TableInfoPage::GetTableInfo() -> TableInfo {
   ASSERT(table_info_offset_ >= TABLE_INFO_PAGE_HEADER_SIZE,
          "table info offset not initialized correctly");
-
-  auto schema = Schema();
-  uint32_t offset = table_info_offset_;
-  schema.DeserializeFrom(page_start_ + offset);
-  offset += schema.GetSerializationSize();
-  uint32_t table_name_size =
-      *reinterpret_cast<const uint32_t *>(page_start_ + offset);
-  offset += sizeof(uint32_t);
-  std::string table_name(page_start_ + offset, table_name_size);
-  offset += table_name_size;
-  uint32_t table_oid =
-      *reinterpret_cast<const uint32_t *>(page_start_ + offset);
-
-  return {schema, table_name, table_oid};
+  ASSERT(table_info_offset_ < PAGE_SIZE,
+         "table info offset not initialized correctly");
+  return TableInfo::DeserializeFrom(page_start_ + table_info_offset_);
 }
 void TableInfoPage::UpdateTableSchema(const Schema &schema) {
   auto old_table_info = GetTableInfo();
