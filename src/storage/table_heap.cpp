@@ -10,14 +10,25 @@ TableHeap::TableHeap(BufferPoolManager *bpm, page_id_t table_info_page_id)
 
   auto table_info_pg = bpm_->FetchPageWrite(table_info_page_id_);
   auto table_info_page = table_info_pg.AsMut<TableInfoPage>();
+
+  ASSERT(table_info_page->GetTableInfo().name_.size() > 0,
+         "table name is empty");
+  std::cout << "init table with name: " << table_info_page->GetTableInfo().name_
+            << std::endl;
+
   if (table_info_page->GetFirstTablePageId() == INVALID_PAGE_ID) {
-    page_id_t new_page = INVALID_PAGE_ID;
-    auto guard = bpm->NewPageGuarded(&new_page);
-    ASSERT(new_page != INVALID_PAGE_ID, "table heap create page failed");
+    page_id_t new_page_id;
+    auto guard = bpm->NewPageGuarded(&new_page_id);
+    ASSERT(new_page_id != INVALID_PAGE_ID, "table heap create page failed");
     auto first_page = guard.AsMut<TablePage>();
     first_page->Init();
-    table_info_page->SetFirstTablePageId(new_page);
+    table_info_page->SetFirstTablePageId(new_page_id);
   }
+  ASSERT(table_info_page->GetLastTablePageId() != INVALID_PAGE_ID &&
+             table_info_page->GetFirstTablePageId() != INVALID_PAGE_ID &&
+             table_info_page->GetLastTablePageId() > 0 &&
+             table_info_page->GetFirstTablePageId() > 0,
+         "table heap last page is invalid");
 };
 auto TableHeap::InsertTuple(const TupleMeta &meta,
                             const Tuple &tuple) -> std::optional<RID> {
