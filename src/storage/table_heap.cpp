@@ -35,9 +35,8 @@ auto TableHeap::InsertTuple(const TupleMeta &meta,
 
   auto table_info_pg = bpm_->FetchPageWrite(table_info_page_id_);
   auto table_info_page = table_info_pg.AsMut<TableInfoPage>();
-
   auto page_guard =
-      bpm_->FetchPageWrite(table_info_page->GetFirstTablePageId());
+      bpm_->FetchPageWrite(table_info_page->GetLastTablePageId());
   while (true) {
     auto page = page_guard.AsMut<TablePage>();
     if (page->GetNextTupleOffset(tuple) != std::nullopt) {

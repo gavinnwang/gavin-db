@@ -33,6 +33,7 @@ auto BufferPoolManager::AllocateFrame(frame_id_t *frame_id) -> bool {
       auto &evict_page = pages_[*frame_id];
       disk_manager_->WritePage(evict_page.page_id_, evict_page.GetData());
     }
+    return true;
   }
   *frame_id = free_list_.front();
   free_list_.pop_front();

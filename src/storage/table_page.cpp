@@ -22,15 +22,20 @@ auto TablePage::GetNextTupleOffset(const Tuple &tuple) const
   ENSURE(slot_end_offset >= TABLE_PAGE_HEADER_SIZE, "invalid slot end offset");
   ENSURE(tuple.GetStorageSize() <= PAGE_SIZE - TABLE_PAGE_HEADER_SIZE,
          "tuple is too large");
-  auto tuple_offset = slot_end_offset - tuple.GetStorageSize();
-  ENSURE(tuple_offset >= TABLE_PAGE_HEADER_SIZE && tuple_offset < PAGE_SIZE,
-         "invalid tuple offset");
 
+  // if the tuple size is already too large we return early to avoid underflow 
+  if (tuple.GetStorageSize() > slot_end_offset ) {
+    return std::nullopt;
+  }
+  auto tuple_offset = slot_end_offset - tuple.GetStorageSize();
+  
   auto offset_size =
       TABLE_PAGE_HEADER_SIZE + TUPLE_INFO_SIZE * (num_tuples_ + 1);
   if (tuple_offset < offset_size) {
     return std::nullopt;
   }
+  ENSURE(tuple_offset >= TABLE_PAGE_HEADER_SIZE && tuple_offset < PAGE_SIZE,
+         "invalid tuple offset");
   return tuple_offset;
 }
 
