@@ -17,8 +17,11 @@ TEST(StorageTest, SimpleTableInfoPageTest) {
   auto c1 = db::Column("user_id", db::TypeId::INTEGER);
   auto c2 = db::Column("user_name", db::TypeId::VARCHAR, 256);
   auto schema = db::Schema({c1, c2});
-  auto table_name = "usr table";
+  auto table_name = "usr";
   table_info_page->Init(table_name, schema, 0);
   auto table_info = table_info_page->GetTableInfo();
   ASSERT_EQ(table_info.name_, table_name);
+  ASSERT_EQ("Schema(user_id:INTEGER, user_name:VARCHAR(256))",
+            table_info.schema_.ToString());
+  ASSERT_EQ(0, table_info.table_oid_);
 }

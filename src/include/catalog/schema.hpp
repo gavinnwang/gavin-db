@@ -41,6 +41,17 @@ public:
   void DeserializeFrom(const char *storage);
   auto GetSerializationSize() const -> uint32_t;
 
+  auto ToString() const -> std::string {
+    std::string str = "Schema(";
+    for (const auto &col : columns_) {
+      str += col.ToString() + ", ";
+    }
+    str.pop_back();
+    str.pop_back();
+    str += ")";
+    return str;
+  }
+
 private:
   std::vector<Column> columns_;
   std::vector<uint32_t> uninlined_columns_;

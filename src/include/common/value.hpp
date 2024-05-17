@@ -7,19 +7,19 @@
 namespace db {
 class Value {
 public:
-  Value() : type_id_(TypeId::INVALID), var_len_(INVALID_VAR_LEN) {};
+  // create an value with type_id
+  Value(TypeId type)
+      : type_id_(type), var_len_(INVALID_VAR_LEN), manage_data_(false) {}
+
+  // create an INVALID value
+  Value() : Value(TypeId::INVALID) {}
 
   // create an BOOLEAN value
-  Value(TypeId type, int8_t i)
-      : type_id_(type), var_len_(INVALID_VAR_LEN), value_{.boolean_ = i} {}
-
+  Value(TypeId type, int8_t i) : Value(type) { value_.boolean_ = i; }
   // INTEGER
-  Value(TypeId type, int32_t i)
-      : type_id_(type), var_len_(INVALID_VAR_LEN), value_{.integer_ = i} {}
-
+  Value(TypeId type, int32_t i) : Value(type) { value_.integer_ = i; }
   // TIMESTAMP
-  Value(TypeId type, uint64_t i)
-      : type_id_(type), var_len_(INVALID_VAR_LEN), value_{.timestamp_ = i} {}
+  Value(TypeId type, uint64_t i) : Value(type) { value_.timestamp_ = i; }
   // VARCHAR
   Value(TypeId type_id, const char *data, uint32_t len, bool manage_data);
   // copy constructor
@@ -74,6 +74,7 @@ public:
     }
     case TypeId::VARCHAR: {
       uint32_t var_len = *reinterpret_cast<const uint32_t *>(storage);
+
       ASSERT(var_len < PAGE_SIZE, "Invalid varchar length");
       return {type_id, storage + sizeof(uint32_t), var_len, true};
     }

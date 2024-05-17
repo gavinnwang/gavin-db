@@ -1,21 +1,33 @@
 #include "storage/table_heap.hpp"
 #include "common/config.hpp"
 #include "common/macros.hpp"
+#include "storage/table_info_page.hpp"
 #include "storage/table_page.hpp"
 namespace db {
 
 TableHeap::TableHeap(BufferPoolManager *bpm, page_id_t table_info_page_id)
     : bpm_(bpm), table_info_page_id_(table_info_page_id) {
-  auto guard = bpm->NewPageGuarded(&first_page_id_);
-  last_page_id_ = first_page_id_;
-  auto first_page = guard.AsMut<TablePage>();
-  ASSERT(first_page != nullptr, "table heap create page failed");
-  first_page->Init();
+
+  auto table_info_pg = bpm_->FetchPageWrite(table_info_page_id_);
+  auto table_info_page = table_info_pg.AsMut<TableInfoPage>();
+  if (table_info_page->GetFirstTablePageId() == INVALID_PAGE_ID) {
+    page_id_t new_page = INVALID_PAGE_ID;
+    auto guard = bpm->NewPageGuarded(&new_page);
+    ASSERT(new_page != INVALID_PAGE_ID, "table heap create page failed");
+    auto first_page = guard.AsMut<TablePage>();
+    first_page->Init();
+    table_info_page->SetFirstTablePageId(new_page);
+  }
 };
 auto TableHeap::InsertTuple(const TupleMeta &meta,
                             const Tuple &tuple) -> std::optional<RID> {
   std::unique_lock<std::mutex> guard(latch_);
-  auto page_guard = bpm_->FetchPageWrite(last_page_id_);
+
+  auto table_info_pg = bpm_->FetchPageWrite(table_info_page_id_);
+  auto table_info_page = table_info_pg.AsMut<TableInfoPage>();
+
+  auto page_guard =
+      bpm_->FetchPageWrite(table_info_page->GetFirstTablePageId());
   while (true) {
     auto page = page_guard.AsMut<TablePage>();
     if (page->GetNextTupleOffset(tuple) != std::nullopt) {
@@ -43,10 +55,12 @@ auto TableHeap::InsertTuple(const TupleMeta &meta,
     auto next_page_guard = WritePageGuard{bpm_, npg};
 
     // update the last page id
-    last_page_id_ = next_page_id;
+
+    // last_page_id_ = next_page_id;
+    table_info_page->SetLastTablePageId(next_page_id);
     page_guard = std::move(next_page_guard);
   }
-  auto last_page_id = last_page_id_;
+  auto last_page_id = table_info_page->GetLastTablePageId();
 
   auto page = page_guard.AsMut<TablePage>();
   auto slot_id = *page->InsertTuple(meta, tuple);
@@ -76,4 +90,11 @@ auto TableHeap::GetTupleMeta(RID rid) -> TupleMeta {
   auto page = page_guard.As<TablePage>();
   return page->GetTupleMeta(rid);
 };
+
+auto TableHeap::GetFirstPageId() const -> page_id_t {
+  auto page_guard = bpm_->FetchPageRead(table_info_page_id_);
+  auto table_info_page = page_guard.As<TableInfoPage>();
+  return table_info_page->GetFirstTablePageId();
+}
+
 } // namespace db
