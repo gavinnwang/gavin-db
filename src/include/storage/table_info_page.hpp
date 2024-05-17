@@ -42,8 +42,9 @@ struct TableInfo {
   }
 
   auto GetSerializationSize() const -> uint32_t {
-    return schema_.GetSerializationSize() + sizeof(uint32_t) + name_.size() +
-           sizeof(table_oid_);
+    auto sz = schema_.GetSerializationSize() + sizeof(uint32_t) + name_.size() +
+              sizeof(table_oid_);
+    return sz;
   }
 };
 

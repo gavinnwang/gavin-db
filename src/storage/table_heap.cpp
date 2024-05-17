@@ -7,14 +7,11 @@ namespace db {
 
 TableHeap::TableHeap(BufferPoolManager *bpm, page_id_t table_info_page_id)
     : bpm_(bpm), table_info_page_id_(table_info_page_id) {
-
   auto table_info_pg = bpm_->FetchPageWrite(table_info_page_id_);
   auto table_info_page = table_info_pg.AsMut<TableInfoPage>();
 
   ASSERT(table_info_page->GetTableInfo().name_.size() > 0,
          "table name is empty");
-  std::cout << "init table with name: " << table_info_page->GetTableInfo().name_
-            << std::endl;
 
   if (table_info_page->GetFirstTablePageId() == INVALID_PAGE_ID) {
     page_id_t new_page_id;
@@ -22,7 +19,9 @@ TableHeap::TableHeap(BufferPoolManager *bpm, page_id_t table_info_page_id)
     ASSERT(new_page_id != INVALID_PAGE_ID, "table heap create page failed");
     auto first_page = guard.AsMut<TablePage>();
     first_page->Init();
+    // set the first and last page id to new page
     table_info_page->SetFirstTablePageId(new_page_id);
+    table_info_page->SetLastTablePageId(new_page_id);
   }
   ASSERT(table_info_page->GetLastTablePageId() != INVALID_PAGE_ID &&
              table_info_page->GetFirstTablePageId() != INVALID_PAGE_ID &&

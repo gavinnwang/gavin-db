@@ -3,6 +3,7 @@
 #include "common/config.hpp"
 #include "common/macros.hpp"
 #include "storage/page_guard.hpp"
+#include <iostream>
 #include <memory>
 #include <vector>
 namespace db {
@@ -34,7 +35,7 @@ auto BufferPoolManager::AllocateFrame(frame_id_t *frame_id) -> bool {
     }
   }
   *frame_id = free_list_.front();
-  free_list_.pop_back();
+  free_list_.pop_front();
   return true;
 }
 
@@ -44,13 +45,18 @@ auto BufferPoolManager::NewPage(page_id_t *page_id) -> Page * {
   if (!AllocateFrame(&frame_id)) {
     return nullptr;
   }
-
+  // assert that frame id is not in the free list
+  ASSERT(std::find(free_list_.begin(), free_list_.end(), frame_id) ==
+             free_list_.end(),
+         "frame id should not be in the free list");
+  // assert that frame id is valid
   ASSERT(frame_id != -1, "frame id has to be assigned a valid value here");
 
   replacer_->Pin(frame_id);
 
   // get rid fo the stale page table record
-  page_table_.erase(pages_[frame_id].page_id_);
+  auto page_id_to_replace = pages_[frame_id].page_id_;
+  page_table_.erase(page_id_to_replace);
 
   *page_id = AllocatePage();
   page_table_[*page_id] = frame_id;

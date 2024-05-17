@@ -1,5 +1,6 @@
 #include "storage/page_guard.hpp"
 #include "buffer/buffer_pool_manager.hpp"
+#include <iostream>
 
 namespace db {
 

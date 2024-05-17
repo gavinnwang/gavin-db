@@ -21,8 +21,8 @@ TEST(StorageTest, SimpleTableHeapTest) {
 
   auto table_info_wpg = guard.UpgradeWrite();
   auto table_info_page = table_info_wpg.AsMut<db::TableInfoPage>();
-
   table_info_page->Init(table_name, schema, 0);
+  table_info_wpg.Drop();
 
   auto table_heap = new db::TableHeap(bpm, table_info_page_id);
   int32_t int_val = 2392;
