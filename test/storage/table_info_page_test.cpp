@@ -2,7 +2,6 @@
 #include "common/config.hpp"
 #include "storage/table_heap.hpp"
 #include "storage/table_info_page.hpp"
-#include "storage/tuple.hpp"
 #include "gtest/gtest.h"
 
 TEST(StorageTest, SimpleTableInfoPageTest) {
@@ -11,7 +10,7 @@ TEST(StorageTest, SimpleTableInfoPageTest) {
   auto *bpm = new db::BufferPoolManager(buffer_pool_size, dm, 0);
 
   db::page_id_t page_id;
-  auto pg = bpm->NewPageGuarded(&page_id);
+  auto pg = bpm->NewPageGuarded(page_id);
   auto pgw = pg.UpgradeWrite();
   auto table_info_page = pgw.AsMut<db::TableInfoPage>();
   auto c1 = db::Column("user_id", db::TypeId::INTEGER);

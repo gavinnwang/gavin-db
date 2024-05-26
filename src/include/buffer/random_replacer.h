@@ -10,7 +10,7 @@ class RandomBogoReplacer : public Replacer {
 public:
   explicit RandomBogoReplacer();
   ~RandomBogoReplacer() = default;
-  auto Evict(frame_id_t *frame_id) -> bool;
+  auto Evict(frame_id_t &frame_id) -> bool;
   void Pin(frame_id_t frame_id);
   void Unpin(frame_id_t frame_id);
 

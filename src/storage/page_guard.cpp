@@ -1,6 +1,5 @@
 #include "storage/page_guard.hpp"
 #include "buffer/buffer_pool_manager.hpp"
-#include <iostream>
 
 namespace db {
 
@@ -90,7 +89,7 @@ WritePageGuard::~WritePageGuard() { Drop(); }
 auto BasicPageGuard::UpgradeRead() -> ReadPageGuard {
   page_->RLatch();
 
-  auto ret = ReadPageGuard{bpm_, page_};
+  auto ret = ReadPageGuard{*bpm_, *page_};
   bpm_ = nullptr;
   page_ = nullptr;
   return ret;
@@ -99,7 +98,7 @@ auto BasicPageGuard::UpgradeRead() -> ReadPageGuard {
 auto BasicPageGuard::UpgradeWrite() -> WritePageGuard {
   page_->WLatch();
 
-  auto ret = WritePageGuard{bpm_, page_};
+  auto ret = WritePageGuard{*bpm_, *page_};
   bpm_ = nullptr;
   page_ = nullptr;
   return ret;

@@ -1,10 +1,10 @@
 #include "buffer/random_replacer.h"
 namespace db {
 RandomBogoReplacer::RandomBogoReplacer() {}
-auto RandomBogoReplacer::Evict(frame_id_t *frame_id) -> bool {
+auto RandomBogoReplacer::Evict(frame_id_t &frame_id) -> bool {
   for (const auto &it : frame_store_) {
     if (it.second) {
-      *frame_id = it.first;
+      frame_id = it.first;
       frame_store_.erase(it.first);
       return true;
     }

@@ -14,20 +14,20 @@ public:
   BufferPoolManager(size_t pool_size, DiskManager *disk_manager,
                     page_id_t next_page_id);
   ~BufferPoolManager();
-  auto NewPage(page_id_t *page_id) -> Page *;
-  auto FetchPage(page_id_t page_id) -> Page *;
-  auto UnpinPage(page_id_t page_id, bool is_dirty) -> bool;
   auto FlushPage(page_id_t page_id) -> bool;
   void FlushAllPages();
-  auto DeletePage(page_id_t page_id) -> bool;
   auto FetchPageBasic(page_id_t page_id) -> BasicPageGuard;
   auto FetchPageRead(page_id_t page_id) -> ReadPageGuard;
   auto FetchPageWrite(page_id_t page_id) -> WritePageGuard;
-  auto NewPageGuarded(page_id_t *page_id) -> BasicPageGuard;
+  auto NewPageGuarded(page_id_t &page_id) -> BasicPageGuard;
+  auto UnpinPage(page_id_t page_id, bool is_dirty) -> bool;
 
 private:
+  auto DeletePage(page_id_t page_id) -> bool;
+  auto NewPage(page_id_t &page_id) -> Page &;
+  auto FetchPage(page_id_t page_id) -> Page &;
   auto AllocatePage() -> page_id_t;
-  auto AllocateFrame(frame_id_t *frame_id) -> bool;
+  auto AllocateFrame(frame_id_t &frame_id) -> bool;
 
   const frame_id_t pool_size_;
   std::atomic<page_id_t> next_page_id_;

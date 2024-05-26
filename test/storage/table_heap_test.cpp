@@ -12,7 +12,7 @@ TEST(StorageTest, TableHeapSimpleTest) {
   auto *bpm = new db::BufferPoolManager(buffer_pool_size, dm, 0);
 
   db::page_id_t table_info_page_id;
-  auto guard = bpm->NewPageGuarded(&table_info_page_id);
+  auto guard = bpm->NewPageGuarded(table_info_page_id);
   ASSERT_NE(table_info_page_id, db::INVALID_PAGE_ID);
 
   auto c1 = db::Column("user_id", db::TypeId::INTEGER);
@@ -52,31 +52,31 @@ TEST(StorageTest, TableHeapSimpleTest) {
   ASSERT_EQ(tuple.ToString(schema), tuple2.ToString(schema));
 }
 std::string generateRandomString(int a, int b) {
-    // Seed with a real random value, if available
-    std::random_device rd;
+  // Seed with a real random value, if available
+  std::random_device rd;
 
-    // Choose a random length between a and b (inclusive)
-    std::mt19937 gen(rd()); // Standard mersenne_twister_engine
-    std::uniform_int_distribution<> dist(a, b);
-    int stringLength = dist(gen);
+  // Choose a random length between a and b (inclusive)
+  std::mt19937 gen(rd()); // Standard mersenne_twister_engine
+  std::uniform_int_distribution<> dist(a, b);
+  int stringLength = dist(gen);
 
-    // Define a character set to use in the string
-    const char charset[] =
-        "0123456789"
-        "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
-        "abcdefghijklmnopqrstuvwxyz";
-    int charsetSize = sizeof(charset) - 1; // Subtract 1 to avoid the null terminator
+  // Define a character set to use in the string
+  const char charset[] = "0123456789"
+                         "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+                         "abcdefghijklmnopqrstuvwxyz";
+  int charsetSize =
+      sizeof(charset) - 1; // Subtract 1 to avoid the null terminator
 
-    // Create a random string
-    std::string randomString;
-    randomString.reserve(stringLength);
-    
-    std::uniform_int_distribution<> charDist(0, charsetSize - 1);
-    for (int i = 0; i < stringLength; ++i) {
-        randomString += charset[charDist(gen)];
-    }
+  // Create a random string
+  std::string randomString;
+  randomString.reserve(stringLength);
 
-    return randomString;
+  std::uniform_int_distribution<> charDist(0, charsetSize - 1);
+  for (int i = 0; i < stringLength; ++i) {
+    randomString += charset[charDist(gen)];
+  }
+
+  return randomString;
 }
 
 TEST(StorageTest, TableHeapManyInsertionTest) {
@@ -85,7 +85,7 @@ TEST(StorageTest, TableHeapManyInsertionTest) {
   auto *bpm = new db::BufferPoolManager(buffer_pool_size, dm, 0);
 
   db::page_id_t table_info_page_id;
-  auto guard = bpm->NewPageGuarded(&table_info_page_id);
+  auto guard = bpm->NewPageGuarded(table_info_page_id);
   ASSERT_NE(table_info_page_id, db::INVALID_PAGE_ID);
 
   auto c1 = db::Column("user_id", db::TypeId::INTEGER);
@@ -99,7 +99,7 @@ TEST(StorageTest, TableHeapManyInsertionTest) {
   table_info_wpg.Drop();
 
   auto table_heap = new db::TableHeap(bpm, table_info_page_id);
-  
+
   std::vector<db::RID> rids;
   std::vector<std::string> ans;
   // insert 200,000 tuples
@@ -109,8 +109,8 @@ TEST(StorageTest, TableHeapManyInsertionTest) {
 
     auto v1 = db::Value(db::TypeId::INTEGER, int_val);
     auto v2 = db::Value(db::TypeId::VARCHAR, str_val.data(),
-                      static_cast<uint32_t>(str_val.size()), true);
-    
+                        static_cast<uint32_t>(str_val.size()), true);
+
     auto tuple = db::Tuple({v1, v2}, schema);
     auto meta = db::TupleMeta{false};
 
@@ -118,9 +118,8 @@ TEST(StorageTest, TableHeapManyInsertionTest) {
     ASSERT_EQ(rid.has_value(), true);
     rids.push_back(*rid);
     ans.push_back("(" + std::to_string(int_val) + ", " + str_val + ")");
-    std::cout << "rid: " << rid->GetPageId() << " " << rid->GetSlotNum() << std::endl;
-      
-      
+    std::cout << "rid: " << rid->GetPageId() << " " << rid->GetSlotNum()
+              << std::endl;
   }
 
   for (int i = 0; i < 200000; ++i) {

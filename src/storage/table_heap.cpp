@@ -15,7 +15,7 @@ TableHeap::TableHeap(BufferPoolManager *bpm, page_id_t table_info_page_id)
 
   if (table_info_page->GetFirstTablePageId() == INVALID_PAGE_ID) {
     page_id_t new_page_id;
-    auto guard = bpm->NewPageGuarded(&new_page_id);
+    auto guard = bpm->NewPageGuarded(new_page_id);
     ASSERT(new_page_id != INVALID_PAGE_ID, "table heap create page failed");
     auto first_page = guard.AsMut<TablePage>();
     first_page->Init();
@@ -47,22 +47,23 @@ auto TableHeap::InsertTuple(const TupleMeta &meta,
 
     // allocate a new page for the tuple because the current page is full
     page_id_t next_page_id = INVALID_PAGE_ID;
-    auto npg = bpm_->NewPage(&next_page_id);
+    auto npg = bpm_->NewPageGuarded(next_page_id);
+    ENSURE(next_page_id != INVALID_PAGE_ID, "cannot allocate page");  
     ENSURE(next_page_id != INVALID_PAGE_ID, "cannot allocate page");
 
     // construct the linked list
     page->SetNextPageId(next_page_id);
 
     // initialize the next page
-    auto next_page = reinterpret_cast<TablePage *>(npg->GetData());
+    // auto next_page = reinterpret_cast<TablePage *>(npg->GetData());
+    auto next_page = npg.AsMut<TablePage>();
     next_page->Init();
 
     // drop the current page
     page_guard.Drop();
 
     // fetch the next page
-    auto next_page_guard = WritePageGuard{bpm_, npg};
-
+    auto next_page_guard = npg.UpgradeWrite();
     // update the last page id
 
     // last_page_id_ = next_page_id;

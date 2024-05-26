@@ -11,7 +11,7 @@ class BasicPageGuard {
 
 public:
   BasicPageGuard() = default;
-  BasicPageGuard(BufferPoolManager *bpm, Page *page) : bpm_(bpm), page_(page) {}
+  BasicPageGuard(BufferPoolManager &bpm, Page &page) : bpm_(&bpm), page_(&page) {}
   // copy constructor is disabled
   BasicPageGuard(const BasicPageGuard &) = delete;
   // move constructor, BPG(std::move(other_guard)), the other guard should not
@@ -40,6 +40,7 @@ public:
   }
 
 private:
+  // TODO convert to shared_ptr
   BufferPoolManager *bpm_{nullptr};
   Page *page_{nullptr};
   bool is_dirty_{false};
@@ -47,7 +48,7 @@ private:
 class ReadPageGuard {
 public:
   ReadPageGuard() = default;
-  ReadPageGuard(BufferPoolManager *bpm, Page *page) : guard_(bpm, page) {}
+  ReadPageGuard(BufferPoolManager &bpm, Page &page) : guard_(bpm, page) {}
   ReadPageGuard(const ReadPageGuard &) = delete;
   auto operator=(const ReadPageGuard &) -> ReadPageGuard & = delete;
   ReadPageGuard(ReadPageGuard &&that) noexcept;
@@ -64,7 +65,7 @@ private:
 class WritePageGuard {
 public:
   WritePageGuard() = default;
-  WritePageGuard(BufferPoolManager *bpm, Page *page) : guard_(bpm, page) {}
+  WritePageGuard(BufferPoolManager &bpm, Page &page) : guard_(bpm, page) {}
   WritePageGuard(const WritePageGuard &) = delete;
   auto operator=(const WritePageGuard &) -> WritePageGuard & = delete;
   WritePageGuard(WritePageGuard &&that) noexcept;

@@ -23,28 +23,29 @@ BufferPoolManager::~BufferPoolManager() { delete[] pages_; }
 
 auto BufferPoolManager::AllocatePage() -> page_id_t { return next_page_id_++; }
 
-auto BufferPoolManager::AllocateFrame(frame_id_t *frame_id) -> bool {
+auto BufferPoolManager::AllocateFrame(frame_id_t &frame_id) -> bool {
   if (free_list_.empty()) {
     // gotta evict a random frame because
     if (!replacer_->Evict(frame_id)) {
       return false;
     }
-    if (pages_[*frame_id].is_dirty_) {
-      auto &evict_page = pages_[*frame_id];
+    if (pages_[frame_id].is_dirty_) {
+      auto &evict_page = pages_[frame_id];
       disk_manager_->WritePage(evict_page.page_id_, evict_page.GetData());
     }
     return true;
   }
-  *frame_id = free_list_.front();
+  frame_id = free_list_.front();
   free_list_.pop_front();
   return true;
 }
 
-auto BufferPoolManager::NewPage(page_id_t *page_id) -> Page * {
+auto BufferPoolManager::NewPage(page_id_t &page_id) -> Page & {
   std::lock_guard<std::mutex> lock(latch_);
   frame_id_t frame_id = -1;
-  if (!AllocateFrame(&frame_id)) {
-    return nullptr;
+  if (!AllocateFrame(frame_id)) {
+    throw std::runtime_error("Failed to allocate frame");
+    // return nullptr;
   }
   // assert that frame id is not in the free list
   ASSERT(std::find(free_list_.begin(), free_list_.end(), frame_id) ==
@@ -59,40 +60,41 @@ auto BufferPoolManager::NewPage(page_id_t *page_id) -> Page * {
   auto page_id_to_replace = pages_[frame_id].page_id_;
   page_table_.erase(page_id_to_replace);
 
-  *page_id = AllocatePage();
-  page_table_[*page_id] = frame_id;
+  page_id = AllocatePage();
+  page_table_[page_id] = frame_id;
   // reset the memory and metadata for the new page
-  Page *page = &pages_[frame_id];
-  page->page_id_ = *page_id;
-  page->pin_count_ = 1;
-  page->is_dirty_ = false;
-  page->ResetMemory();
+  Page &page = pages_[frame_id];
+  page.page_id_ = page_id;
+  page.pin_count_ = 1;
+  page.is_dirty_ = false;
+  page.ResetMemory();
 
   return page;
 }
-auto BufferPoolManager::FetchPage(page_id_t page_id) -> Page * {
+auto BufferPoolManager::FetchPage(page_id_t page_id) -> Page & {
   std::lock_guard<std::mutex> lock(latch_);
   if (page_table_.find(page_id) != page_table_.end()) {
     frame_id_t frame_id = page_table_[page_id];
-    Page *page = &pages_[frame_id];
-    page->pin_count_++;
+    Page &page = pages_[frame_id];
+    page.pin_count_++;
     replacer_->Pin(frame_id);
     return page;
   }
 
   frame_id_t frame_id = 0;
-  if (!AllocateFrame(&frame_id)) {
-    return nullptr;
+  if (!AllocateFrame(frame_id)) {
+    throw std::runtime_error("Failed to allocate frame");
+    // return nullptr;
   }
 
   page_table_.erase(pages_[frame_id].page_id_);
   page_table_.insert({page_id, frame_id});
 
-  Page *page = &pages_[frame_id];
-  page->page_id_ = page_id;
-  page->pin_count_++;
-  page->is_dirty_ = false;
-  disk_manager_->ReadPage(page_id, page->GetData());
+  Page &page = pages_[frame_id];
+  page.page_id_ = page_id;
+  page.pin_count_++;
+  page.is_dirty_ = false;
+  disk_manager_->ReadPage(page_id, page.GetData());
 
   return page;
 }
@@ -156,24 +158,24 @@ auto BufferPoolManager::DeletePage(page_id_t page_id) -> bool {
 }
 
 auto BufferPoolManager::FetchPageBasic(page_id_t page_id) -> BasicPageGuard {
-  Page *page = FetchPage(page_id);
-  return {this, page};
+  auto &page = FetchPage(page_id);
+  return {*this, page};
 }
 
 auto BufferPoolManager::FetchPageRead(page_id_t page_id) -> ReadPageGuard {
-  Page *page = FetchPage(page_id);
-  page->RLatch();
-  return {this, page};
+  auto &page = FetchPage(page_id);
+  page.RLatch();
+  return {*this, page};
 }
 
 auto BufferPoolManager::FetchPageWrite(page_id_t page_id) -> WritePageGuard {
-  Page *page = FetchPage(page_id);
-  page->WLatch();
-  return {this, page};
+  auto &page = FetchPage(page_id);
+  page.WLatch();
+  return {*this, page};
 }
 
-auto BufferPoolManager::NewPageGuarded(page_id_t *page_id) -> BasicPageGuard {
-  Page *page = NewPage(page_id);
-  return {this, page};
+auto BufferPoolManager::NewPageGuarded(page_id_t &page_id) -> BasicPageGuard {
+  auto& page = NewPage(page_id);
+  return {*this, page};
 }
 } // namespace db
