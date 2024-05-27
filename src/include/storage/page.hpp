@@ -9,7 +9,7 @@ class Page {
 
 public:
   /** Constructor. Zeros out the page data. */
-  Page() : data_(PAGE_SIZE, 0) {}
+  explicit Page() : data_(PAGE_SIZE, 0) {}
   // ~Page() { delete[] data_; }
 
   inline auto GetData() -> char * { return data_.data(); }
@@ -30,7 +30,6 @@ public:
   inline void RUnlatch() { rwlatch_.RUnlock(); }
 
 private:
-  static constexpr size_t OFFSET_PAGE_START = 0;
   inline void ResetMemory() { std::fill(data_.begin(), data_.end(), 0); }
   page_id_t page_id_ = INVALID_PAGE_ID;
   bool is_dirty_ = false;

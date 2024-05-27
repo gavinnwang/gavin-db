@@ -7,13 +7,14 @@
 #include "storage/page_guard.hpp"
 #include <list>
 #include <memory>
+#include <vector>
 namespace db {
 
 class BufferPoolManager {
 public:
   BufferPoolManager(size_t pool_size, DiskManager *disk_manager,
                     page_id_t next_page_id);
-  ~BufferPoolManager();
+  // ~BufferPoolManager();
   auto FlushPage(page_id_t page_id) -> bool;
   void FlushAllPages();
   auto FetchPageBasic(page_id_t page_id) -> BasicPageGuard;
@@ -36,6 +37,6 @@ private:
   std::mutex latch_;
   std::list<frame_id_t> free_list_;
   std::unordered_map<page_id_t, frame_id_t> page_table_;
-  Page *pages_;
+  std::vector<Page> pages_;
 };
 } // namespace db

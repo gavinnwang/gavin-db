@@ -2,7 +2,6 @@
 
 #include "buffer/buffer_pool_manager.hpp"
 #include "catalog/schema.hpp"
-#include "common/config.hpp"
 #include <string>
 namespace db {
 

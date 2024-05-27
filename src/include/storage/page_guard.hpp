@@ -40,7 +40,7 @@ public:
   }
 
 private:
-  // TODO convert to shared_ptr
+  // TODO convert to shared_ptr maybe?
   BufferPoolManager *bpm_{nullptr};
   Page *page_{nullptr};
   bool is_dirty_{false};
