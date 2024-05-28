@@ -10,6 +10,31 @@ void BinarySerializer::OnPropertyEnd() {
 	// Nothing to do here
 }
 
+void BinarySerializer::OnOptionalPropertyBegin(const field_id_t field_id, const char *tag, bool present) {
+	// Dont write anything at all if the property is not present
+	if (present) {
+		OnPropertyBegin(field_id, tag);
+	}
+}
+
+void BinarySerializer::OnOptionalPropertyEnd(bool present) {
+	// Nothing to do here
+}
+
+void BinarySerializer::OnObjectBegin() {
+	// #ifdef DEBUG
+	// 	debug_stack.emplace_back();
+	// #endif
+}
+
+void BinarySerializer::OnObjectEnd() {
+	// #ifdef DEBUG
+	// 	debug_stack.pop_back();
+	// #endif
+	// Write object terminator
+	Write<field_id_t>(0xFFFF);
+}
+
 void BinarySerializer::OnListBegin(idx_t count) {
 	WriteVarInt(count);
 }
