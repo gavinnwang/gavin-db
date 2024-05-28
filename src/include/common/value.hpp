@@ -4,6 +4,7 @@
 #include "common/macros.hpp"
 #include "common/type.hpp"
 #include <cstdint>
+#include <string_view>
 namespace db {
 class Value {
 public:
@@ -15,30 +16,30 @@ public:
   Value() : Value(TypeId::INVALID) {}
 
   // create an BOOLEAN value
-  Value(TypeId type, int8_t i) : Value(type) { value_.boolean_ = i; }
+  Value(TypeId type, int8_t i) : Value(type) { value_ = i; }
   // INTEGER
-  Value(TypeId type, int32_t i) : Value(type) { value_.integer_ = i; }
+  Value(TypeId type, int32_t i) : Value(type) { value_ = i; }
   // TIMESTAMP
-  Value(TypeId type, uint64_t i) : Value(type) { value_.timestamp_ = i; }
+  Value(TypeId type, uint64_t i) : Value(type) { value_ = i; }
   // VARCHAR
   Value(TypeId type_id, const char *data, uint32_t len, bool manage_data);
   // copy constructor
   Value(const Value &other);
-  // // move constructor
-  // Value(Value &&other) noexcept;
   // deconstructor
   ~Value();
   // copy assignment
   auto operator=(Value other) -> Value &;
-  // // move assignment
-  // auto operator=(Value &&other) noexcept -> Value &;
+  // move constructor
+  Value(Value &&other) noexcept;
+  // move assignment
+  auto operator=(Value &&other) noexcept -> Value &;
 
-  friend void Swap(Value &first, Value &second) {
-    std::swap(first.value_, second.value_);
-    std::swap(first.var_len_, second.var_len_);
-    std::swap(first.manage_data_, second.manage_data_);
-    std::swap(first.type_id_, second.type_id_);
-  }
+  // friend void Swap(Value &first, Value &second) {
+  //   std::swap(first.value_, second.value_);
+  //   std::swap(first.var_len_, second.var_len_);
+  //   std::swap(first.manage_data_, second.manage_data_);
+  //   std::swap(first.type_id_, second.type_id_);
+  // }
 
   // Get the length of the variable length data
   inline auto GetStorageSize() const -> uint32_t {
@@ -92,13 +93,18 @@ private:
 
   bool manage_data_;
 
-  union Val {
-    int8_t boolean_;
-    int32_t integer_;
-    uint64_t timestamp_;
-    char *varlen_;
-    const char *const_varlen_;
-  } value_;
+  // Define the variant to hold all possible types
+  using Val = std::variant<int8_t, int32_t, uint64_t, char *, std::string_view>;
+
+  // Store the variant
+  Val value_;
+  // union Val {
+  //   int8_t boolean_;
+  //   int32_t integer_;
+  //   uint64_t timestamp_;
+  //   char *varlen_;
+  //   const char *const_varlen_;
+  // } value_;
 
   // TODO look into variant
 };

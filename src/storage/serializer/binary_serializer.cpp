@@ -44,13 +44,13 @@ void BinarySerializer::WriteValue(float value) { Write(value); }
 void BinarySerializer::WriteValue(double value) { Write(value); }
 
 void BinarySerializer::WriteValue(const std::string &value) {
-  auto len = NumericCast<uint32_t>(value.length());
+  auto len = static_cast<uint32_t>(value.length());
   WriteVarInt(len);
   WriteData(value.c_str(), len);
 }
 
 void BinarySerializer::WriteValue(const char *value) {
-  auto len = NumericCast<uint32_t>(strlen(value));
+  auto len = static_cast<uint32_t>(strlen(value));
   WriteVarInt(len);
   WriteData(value, len);
 }
