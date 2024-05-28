@@ -12,7 +12,6 @@ BufferPoolManager::BufferPoolManager(size_t pool_size,
     : pool_size_(pool_size), next_page_id_(next_page_id),
       replacer_(std::make_unique<RandomBogoReplacer>()),
       disk_manager_(disk_manager), pages_(pool_size) {
-  std::vector<bool> free_frame_tracker_(pool_size_, true);
   for (frame_id_t i = 0; i < pool_size_; ++i) {
     free_list_.emplace_back(i);
   }

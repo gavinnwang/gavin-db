@@ -3,7 +3,13 @@
 #include "common/macros.hpp"
 #include <string>
 namespace db {
-enum TypeId : uint8_t { INVALID = 0, BOOLEAN, INTEGER, TIMESTAMP, VARCHAR };
+enum class TypeId : uint8_t {
+  INVALID = 0,
+  BOOLEAN,
+  INTEGER,
+  TIMESTAMP,
+  VARCHAR
+};
 
 class Type {
 public:

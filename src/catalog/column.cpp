@@ -8,7 +8,7 @@ auto Column::ToString(bool simplified) const -> std::string {
   if (simplified) {
     std::ostringstream os;
     os << column_name_ << ":" << Type::TypeIdToString(column_type_);
-    if (column_type_ == VARCHAR) {
+    if (column_type_ == TypeId::VARCHAR) {
       os << "(" << length_ << ")";
     }
     return (os.str());
@@ -50,7 +50,7 @@ void Column::DeserializeFrom(const char *storage) {
   column_name_.assign(storage + offset, col_name_size);
   ASSERT(column_name_.size() == col_name_size, "Column name size mismatch");
   ASSERT(length_ != 0, "Column length is not set");
-  ASSERT(column_type_ != INVALID, "Column type is not set");
+  ASSERT(column_type_ != TypeId::INVALID, "Column type is not set");
 }
 
 auto Column::GetSerializationSize() const -> uint32_t {

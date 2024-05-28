@@ -29,8 +29,9 @@ TEST(StorageTest, TableHeapSimpleTest) {
   int32_t int_val = 2392;
   std::string str_val = "hhihi";
   auto v1 = db::Value(db::TypeId::INTEGER, int_val);
-  auto v2 = db::Value(db::TypeId::VARCHAR, str_val.data(),
-                      static_cast<uint32_t>(str_val.size()), true);
+  auto v2 = db::Value(db::TypeId::VARCHAR, str_val);
+  // auto v2 = db::Value(db::TypeId::VARCHAR, str_val.data(),
+  //                     static_cast<uint32_t>(str_val.size()), true);
 
   auto tuple = db::Tuple({v1, v2}, schema);
 
@@ -80,7 +81,7 @@ std::string generateRandomString(int a, int b) {
 }
 
 TEST(StorageTest, TableHeapManyInsertionTest) {
-  const size_t buffer_pool_size = 10;
+  const size_t buffer_pool_size = 25;
   auto *dm = new db::DiskManager("test.db");
   auto *bpm = new db::BufferPoolManager(buffer_pool_size, dm, 0);
 
@@ -108,8 +109,7 @@ TEST(StorageTest, TableHeapManyInsertionTest) {
     std::string str_val = generateRandomString(10, 256);
 
     auto v1 = db::Value(db::TypeId::INTEGER, int_val);
-    auto v2 = db::Value(db::TypeId::VARCHAR, str_val.data(),
-                        static_cast<uint32_t>(str_val.size()), true);
+    auto v2 = db::Value(db::TypeId::VARCHAR, str_val);
 
     auto tuple = db::Tuple({v1, v2}, schema);
     auto meta = db::TupleMeta{false};

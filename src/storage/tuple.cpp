@@ -13,6 +13,7 @@ Tuple::Tuple(std::vector<Value> values, const Schema &schema) {
   ASSERT(tuple_size < PAGE_SIZE, "Tuple size must be less than PAGE_SIZE");
   for (auto &i : schema.GetUnlinedColumns()) {
     auto len = values[i].GetStorageSize();
+
     // if the length of the value is greater than the schema max length for that
     // column, error
     if (len > schema.GetColumn(i).GetStorageSize()) {
@@ -39,6 +40,7 @@ Tuple::Tuple(std::vector<Value> values, const Schema &schema) {
       *reinterpret_cast<uint32_t *>(data_.data() + col.GetOffset()) = offset;
       // serialize actual varchar value, in place (size | data)
       values[i].SerializeTo(data_.data() + offset);
+      offset += values[i].GetStorageSize() + sizeof(uint32_t);
     } else {
       values[i].SerializeTo(data_.data() + col.GetOffset());
     }
