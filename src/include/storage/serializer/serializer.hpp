@@ -2,6 +2,7 @@
 
 #include "common/config.hpp"
 #include "common/exception.hpp"
+#include "common/value.hpp"
 #include "storage/serializer/serialization_traits.hpp"
 #include <memory>
 #include <set>
@@ -36,6 +37,17 @@ public:
     OnOptionalPropertyBegin(field_id, tag, true);
     WriteValue(value);
     OnOptionalPropertyEnd(true);
+  }
+  //
+  // Specialization for Value (default Value comparison throws when comparing
+  // nulls)
+  template <>
+  void WritePropertyWithDefault<Value>(const field_id_t field_id,
+                                       const char *tag, const Value &value,
+                                       const Value &&default_value) {
+    // If current value is default, don't write it
+    // TODO
+    throw Exception("Not implemented");
   }
 
 protected:
@@ -129,7 +141,7 @@ protected:
   virtual void OnNullableEnd() = 0;
 
   // Handle primitive types, a serializer needs to implement these.
-  virtual void WriteNull() = 0;
+  virtual void WriteNull() = delete;
   virtual void WriteValue(char value) {
     throw Exception("Write char value not implemented");
     // throw NotImplementedException("Write char value not implemented");
@@ -147,6 +159,6 @@ protected:
   virtual void WriteValue(double value) = 0;
   virtual void WriteValue(const std::string &value) = 0;
   virtual void WriteValue(const char *str) = 0;
-  // virtual void WriteDataPtr(const_data_ptr_t ptr, idx_t count) = 0;
+  virtual void WriteDataPtr(const_data_ptr_t ptr, idx_t count) = 0;
 };
 } // namespace db

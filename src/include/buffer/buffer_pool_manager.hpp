@@ -2,6 +2,7 @@
 
 #include "buffer/replacer.hpp"
 #include "common/config.hpp"
+#include "common/macros.hpp"
 #include "storage/disk_manager.hpp"
 #include "storage/page.hpp"
 #include "storage/page_guard.hpp"
@@ -14,7 +15,7 @@ class BufferPoolManager {
 public:
   BufferPoolManager(size_t pool_size, DiskManager *disk_manager,
                     page_id_t next_page_id);
-  // ~BufferPoolManager();
+  DISALLOW_COPY_AND_MOVE(BufferPoolManager);
   auto FlushPage(page_id_t page_id) -> bool;
   void FlushAllPages();
   auto FetchPageBasic(page_id_t page_id) -> BasicPageGuard;
