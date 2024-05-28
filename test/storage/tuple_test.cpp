@@ -20,8 +20,7 @@ TEST(StorageTest, TupleTest2) {
   auto schema = db::Schema({c1, c2});
   uint32_t num = 2;
   auto v1 = db::Value(db::TypeId::INTEGER, num);
-  // std::string_view sv_var = "hii4";
-  // auto v2 = db::Value(db::TypeId::VARCHAR, "hii4");
+  auto v2 = db::Value(db::TypeId::VARCHAR, std::string_view("hii4"));
 
-  // EXPECT_THROW(db::Tuple({v1, v2}, schema), std::runtime_error);
+  EXPECT_THROW(db::Tuple({v1, v2}, schema), std::runtime_error);
 }
