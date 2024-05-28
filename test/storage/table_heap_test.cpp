@@ -117,7 +117,8 @@ TEST(StorageTest, TableHeapManyInsertionTest) {
     auto rid = table_heap->InsertTuple(meta, tuple);
     ASSERT_EQ(rid.has_value(), true);
     rids.push_back(*rid);
-    ans.push_back("(" + std::to_string(int_val) + ", " + str_val + ")");
+    ans.push_back("(" + std::to_string(int_val) + ", " + std::move(str_val) +
+                  ")");
     std::cout << "rid: " << rid->GetPageId() << " " << rid->GetSlotNum()
               << std::endl;
   }

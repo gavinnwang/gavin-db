@@ -10,6 +10,8 @@ class Page {
 public:
   /** Constructor. Zeros out the page data. */
   explicit Page() : data_(PAGE_SIZE, 0) {}
+  Page(Page &&other) noexcept;            // Move constructor
+  Page &operator=(Page &&other) noexcept; // Move assignment operator
   // ~Page() { delete[] data_; }
 
   inline auto GetData() -> char * { return data_.data(); }

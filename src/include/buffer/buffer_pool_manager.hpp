@@ -38,6 +38,6 @@ private:
   std::mutex latch_;
   std::list<frame_id_t> free_list_;
   std::unordered_map<page_id_t, frame_id_t> page_table_;
-  std::vector<Page> pages_;
+  std::vector<Page> ages_;
 };
 } // namespace db

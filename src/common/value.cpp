@@ -3,7 +3,6 @@
 #include "common/type.hpp"
 #include <cstdint>
 #include <cstring>
-#include <string_view>
 #include <variant>
 namespace db {
 
@@ -24,19 +23,19 @@ void Value::SerializeTo(char *storage) const {
     return;
   }
   case TypeId::VARCHAR: {
-    if (std::holds_alternative<std::string>(value_)) {
-      auto &varchar_val = std::get<std::string>(value_);
-      uint32_t var_len = varchar_val.size();
-      memcpy(storage, &var_len, sizeof(uint32_t));
-      memcpy(storage + sizeof(uint32_t), varchar_val.data(), var_len);
-    } else {
-      ASSERT(std::holds_alternative<std::string_view>(value_),
-             "Invalid variant type for VARCHAR Value");
-      auto &varchar_val = std::get<std::string_view>(value_);
-      uint32_t var_len = varchar_val.size();
-      memcpy(storage, &var_len, sizeof(uint32_t));
-      memcpy(storage + sizeof(uint32_t), varchar_val.data(), var_len);
-    }
+    // if (std::holds_alternative<std::string>(value_)) {
+    auto &varchar_val = std::get<std::string>(value_);
+    uint32_t var_len = varchar_val.size();
+    memcpy(storage, &var_len, sizeof(uint32_t));
+    memcpy(storage + sizeof(uint32_t), varchar_val.data(), var_len);
+    // } else {
+    //   ASSERT(std::holds_alternative<std::string_view>(value_),
+    //          "Invalid variant type for VARCHAR Value");
+    //   auto &varchar_val = std::get<std::string_view>(value_);
+    //   uint32_t var_len = varchar_val.size();
+    //   memcpy(storage, &var_len, sizeof(uint32_t));
+    //   memcpy(storage + sizeof(uint32_t), varchar_val.data(), var_len);
+    // }
     return;
   }
   case TypeId::INVALID: {
@@ -55,13 +54,13 @@ auto Value::ToString() const -> std::string {
   case TypeId::TIMESTAMP:
     return std::to_string(std::get<uint64_t>(value_));
   case TypeId::VARCHAR:
-    if (std::holds_alternative<std::string>(value_)) {
-      return std::get<std::string>(value_);
-    } else {
-      ASSERT(std::holds_alternative<std::string_view>(value_),
-             "Invalid variant type for VARCHAR Value");
-      return std::string(std::get<std::string_view>(value_));
-    }
+    // if (std::holds_alternative<std::string>(value_)) {
+    return std::get<std::string>(value_);
+    // } else {
+    //   ASSERT(std::holds_alternative<std::string_view>(value_),
+    //          "Invalid variant type for VARCHAR Value");
+    //   return std::string(std::get<std::string_view>(value_));
+    // }
   case TypeId::INVALID:
     UNREACHABLE("Cannot convert invalid type value to string");
     return "";

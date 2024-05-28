@@ -4,7 +4,6 @@
 #include "common/macros.hpp"
 #include "common/type.hpp"
 #include <cstdint>
-#include <string_view>
 #include <variant>
 namespace db {
 class Value {
@@ -60,21 +59,13 @@ private:
     if (type_id_ != TypeId::VARCHAR) {
       return 0;
     } else {
-      if (std::holds_alternative<std::string>(value_)) {
-        return std::get<std::string>(value_).size();
-      } else {
-        ASSERT(std::holds_alternative<std::string_view>(value_),
-               "Invalid variant type for VARCHAR Value");
-        return std::get<std::string_view>(value_).size();
-      }
+      return std::get<std::string>(value_).size();
     }
   }
-  static constexpr uint32_t INVALID_VAR_LEN = 0;
   TypeId type_id_;
 
   // Define the variant to hold all possible types
-  using Val =
-      std::variant<int8_t, int32_t, uint64_t, std::string_view, std::string>;
+  using Val = std::variant<int8_t, int32_t, uint64_t, std::string>;
 
   Val value_;
 };
