@@ -40,8 +40,6 @@ struct Foo {
 	}
 };
 
-static void Debug() {
-}
 TEST(StorageTest, SerializerTest) {
 	Foo foo_in;
 	foo_in.a = 42;
@@ -71,7 +69,6 @@ TEST(StorageTest, SerializerTest) {
 
 	stream.Rewind();
 
-	Debug();
 	BinarySerializer::Serialize(foo_in, stream, false);
 	auto pos2 = stream.GetPosition();
 	stream.Rewind();
@@ -81,7 +78,8 @@ TEST(StorageTest, SerializerTest) {
 	EXPECT_EQ(foo_in.a, foo_out2.a);
 	EXPECT_TRUE(foo_in.bar == nullptr && foo_out2.bar == nullptr);
 	EXPECT_EQ(foo_in.c, foo_out2.c);
-	// shoudl not written the default value
+
+	// should not write the default value
 	EXPECT_TRUE(pos1 > pos2);
 }
 } // namespace db
