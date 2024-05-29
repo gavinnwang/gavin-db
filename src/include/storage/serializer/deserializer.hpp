@@ -1,7 +1,7 @@
 #pragma once
 
-#include "common/config.hpp"
 #include "common/exception.hpp"
+#include "common/typedef.hpp"
 #include "storage/serializer/serialization_traits.hpp"
 namespace db {
 
@@ -110,7 +110,7 @@ private:
 		auto is_present = OnNullableBegin();
 		if (is_present) {
 			OnObjectBegin();
-			ptr = make_uniq<ELEMENT_TYPE>(Read<ELEMENT_TYPE>());
+			ptr = std::make_unique<ELEMENT_TYPE>(Read<ELEMENT_TYPE>());
 			OnObjectEnd();
 		}
 		OnNullableEnd();

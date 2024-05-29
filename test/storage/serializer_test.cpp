@@ -1,8 +1,10 @@
+#include "storage/serializer/binary_deserializer.hpp"
 #include "storage/serializer/binary_serializer.hpp"
 #include "storage/serializer/deserializer.hpp"
 #include "storage/serializer/memory_stream.hpp"
 
 #include "gtest/gtest.h"
+#include <cstdio>
 namespace db {
 
 struct Bar {
@@ -11,11 +13,11 @@ struct Bar {
 		serializer.WriteProperty<uint32_t>(1, "b", b);
 	}
 
-	// static unique_ptr<Bar> Deserialize(Deserializer &deserializer) {
-	// 	auto result = make_uniq<Bar>();
-	// 	deserializer.ReadProperty<uint32_t>(1, "b", result->b);
-	// 	return result;
-	// }
+	static std::unique_ptr<Bar> Deserialize(Deserializer &deserializer) {
+		auto result = std::make_unique<Bar>();
+		deserializer.ReadProperty<uint32_t>(1, "b", result->b);
+		return result;
+	}
 };
 
 struct Foo {
@@ -37,6 +39,9 @@ struct Foo {
 		return result;
 	}
 };
+
+static void Debug() {
+}
 TEST(StorageTest, SerializerTest) {
 	Foo foo_in;
 	foo_in.a = 42;
@@ -49,5 +54,34 @@ TEST(StorageTest, SerializerTest) {
 	auto pos1 = stream.GetPosition();
 	stream.Print();
 	stream.Rewind();
+
+	auto foo_out_ptr = BinaryDeserializer::Deserialize<Foo>(stream);
+	auto &foo_out = *foo_out_ptr.get();
+	std::cout << "foo_out.a: " << foo_out.a << std::endl;
+	std::cout << "foo_out.bar->b: " << foo_out.bar->b << std::endl;
+	std::cout << "foo_out.c: " << foo_out.c << std::endl;
+	// REQUIRE(foo_in.a == foo_out.a);
+	// REQUIRE(foo_in.bar->b == foo_out.bar->b);
+	// REQUIRE(foo_in.c == foo_out.c);
+	EXPECT_EQ(foo_in.a, foo_out.a);
+	EXPECT_EQ(foo_in.bar->b, foo_out.bar->b);
+	EXPECT_EQ(foo_in.c, foo_out.c);
+
+	foo_in.bar = nullptr;
+
+	stream.Rewind();
+
+	Debug();
+	BinarySerializer::Serialize(foo_in, stream, false);
+	auto pos2 = stream.GetPosition();
+	stream.Rewind();
+
+	foo_out_ptr = BinaryDeserializer::Deserialize<Foo>(stream);
+	auto &foo_out2 = *foo_out_ptr.get();
+	EXPECT_EQ(foo_in.a, foo_out2.a);
+	EXPECT_TRUE(foo_in.bar == nullptr && foo_out2.bar == nullptr);
+	EXPECT_EQ(foo_in.c, foo_out2.c);
+	// shoudl not written the default value
+	EXPECT_TRUE(pos1 > pos2);
 }
 } // namespace db

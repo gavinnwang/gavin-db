@@ -7,7 +7,8 @@
 #include <type_traits>
 #include <unordered_set>
 namespace db {
-class Serializer; // Forward declare
+class Serializer;   // Forward declare
+class Deserializer; // Forward declare
 typedef uint16_t field_id_t;
 
 template <typename T, typename = T>
@@ -17,9 +18,28 @@ struct has_serialize<
     T, typename std::enable_if<
            std::is_same<decltype(std::declval<T>().Serialize(std::declval<db::Serializer &>())), void>::value, T>::type>
     : std::true_type {};
-
 template <typename T, typename = T>
 struct has_deserialize : std::false_type {};
+
+// Accept `static unique_ptr<T> Deserialize(Deserializer& deserializer)`
+template <typename T>
+struct has_deserialize<
+    T,
+    typename std::enable_if<std::is_same<decltype(T::Deserialize), std::unique_ptr<T>(Deserializer &)>::value, T>::type>
+    : std::true_type {};
+
+// Accept `static shared_ptr<T> Deserialize(Deserializer& deserializer)`
+template <typename T>
+struct has_deserialize<
+    T,
+    typename std::enable_if<std::is_same<decltype(T::Deserialize), std::shared_ptr<T>(Deserializer &)>::value, T>::type>
+    : std::true_type {};
+
+// Accept `static T Deserialize(Deserializer& deserializer)`
+template <typename T>
+struct has_deserialize<
+    T, typename std::enable_if<std::is_same<decltype(T::Deserialize), T(Deserializer &)>::value, T>::type>
+    : std::true_type {};
 
 template <typename T>
 struct is_unique_ptr : std::false_type {};

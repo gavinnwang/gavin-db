@@ -18,6 +18,7 @@ void BinarySerializer::OnOptionalPropertyBegin(const field_id_t field_id, const 
 }
 
 void BinarySerializer::OnOptionalPropertyEnd(bool present) {
+	(void)present;
 	// Nothing to do here
 }
 
@@ -36,7 +37,8 @@ void BinarySerializer::OnObjectEnd() {
 }
 
 void BinarySerializer::OnListBegin(idx_t count) {
-	WriteVarInt(count);
+	Write<idx_t>(count);
+	// Write(count);
 }
 
 void BinarySerializer::OnListEnd() {
@@ -50,43 +52,48 @@ void BinarySerializer::OnNullableEnd() {
 }
 
 void BinarySerializer::WriteValue(bool value) {
-	Write<uint8_t>(value);
-}
-
-void BinarySerializer::WriteValue(uint8_t value) {
-	WriteVarInt(value);
+	Write(value);
 }
 
 void BinarySerializer::WriteValue(char value) {
 	Write(value);
 }
 
+// template <typename T>
+// typename std::enable_if<std::is_arithmetic<T>::value>::type BinarySerializer::WriteValue(T value) {
+// 	Write(value);
+// }
+
+void BinarySerializer::WriteValue(uint8_t value) {
+	Write(value);
+}
+
 void BinarySerializer::WriteValue(int8_t value) {
-	WriteVarInt(value);
+	Write(value);
 }
 
 void BinarySerializer::WriteValue(uint16_t value) {
-	WriteVarInt(value);
+	Write(value);
 }
 
 void BinarySerializer::WriteValue(int16_t value) {
-	WriteVarInt(value);
+	Write(value);
 }
 
 void BinarySerializer::WriteValue(uint32_t value) {
-	WriteVarInt(value);
+	Write(value);
 }
 
 void BinarySerializer::WriteValue(int32_t value) {
-	WriteVarInt(value);
+	Write(value);
 }
 
 void BinarySerializer::WriteValue(uint64_t value) {
-	WriteVarInt(value);
+	Write(value);
 }
 
 void BinarySerializer::WriteValue(int64_t value) {
-	WriteVarInt(value);
+	Write(value);
 }
 
 void BinarySerializer::WriteValue(float value) {
@@ -99,18 +106,18 @@ void BinarySerializer::WriteValue(double value) {
 
 void BinarySerializer::WriteValue(const std::string &value) {
 	auto len = static_cast<uint32_t>(value.length());
-	WriteVarInt(len);
+	Write(len);
 	WriteData(value.c_str(), len);
 }
 
 void BinarySerializer::WriteValue(const char *value) {
 	auto len = static_cast<uint32_t>(strlen(value));
-	WriteVarInt(len);
+	Write(len);
 	WriteData(value, len);
 }
 
 void BinarySerializer::WriteDataPtr(const_data_ptr_t ptr, idx_t count) {
-	WriteVarInt(static_cast<uint64_t>(count));
+	Write(static_cast<uint64_t>(count));
 	WriteData(ptr, count);
 }
 

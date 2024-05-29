@@ -1,7 +1,6 @@
 #include "storage/table_page.hpp"
 
 #include "common/config.hpp"
-#include "common/debug.hpp"
 #include "common/exception.hpp"
 #include "common/macros.hpp"
 
@@ -45,9 +44,7 @@ auto TablePage::InsertTuple(const TupleMeta &meta, const Tuple &tuple) -> std::o
 	tuple_info_[tuple_id] = std::make_tuple(*tuple_offset, tuple.GetStorageSize(), meta);
 	num_tuples_++;
 	ASSERT(*tuple_offset + tuple.GetStorageSize() <= PAGE_SIZE, "tuple out of range");
-	// print data of the page_start_
 	memcpy(page_start_ + *tuple_offset, tuple.data_.data(), tuple.GetStorageSize());
-	// printData(page_start_, PAGE_SIZE);
 	return tuple_id;
 }
 

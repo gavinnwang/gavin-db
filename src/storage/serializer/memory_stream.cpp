@@ -33,6 +33,14 @@ void MemoryStream::WriteData(const_data_ptr_t source, idx_t write_size) {
 	position += write_size;
 }
 
+void MemoryStream::ReadData(data_ptr_t destination, idx_t read_size) {
+	if (position + read_size > capacity) {
+		throw Exception("Failed to deserialize: not enough data in buffer to fulfill read request");
+	}
+	memcpy(destination, data + position, read_size);
+	position += read_size;
+}
+
 void MemoryStream::Rewind() {
 	position = 0;
 }
