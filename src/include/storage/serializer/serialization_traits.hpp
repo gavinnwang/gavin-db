@@ -10,6 +10,7 @@ namespace db {
 class Serializer;   // Forward declare
 class Deserializer; // Forward declare
 typedef uint16_t field_id_t;
+const field_id_t MESSAGE_TERMINATOR_FIELD_ID = 0xFFFF;
 
 template <typename T, typename = T>
 struct has_serialize : std::false_type {};

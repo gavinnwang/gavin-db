@@ -36,7 +36,7 @@ void BinaryDeserializer::OnObjectBegin() {
 
 void BinaryDeserializer::OnObjectEnd() {
 	auto next_field = NextField();
-	if (next_field != 0xFFFF)
+	if (next_field != MESSAGE_TERMINATOR_FIELD_ID)
 		throw SerializationException("Failed to deserialize: expected end of object, but found field id: " +
 		                             std::to_string(next_field));
 	nesting_level--;

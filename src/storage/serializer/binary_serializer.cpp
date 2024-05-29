@@ -33,7 +33,7 @@ void BinarySerializer::OnObjectEnd() {
 	// 	debug_stack.pop_back();
 	// #endif
 	// Write object terminator
-	Write<field_id_t>(0xFFFF);
+	Write<field_id_t>(MESSAGE_TERMINATOR_FIELD_ID);
 }
 
 void BinarySerializer::OnListBegin(idx_t count) {
