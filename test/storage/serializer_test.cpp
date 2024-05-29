@@ -1,4 +1,5 @@
 #include "storage/serializer/binary_serializer.hpp"
+#include "storage/serializer/deserializer.hpp"
 #include "storage/serializer/memory_stream.hpp"
 
 #include "gtest/gtest.h"
@@ -28,13 +29,13 @@ struct Foo {
 		serializer.WriteProperty<int32_t>(3, "c", c);
 	}
 
-	// static std::unique_ptr<Foo> Deserialize(Deserializer &deserializer) {
-	// 	auto result = make_uniq<Foo>();
-	// 	deserializer.ReadProperty<int32_t>(1, "a", result->a);
-	// 	deserializer.ReadPropertyWithDefault<unique_ptr<Bar>>(2, "bar", result->bar, unique_ptr<Bar>());
-	// 	deserializer.ReadProperty<int32_t>(3, "c", result->c);
-	// 	return result;
-	// }
+	static std::unique_ptr<Foo> Deserialize(Deserializer &deserializer) {
+		auto result = std::make_unique<Foo>();
+		deserializer.ReadProperty<int32_t>(1, "a", result->a);
+		deserializer.ReadPropertyWithDefault<std::unique_ptr<Bar>>(2, "bar", result->bar, std::unique_ptr<Bar>());
+		deserializer.ReadProperty<int32_t>(3, "c", result->c);
+		return result;
+	}
 };
 TEST(StorageTest, SerializerTest) {
 	Foo foo_in;

@@ -15,6 +15,5 @@ typedef uint8_t data_t;
 typedef data_t *data_ptr_t;
 typedef const data_t *const_data_ptr_t;
 
-static constexpr page_id_t CATALOG_PAGE_ID =
-    0; // fixed page id of the catalog page
+static constexpr page_id_t CATALOG_PAGE_ID = 0; // fixed page id of the catalog page
 } // namespace db

@@ -7,10 +7,9 @@ namespace db {
 
 class Deserializer {
 
+public:
 	virtual ~Deserializer() {
 	}
-
-public:
 	// Read into an existing value
 	template <typename T>
 	inline void ReadProperty(const field_id_t field_id, const char *tag, T &ret) {

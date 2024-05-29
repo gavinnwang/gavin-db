@@ -2,19 +2,20 @@
 
 #include "buffer/replacer.hpp"
 #include "common/config.hpp"
+
 #include <cstdint>
 #include <unordered_map>
 
 namespace db {
 class RandomBogoReplacer : public Replacer {
 public:
-  explicit RandomBogoReplacer();
-  ~RandomBogoReplacer() = default;
-  auto Evict(frame_id_t &frame_id) -> bool;
-  void Pin(frame_id_t frame_id);
-  void Unpin(frame_id_t frame_id);
+	explicit RandomBogoReplacer();
+	~RandomBogoReplacer() = default;
+	auto Evict(frame_id_t &frame_id) -> bool;
+	void Pin(frame_id_t frame_id);
+	void Unpin(frame_id_t frame_id);
 
 private:
-  std::unordered_map<frame_id_t, uint16_t> frame_store_;
+	std::unordered_map<frame_id_t, uint16_t> frame_store_;
 };
 } // namespace db
