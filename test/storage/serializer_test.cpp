@@ -4,7 +4,6 @@
 #include "storage/serializer/memory_stream.hpp"
 
 #include "gtest/gtest.h"
-#include <cstdio>
 namespace db {
 
 struct Bar {
@@ -50,14 +49,11 @@ TEST(StorageTest, SerializerTest) {
 
 	BinarySerializer::Serialize(foo_in, stream, false);
 	auto pos1 = stream.GetPosition();
-	stream.Print();
+	// stream.Print();
 	stream.Rewind();
 
 	auto foo_out_ptr = BinaryDeserializer::Deserialize<Foo>(stream);
 	auto &foo_out = *foo_out_ptr.get();
-	std::cout << "foo_out.a: " << foo_out.a << std::endl;
-	std::cout << "foo_out.bar->b: " << foo_out.bar->b << std::endl;
-	std::cout << "foo_out.c: " << foo_out.c << std::endl;
 	// REQUIRE(foo_in.a == foo_out.a);
 	// REQUIRE(foo_in.bar->b == foo_out.bar->b);
 	// REQUIRE(foo_in.c == foo_out.c);
