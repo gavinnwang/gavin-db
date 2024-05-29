@@ -49,6 +49,17 @@ public:
 	}
 
 protected:
+	template <typename T>
+	typename std::enable_if<std::is_enum<T>::value, void>::type WriteValue(const T value) {
+		// if (serialize_enum_as_string) {
+		// 	// Use the enum serializer to lookup tostring function
+		// 	auto str = EnumUtil::ToChars(value);
+		// 	WriteValue(str);
+		// } else {
+			// Use the underlying type
+			WriteValue(static_cast<std::underlying_type<T>::type>(value));
+		// }
+	}
 	// Unique Pointer Ref
 	template <typename T>
 	void WriteValue(const std::unique_ptr<T> &ptr) {

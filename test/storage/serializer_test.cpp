@@ -1,3 +1,4 @@
+#include "common/type.hpp"
 #include "storage/serializer/binary_deserializer.hpp"
 #include "storage/serializer/binary_serializer.hpp"
 #include "storage/serializer/deserializer.hpp"
@@ -27,11 +28,13 @@ struct Foo {
 	int32_t a;
 	std::unique_ptr<Bar> bar;
 	int32_t c;
+  TypeId type;
 
 	void Serialize(Serializer &serializer) const {
 		serializer.WriteProperty<int32_t>(1, "a", a);
 		serializer.WritePropertyWithDefault<std::unique_ptr<Bar>>(2, "bar", bar, std::unique_ptr<Bar>());
 		serializer.WriteProperty<int32_t>(3, "c", c);
+    serializer.WriteProperty<TypeId>(4, "type", type);
 	}
 
 	static std::unique_ptr<Foo> Deserialize(Deserializer &deserializer) {
@@ -39,6 +42,7 @@ struct Foo {
 		deserializer.ReadProperty<int32_t>(1, "a", result->a);
 		deserializer.ReadPropertyWithDefault<std::unique_ptr<Bar>>(2, "bar", result->bar, std::unique_ptr<Bar>());
 		deserializer.ReadProperty<int32_t>(3, "c", result->c);
+    deserializer.ReadProperty<TypeId>(4, "type", result->type);
 		return result;
 	}
 };
@@ -51,6 +55,7 @@ TEST(StorageTest, SerializerTest) {
   std::vector<std::string> vec_str = {"a", "b", "c", "d", "e"};
   foo_in.bar->vec = vec_str;
 	foo_in.c = 44;
+  foo_in.type = TypeId::VARCHAR;
 	MemoryStream stream;
 
 	BinarySerializer::Serialize(foo_in, stream, false);
@@ -63,6 +68,7 @@ TEST(StorageTest, SerializerTest) {
 	EXPECT_EQ(foo_in.a, foo_out.a);
 	EXPECT_EQ(foo_in.bar->b, foo_out.bar->b);
 	EXPECT_EQ(foo_in.c, foo_out.c);
+  EXPECT_EQ(foo_in.type, foo_out.type);
   for (size_t i = 0; i < vec_str.size(); i++) {
     EXPECT_EQ(vec_str[i], foo_out.bar->vec[i]);
   }
