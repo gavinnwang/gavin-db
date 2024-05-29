@@ -87,6 +87,11 @@ private:
 		OnObjectBegin();
 		auto val = T::Deserialize(*this);
 		OnObjectEnd();
+    // if type of val is a unique ptr then remove the unique ptr
+  // if (!is_unique_ptr<decltype(val)>::value) {
+  //   
+  //   return *val;
+  // }
 		return val;
 	}
 
