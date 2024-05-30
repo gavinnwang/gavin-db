@@ -8,6 +8,63 @@
 #include <variant>
 namespace db {
 
+void Value::Serialize(Serializer &serializer) const {
+
+	serializer.WriteProperty(100, "type", type_id_);
+	serializer.WriteProperty(101, "is_null", is_null_);
+
+	if (!IsNull()) {
+		switch (type_id_) {
+		case TypeId::INVALID:
+			UNREACHABLE("Cannot serialize invalid type value");
+		case TypeId::BOOLEAN:
+			serializer.WriteProperty(102, "value", std::get<int8_t>(value_));
+			break;
+		case TypeId::INTEGER:
+			serializer.WriteProperty(102, "value", std::get<int32_t>(value_));
+			break;
+		case TypeId::TIMESTAMP:
+			serializer.WriteProperty(102, "value", std::get<uint64_t>(value_));
+			break;
+		case TypeId::VARCHAR:
+			serializer.WriteProperty(102, "value", std::get<std::string>(value_));
+			break;
+		default:
+			throw NotImplementedException("Unimplemented type for Serialize");
+		}
+	}
+}
+
+Value Value::Deserialize(Deserializer &deserializer) {
+	auto type_id = deserializer.ReadProperty<TypeId>(100, "type");
+	auto is_null = deserializer.ReadProperty<bool>(101, "is_null");
+	Value new_value = Value(type_id);
+	if (is_null) {
+		return new_value;
+	}
+	new_value.is_null_ = false;
+	switch (type_id) {
+	case TypeId::INVALID:
+		UNREACHABLE("Cannot serialize invalid type value");
+	case TypeId::BOOLEAN:
+		new_value.value_ = deserializer.ReadProperty<int8_t>(102, "value");
+		break;
+	case TypeId::INTEGER:
+		new_value.value_ = deserializer.ReadProperty<int32_t>(102, "value");
+		break;
+	case TypeId::TIMESTAMP:
+		new_value.value_ = deserializer.ReadProperty<uint64_t>(102, "value");
+		break;
+	case TypeId::VARCHAR:
+		new_value.value_ = deserializer.ReadProperty<std::string>(102, "value");
+		break;
+	default:
+		throw NotImplementedException("Unimplemented type for Serialize");
+	}
+
+	return new_value;
+};
+
 void Value::SerializeTo(char *storage) const {
 	switch (type_id_) {
 	case TypeId::BOOLEAN: {

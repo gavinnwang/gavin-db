@@ -3,6 +3,8 @@
 #include "common/config.hpp"
 #include "common/macros.hpp"
 #include "common/type.hpp"
+#include "storage/serializer/deserializer.hpp"
+#include "storage/serializer/serializer.hpp"
 
 #include <cstdint>
 #include <variant>
@@ -10,24 +12,27 @@ namespace db {
 class Value {
 public:
 	// create an value with type_id
-	Value(TypeId type) : type_id_(type) {
-	}
-
-	// create an INVALID value
-	Value() : Value(TypeId::INVALID) {
+	Value(TypeId type) : type_id_(type), is_null_(true) {
 	}
 
 	template <typename T>
-	Value(TypeId type, T &&i) : type_id_(type), value_(std::forward<T>(i)) {};
+	Value(TypeId type, T &&i) : type_id_(type), value_(std::forward<T>(i)), is_null_(false) {};
 
 	// Get the length of the variable length data
 	inline auto GetStorageSize() const -> uint32_t {
 		return Type::TypeSize(type_id_, GetVarlenStorageSize());
 	}
 
+	inline auto IsNull() const -> bool {
+		return is_null_;
+	}
+
 	void SerializeTo(char *storage) const;
 
 	auto ToString() const -> std::string;
+
+	void Serialize(Serializer &serializer) const;
+	static Value Deserialize(Deserializer &deserializer);
 
 	static auto DeserializeFrom(const char *storage, const TypeId type_id) -> Value {
 		switch (type_id) {
@@ -70,5 +75,6 @@ private:
 	using Val = std::variant<int8_t, int32_t, uint64_t, std::string>;
 
 	Val value_;
+	bool is_null_;
 };
 } // namespace db

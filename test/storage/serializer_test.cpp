@@ -1,9 +1,9 @@
 #include "common/type.hpp"
+#include "common/value.hpp"
 #include "storage/serializer/binary_deserializer.hpp"
 #include "storage/serializer/binary_serializer.hpp"
 #include "storage/serializer/deserializer.hpp"
 #include "storage/serializer/file_stream.hpp"
-#include "storage/serializer/memory_stream.hpp"
 
 #include "gtest/gtest.h"
 #include <memory>
@@ -32,6 +32,7 @@ struct Foo {
 	int32_t c;
 	TypeId type;
 	std::vector<std::unique_ptr<Bar>> bars;
+	Value value {TypeId::INTEGER, 10};
 
 	void Serialize(Serializer &serializer) const {
 		serializer.WriteProperty<int32_t>(1, "a", a);
@@ -39,6 +40,7 @@ struct Foo {
 		serializer.WriteProperty<int32_t>(3, "c", c);
 		serializer.WriteProperty<TypeId>(4, "type", type);
 		serializer.WriteProperty<std::vector<std::unique_ptr<Bar>>>(5, "bars", bars);
+		serializer.WriteProperty<Value>(6, "value", value);
 	}
 
 	static std::unique_ptr<Foo> Deserialize(Deserializer &deserializer) {
@@ -48,6 +50,7 @@ struct Foo {
 		deserializer.ReadProperty<int32_t>(3, "c", result->c);
 		deserializer.ReadProperty<TypeId>(4, "type", result->type);
 		deserializer.ReadProperty<std::vector<std::unique_ptr<Bar>>>(5, "bars", result->bars);
+		deserializer.ReadProperty<Value>(6, "value", result->value);
 
 		return result;
 	}
@@ -58,6 +61,8 @@ TEST(StorageTest, SerializerTest) {
 	foo_in.a = 42;
 	foo_in.bar = std::make_unique<Bar>();
 	foo_in.bar->b = 43;
+	auto value_str = "hello";
+	foo_in.value = Value(TypeId::VARCHAR, value_str);
 	// lambda to create a bar
 	auto create_bar = [](uint32_t b) {
 		Bar bar;
@@ -90,6 +95,7 @@ TEST(StorageTest, SerializerTest) {
 	for (size_t i = 0; i < foo_in.bars.size(); i++) {
 		EXPECT_EQ(foo_in.bars[i]->b, foo_out.bars[i]->b);
 	}
+	EXPECT_EQ(value_str, foo_out.value.ToString());
 
 	foo_in.bar = nullptr;
 
@@ -106,6 +112,7 @@ TEST(StorageTest, SerializerTest) {
 	EXPECT_TRUE(foo_in.bar == nullptr && foo_out2.bar == nullptr);
 	EXPECT_EQ(foo_in.c, foo_out2.c);
 	EXPECT_EQ(foo_in.type, foo_out2.type);
+	EXPECT_EQ(value_str, foo_out2.value.ToString());
 	std::cout << pos1 << " " << pos2 << std::endl;
 	// should not write the default value
 	EXPECT_TRUE(pos1 > pos2);

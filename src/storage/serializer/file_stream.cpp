@@ -31,7 +31,7 @@ FileStream::~FileStream() {
 }
 
 void FileStream::WriteData(const_data_ptr_t buffer, idx_t write_size) {
-	if (!file.write(reinterpret_cast<const char *>(buffer), write_size)) {
+	if (!file.write(const_char_ptr_cast(buffer), write_size)) {
 		throw Exception("Failed to write data to file");
 	}
 }

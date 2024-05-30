@@ -14,13 +14,13 @@ public:
 
 	// Reads a type from the stream and moves the stream forward sizeof(T) bytes
 	// The type must be a standard layout type
-	template <class T>
-	T Read() {
-		static_assert(std::is_standard_layout<T>(), "Read element must be a standard layout data type");
-		T value;
-		ReadData(data_ptr_cast(&value), sizeof(T));
-		return value;
-	}
+	// template <class T>
+	// T Read() {
+	// 	static_assert(std::is_standard_layout<T>(), "Read element must be a standard layout data type");
+	// 	T value;
+	// 	ReadData(data_ptr_cast(&value), sizeof(T));
+	// 	return value;
+	// }
 
 	virtual ~ReadStream() {
 	}

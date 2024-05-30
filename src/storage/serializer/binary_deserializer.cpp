@@ -114,7 +114,7 @@ std::string BinaryDeserializer::ReadString() {
 	if (len == 0) {
 		return std::string();
 	}
-	auto buffer = std::make_unique<data_t>(len);
+	auto buffer = std::make_unique<data_t[]>(len);
 	ReadData(buffer.get(), len);
 	return std::string(const_char_ptr_cast(buffer.get()), len);
 }

@@ -2,15 +2,18 @@
 
 #include "common/config.hpp"
 #include "common/exception.hpp"
-#include "common/value.hpp"
 #include "storage/serializer/serialization_traits.hpp"
 
 #include <memory>
 #include <set>
+#include <type_traits>
 #include <unordered_map>
 #include <vector>
 
 namespace db {
+
+class Value;
+
 class Serializer {
 protected:
 	// bool serialize_enum_as_string = false;
@@ -50,15 +53,10 @@ public:
 
 protected:
 	template <typename T>
-	typename std::enable_if<std::is_enum<T>::value, void>::type WriteValue(const T value) {
-		// if (serialize_enum_as_string) {
-		// 	// Use the enum serializer to lookup tostring function
-		// 	auto str = EnumUtil::ToChars(value);
-		// 	WriteValue(str);
-		// } else {
-		// Use the underlying type
+	void WriteValue(const T value)
+	    requires std::is_enum_v<T>
+	{
 		WriteValue(static_cast<std::underlying_type<T>::type>(value));
-		// }
 	}
 	// Unique Pointer Ref
 	template <typename T>
