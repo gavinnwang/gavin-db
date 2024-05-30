@@ -56,8 +56,8 @@ protected:
 		// 	auto str = EnumUtil::ToChars(value);
 		// 	WriteValue(str);
 		// } else {
-			// Use the underlying type
-			WriteValue(static_cast<std::underlying_type<T>::type>(value));
+		// Use the underlying type
+		WriteValue(static_cast<std::underlying_type<T>::type>(value));
 		// }
 	}
 	// Unique Pointer Ref
@@ -133,11 +133,19 @@ protected:
 
 	// class or struct implementing `Serialize(Serializer& Serializer)`;
 	template <typename T>
-	typename std::enable_if<has_serialize<T>::value>::type WriteValue(const T &value) {
+	void WriteValue(const T &value)
+	    requires HasSerialize<T>
+	{
 		OnObjectBegin();
 		value.Serialize(*this);
 		OnObjectEnd();
 	}
+	// template <typename T>
+	// typename std::enable_if<has_serialize<T>::value>::type WriteValue(const T &value) {
+	// 	OnObjectBegin();
+	// 	value.Serialize(*this);
+	// 	OnObjectEnd();
+	// }
 
 protected:
 	// Hooks for subclasses to override to implement custom behavior
