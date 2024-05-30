@@ -85,10 +85,10 @@ protected:
 
 	template <class K, class V>
 	void WriteValue(const std::pair<K, V> &pair) {
-		// OnObjectBegin();
+		OnObjectBegin();
 		WriteProperty(0, "first", pair.first);
 		WriteProperty(1, "second", pair.second);
-		// OnObjectEnd();
+		OnObjectEnd();
 	}
 
 	// Vector

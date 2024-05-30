@@ -1,9 +1,12 @@
+#include "catalog/column.hpp"
+#include "catalog/schema.hpp"
 #include "common/type.hpp"
 #include "common/value.hpp"
 #include "storage/serializer/binary_deserializer.hpp"
 #include "storage/serializer/binary_serializer.hpp"
 #include "storage/serializer/deserializer.hpp"
 #include "storage/serializer/file_stream.hpp"
+#include "storage/table_info_page.hpp"
 
 #include "gtest/gtest.h"
 #include <memory>
@@ -116,5 +119,27 @@ TEST(StorageTest, SerializerTest) {
 	std::cout << pos1 << " " << pos2 << std::endl;
 	// should not write the default value
 	EXPECT_TRUE(pos1 > pos2);
+}
+
+TEST(StorageTest, SerializeValueTest) {
+	auto c1 = Column("user_id", db::TypeId::INTEGER);
+	auto c2 = Column("user_name", db::TypeId::VARCHAR, 256);
+	auto c3 = Column("user_location", db::TypeId::VARCHAR, 256);
+	auto c4 = Column("user_age", db::TypeId::INTEGER);
+	auto c5 = Column("user_preference", db::TypeId::VARCHAR, 64);
+	auto c6 = Column("user_email", db::TypeId::VARCHAR, 30);
+	auto c7 = Column("user_last_active", db::TypeId::TIMESTAMP);
+	auto c8 = Column("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", db::TypeId::INTEGER);
+	auto schema = Schema({c1, c2, c3, c4, c5, c6, c7, c8});
+
+	auto table_info = TableInfo {schema, "table_name", 1};
+	FileStream stream("schema_test_file", std::ios::in | std::ios::out | std::ios::binary | std::ios::trunc);
+	BinarySerializer::Serialize(table_info, stream, false);
+	stream.Print();
+	stream.Rewind();
+
+	auto out = BinaryDeserializer::Deserialize<TableInfo>(stream);
+	std::cout << out->schema_.ToString() << std::endl;
+	std::cout << out->name_;
 }
 } // namespace db

@@ -20,12 +20,27 @@ public:
 	}
 
 	template <class T>
+	T DeserializeRaw() {
+		OnObjectBegin();
+		auto result = T::Deserialize(*this);
+		OnObjectEnd();
+		assert(nesting_level == 0); // make sure we are at the root level
+		return result;
+	}
+
+	template <class T>
 	std::unique_ptr<T> Deserialize() {
 		OnObjectBegin();
 		auto result = T::Deserialize(*this);
 		OnObjectEnd();
 		assert(nesting_level == 0); // make sure we are at the root level
 		return result;
+	}
+
+	template <class T>
+	static T DeserializeRaw(ReadStream &stream) {
+		BinaryDeserializer deserializer(stream);
+		return deserializer.DeserializeRaw<T>();
 	}
 
 	template <class T>
