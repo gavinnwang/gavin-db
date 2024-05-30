@@ -2,6 +2,7 @@
 #include "storage/serializer/binary_deserializer.hpp"
 #include "storage/serializer/binary_serializer.hpp"
 #include "storage/serializer/deserializer.hpp"
+#include "storage/serializer/file_stream.hpp"
 #include "storage/serializer/memory_stream.hpp"
 
 #include "gtest/gtest.h"
@@ -70,7 +71,7 @@ TEST(StorageTest, SerializerTest) {
 	foo_in.bar->vec = vec_str;
 	foo_in.c = 44;
 	foo_in.type = TypeId::VARCHAR;
-	MemoryStream stream;
+	FileStream stream("test_file", std::ios::in | std::ios::out | std::ios::binary | std::ios::trunc);
 
 	BinarySerializer::Serialize(foo_in, stream, false);
 	auto pos1 = stream.GetPosition();
@@ -96,6 +97,7 @@ TEST(StorageTest, SerializerTest) {
 
 	BinarySerializer::Serialize(foo_in, stream, false);
 	auto pos2 = stream.GetPosition();
+	stream.Print();
 	stream.Rewind();
 
 	foo_out_ptr = BinaryDeserializer::Deserialize<Foo>(stream);
@@ -104,7 +106,7 @@ TEST(StorageTest, SerializerTest) {
 	EXPECT_TRUE(foo_in.bar == nullptr && foo_out2.bar == nullptr);
 	EXPECT_EQ(foo_in.c, foo_out2.c);
 	EXPECT_EQ(foo_in.type, foo_out2.type);
-
+	std::cout << pos1 << " " << pos2 << std::endl;
 	// should not write the default value
 	EXPECT_TRUE(pos1 > pos2);
 }
