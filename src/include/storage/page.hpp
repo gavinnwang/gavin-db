@@ -2,6 +2,7 @@
 
 #include "common/config.hpp"
 #include "common/rwlatch.hpp"
+#include <vector>
 
 namespace db {
 class Page {

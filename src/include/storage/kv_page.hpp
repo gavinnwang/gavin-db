@@ -1,6 +1,7 @@
 #pragma once
 
 #include <cstdint>
+#include <optional>
 #include <string>
 namespace db {
 static constexpr uint16_t KV_META_SIZE = 1;

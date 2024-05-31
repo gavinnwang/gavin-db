@@ -14,7 +14,7 @@ namespace db {
 
 class BufferPoolManager {
 public:
-	BufferPoolManager(size_t pool_size, DiskManager *disk_manager, page_id_t next_page_id);
+	BufferPoolManager(size_t pool_size, std::unique_ptr<DiskManager> disk_manager, page_id_t next_page_id);
 	DISALLOW_COPY_AND_MOVE(BufferPoolManager);
 	auto FlushPage(page_id_t page_id) -> bool;
 	void FlushAllPages();

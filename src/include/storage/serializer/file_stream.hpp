@@ -6,6 +6,7 @@
 #include <fstream>
 #include <iostream>
 #include <string>
+#include <vector>
 
 namespace db {
 class FileStream : public WriteStream, public ReadStream {

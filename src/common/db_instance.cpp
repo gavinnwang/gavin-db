@@ -21,13 +21,13 @@ std::vector<std::string> split(const std::string &str, char delimiter) {
 }
 
 DBInstance::DBInstance(const std::string &db_file_name) {
-	disk_manager_ = std::make_unique<DiskManager>(db_file_name);
-	buffer_pool_manager_ = std::make_unique<BufferPoolManager>(DEFAULT_POOL_SIZE, disk_manager_.get(), 0);
+	auto disk_manager = std::make_unique<DiskManager>(db_file_name);
+	buffer_pool_manager_ = std::make_shared<BufferPoolManager>(DEFAULT_POOL_SIZE, std::move(disk_manager), 0);
 };
 
 DBInstance::~DBInstance() {
 	buffer_pool_manager_->FlushAllPages();
-	disk_manager_->ShutDown();
+	// disk_manager_->ShutDown();
 }
 
 auto DBInstance::ExecuteQuery(const std::string &query, std::string *output) -> bool {

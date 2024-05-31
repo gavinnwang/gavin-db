@@ -60,6 +60,10 @@ void DiskManager::ShutDown() {
 	db_io_.close();
 }
 
+DiskManager::~DiskManager() {
+	ShutDown();
+}
+
 auto DiskManager::GetFileSize(const std::string &file_name) -> int {
 	struct stat stat_buf;
 	int rc = stat(file_name.c_str(), &stat_buf);

@@ -9,9 +9,8 @@
 
 TEST(StorageTest, TableHeapSimpleTest) {
 	const size_t buffer_pool_size = 10;
-	auto *dm = new db::DiskManager("test.db");
-	auto *bpm = new db::BufferPoolManager(buffer_pool_size, dm, 0);
-
+	auto dm = std::make_unique<db::DiskManager>("test.db");
+	auto bpm = std::make_shared<db::BufferPoolManager>(buffer_pool_size, std::move(dm), 0);
 	// db::page_id_t table_info_page_id;
 	// auto guard = bpm->NewPageGuarded(table_info_page_id);
 	// ASSERT_NE(table_info_page_id, db::INVALID_PAGE_ID);
@@ -82,8 +81,8 @@ std::string generateRandomString(int a, int b) {
 
 TEST(StorageTest, TableHeapManyInsertionTest) {
 	const size_t buffer_pool_size = 25;
-	auto *dm = new db::DiskManager("test.db");
-	auto *bpm = new db::BufferPoolManager(buffer_pool_size, dm, 0);
+	auto dm = std::make_unique<db::DiskManager>("test.db");
+	auto bpm = std::make_shared<db::BufferPoolManager>(buffer_pool_size, std::move(dm), 0);
 
 	// db::page_id_t table_info_page_id;
 	// auto guard = bpm->NewPageGuarded(table_info_page_id);

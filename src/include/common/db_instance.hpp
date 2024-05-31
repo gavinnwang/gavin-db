@@ -1,7 +1,6 @@
 #pragma once
 
 #include "buffer/buffer_pool_manager.hpp"
-#include "storage/disk_manager.hpp"
 
 #include <string>
 namespace db {
@@ -15,8 +14,8 @@ public:
 	~DBInstance();
 
 private:
-	std::unique_ptr<DiskManager> disk_manager_;
-	std::unique_ptr<BufferPoolManager> buffer_pool_manager_;
+	// std::shared_ptr<DiskManager> disk_manager_;
+	std::shared_ptr<BufferPoolManager> buffer_pool_manager_;
 };
 
 }; // namespace db

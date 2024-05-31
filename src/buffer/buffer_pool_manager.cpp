@@ -8,9 +8,10 @@
 #include <memory>
 #include <vector>
 namespace db {
-BufferPoolManager::BufferPoolManager(size_t pool_size, DiskManager *disk_manager, page_id_t next_page_id)
+BufferPoolManager::BufferPoolManager(size_t pool_size, std::unique_ptr<DiskManager> disk_manager,
+                                     page_id_t next_page_id)
     : pool_size_(pool_size), next_page_id_(next_page_id), replacer_(std::make_unique<RandomBogoReplacer>()),
-      disk_manager_(disk_manager), pages_(pool_size) {
+      disk_manager_(std::move(disk_manager)), pages_(pool_size) {
 	for (frame_id_t i = 0; i < pool_size_; ++i) {
 		free_list_.emplace_back(i);
 	}

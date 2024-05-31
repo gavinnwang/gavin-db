@@ -1,19 +1,17 @@
-#include "storage/table_heap.hpp"
 
-#include "common/config.hpp"
+#include "buffer/buffer_pool_manager.hpp"
 #include "common/macros.hpp"
-#include "storage/table_page.hpp"
+#include "storage/table_info.hpp"
+#include "storage/table_heap.hpp"
 
 #include <memory>
 namespace db {
-
-TableHeap::TableHeap(BufferPoolManager *bpm, std::shared_ptr<TableInfo> table_info)
+TableHeap::TableHeap(std::shared_ptr<BufferPoolManager> bpm, std::shared_ptr<TableInfo> table_info)
     : bpm_(bpm), table_info_(std::move(table_info)) {
 	assert(table_info_ != nullptr);
 	if (table_info_->GetFirstTablePageId() == INVALID_PAGE_ID) {
 		page_id_t new_page_id;
 		auto guard = bpm->NewPageGuarded(new_page_id);
-		std::cout << "new_page_id " << new_page_id;
 		ASSERT(new_page_id != INVALID_PAGE_ID && new_page_id >= 0, "table heap create page failed");
 
 		auto first_page = guard.AsMut<TablePage>();
@@ -22,13 +20,12 @@ TableHeap::TableHeap(BufferPoolManager *bpm, std::shared_ptr<TableInfo> table_in
 		table_info_->SetFirstTablePageId(new_page_id);
 		table_info_->SetLastTablePageId(new_page_id);
 	}
-	// std::cout << "TableHeap::TableHeap" << table_info_->GetFirstTablePageId() << std::endl;
-	// std::cout << "TableHeap::TableHeap" << table_info_->GetLastTablePageId() << std::endl;
 	ASSERT(table_info_->GetLastTablePageId() != INVALID_PAGE_ID &&
 	           table_info_->GetFirstTablePageId() != INVALID_PAGE_ID && table_info_->GetLastTablePageId() >= 0 &&
 	           table_info_->GetFirstTablePageId() >= 0,
 	       "table heap last page is invalid");
 };
+
 auto TableHeap::InsertTuple(const TupleMeta &meta, const Tuple &tuple) -> std::optional<RID> {
 	std::unique_lock<std::mutex> guard(latch_);
 
