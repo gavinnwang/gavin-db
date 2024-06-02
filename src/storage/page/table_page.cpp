@@ -1,7 +1,4 @@
-#include "storage/table_page.hpp"
-
-#include "common/config.hpp"
-#include "common/exception.hpp"
+#include "storage/page/table_page.hpp"
 #include "common/macros.hpp"
 
 namespace db {
@@ -60,10 +57,11 @@ void TablePage::UpdateTupleMeta(const TupleMeta &meta, const RID &rid) {
 	tuple_info_[tuple_id] = std::make_tuple(offset, size, meta);
 }
 
-auto TablePage::GetTuple(const RID &rid) const -> std::pair<TupleMeta, Tuple> {
+auto TablePage::GetTuple(const RID &rid) const -> std::optional<std::pair<TupleMeta, Tuple>> {
 	auto tuple_id = rid.GetSlotNum();
 	if (tuple_id >= num_tuples_) {
-		throw Exception("Tuple ID out of range");
+		return std::nullopt;
+		// throw Exception("Tuple ID out of range");
 	}
 	auto &[offset, size, meta] = tuple_info_[tuple_id];
 	Tuple tuple;

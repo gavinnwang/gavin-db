@@ -1,8 +1,5 @@
-#include "storage/tuple.hpp"
+#include "storage/table/tuple.hpp"
 
-#include "common/exception.hpp"
-
-#include <cassert>
 #include <sstream>
 namespace db {
 

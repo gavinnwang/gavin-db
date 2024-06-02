@@ -5,8 +5,8 @@
 #include "common/macros.hpp"
 #include "common/page_id.hpp"
 #include "storage/disk_manager.hpp"
-#include "storage/page.hpp"
-#include "storage/page_guard.hpp"
+#include "storage/page/page.hpp"
+#include "storage/page/page_guard.hpp"
 
 #include <list>
 #include <memory>

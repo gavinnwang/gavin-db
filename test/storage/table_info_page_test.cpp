@@ -1,10 +1,8 @@
 #include "buffer/buffer_pool_manager.hpp"
-#include "common/exception.hpp"
 #include "common/fs_utils.hpp"
 #include "common/typedef.hpp"
 #include "storage/file_path_manager.hpp"
-#include "storage/table_heap.hpp"
-#include "storage/table_info_page.hpp"
+#include "storage/table/table_heap.hpp"
 
 #include "gtest/gtest.h"
 #include <stdexcept>

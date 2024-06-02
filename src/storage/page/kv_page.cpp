@@ -1,6 +1,5 @@
-#include "storage/kv_page.hpp"
-
-#include "storage/disk_manager.hpp"
+#include "storage/page/kv_page.hpp"
+#include "common/config.hpp"
 
 #include <cstdint>
 #include <cstring>

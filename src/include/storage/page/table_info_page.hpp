@@ -1,7 +1,6 @@
 
 #pragma once
-#include "storage/table_info.hpp"
-#include "storage/table_page.hpp"
+#include "storage/table/table_info.hpp"
 
 #include <cstdint>
 namespace db {

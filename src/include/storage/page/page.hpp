@@ -11,12 +11,10 @@ class Page {
 	friend class BufferPoolManager;
 
 public:
-	/** Constructor. Zeros out the page data. */
 	explicit Page() : data_(PAGE_SIZE, 0) {
 	}
 	Page(Page &&other) noexcept;            // Move constructor
 	Page &operator=(Page &&other) noexcept; // Move assignment operator
-	// ~Page() { delete[] data_; }
 
 	inline auto GetData() -> char * {
 		return data_.data();
@@ -56,12 +54,10 @@ private:
 		std::fill(data_.begin(), data_.end(), 0);
 	}
 	PageId page_id_;
-	// page_id_t page_id_ = INVALID_PAGE_ID;
 	bool is_dirty_ = false;
 	uint16_t pin_count_ = 0;
 	ReaderWriterLatch rwlatch_;
 
-	// char *data_;
 	std::vector<char> data_;
 };
 } // namespace db

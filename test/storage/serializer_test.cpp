@@ -6,7 +6,7 @@
 #include "storage/serializer/binary_serializer.hpp"
 #include "storage/serializer/deserializer.hpp"
 #include "storage/serializer/file_stream.hpp"
-#include "storage/table_info_page.hpp"
+#include "storage/table/table_info.hpp"
 
 #include "gtest/gtest.h"
 #include <memory>

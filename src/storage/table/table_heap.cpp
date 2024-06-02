@@ -1,11 +1,11 @@
 
-#include "storage/table_heap.hpp"
+#include "storage/table/table_heap.hpp"
 
 #include "buffer/buffer_pool_manager.hpp"
 #include "common/macros.hpp"
 #include "common/page_id.hpp"
-#include "storage/table_info.hpp"
-#include "storage/table_page.hpp"
+#include "storage/table/table_info.hpp"
+#include "storage/page/table_page.hpp"
 
 #include <memory>
 namespace db {
@@ -24,9 +24,8 @@ TableHeap::TableHeap(std::shared_ptr<BufferPoolManager> bpm, std::shared_ptr<Tab
 		// set the first and last page id to new page
 		// table_info_->SetFirstTablePageId(new_page_id.page_number_);
 		table_info_->SetLastTablePageId(new_page_id.page_number_);
-	} 
-	ASSERT(table_info_->GetLastTablePageId() != INVALID_PAGE_ID &&
-	           table_info_->GetLastTablePageId() >= 0,
+	}
+	ASSERT(table_info_->GetLastTablePageId() != INVALID_PAGE_ID && table_info_->GetLastTablePageId() >= 0,
 	       "table heap last page is invalid");
 };
 
@@ -54,7 +53,7 @@ std::optional<RID> TableHeap::InsertTuple(const TupleMeta &meta, const Tuple &tu
 
 		// construct the linked list
 		page->SetNextPageId(next_page_id.page_number_);
-    table_info_->SetLastTablePageId(next_page_id.page_number_);
+		table_info_->SetLastTablePageId(next_page_id.page_number_);
 
 		// initialize the next page
 		// auto next_page = reinterpret_cast<TablePage *>(npg->GetData());
@@ -79,7 +78,7 @@ std::optional<RID> TableHeap::InsertTuple(const TupleMeta &meta, const Tuple &tu
 	guard.unlock();
 
 	page_guard.Drop();
-	return RID({table_info_->table_oid_,last_page_id}, slot_id);
+	return RID({table_info_->table_oid_, last_page_id}, slot_id);
 };
 
 void TableHeap::UpdateTupleMeta(const TupleMeta &meta, RID rid) {
@@ -88,10 +87,14 @@ void TableHeap::UpdateTupleMeta(const TupleMeta &meta, RID rid) {
 	page->UpdateTupleMeta(meta, rid);
 };
 
-std::pair<TupleMeta, Tuple> TableHeap::GetTuple(RID rid) {
+std::optional<std::pair<TupleMeta, Tuple>> TableHeap::GetTuple(RID rid) {
 	auto page_guard = bpm_->FetchPageRead(rid.GetPageId());
 	auto page = page_guard.As<TablePage>();
-	auto [meta, tuple] = page->GetTuple(rid);
+	auto ret = page->GetTuple(rid);
+	if (!ret.has_value()) {
+		return std::nullopt;
+	}
+	auto [meta, tuple] = *ret;
 	tuple.rid_ = rid;
 	return std::make_pair(meta, std::move(tuple));
 };

@@ -1,7 +1,5 @@
 #pragma once
-#include "common/config.hpp"
-#include "common/page_id.hpp"
-#include "storage/tuple.hpp"
+#include "storage/table/tuple.hpp"
 
 #include <cstdint>
 #include <tuple>
@@ -23,7 +21,7 @@ public:
 	auto InsertTuple(const TupleMeta &meta, const Tuple &tuple) -> std::optional<uint16_t>;
 	void UpdateTupleMeta(const TupleMeta &meta, const RID &rid);
 	auto GetTupleMeta(const RID &rid) const -> TupleMeta;
-	auto GetTuple(const RID &rid) const -> std::pair<TupleMeta, Tuple>;
+	auto GetTuple(const RID &rid) const -> std::optional<std::pair<TupleMeta, Tuple>>;
 	void UpdateTupleInPlaceUnsafe(const TupleMeta &meta, const Tuple &tuple, RID rid);
 
 private:

@@ -9,7 +9,7 @@
 #include "storage/serializer/binary_serializer.hpp"
 #include "storage/serializer/file_stream.hpp"
 #include "storage/serializer/serialization_traits.hpp"
-#include "storage/table_info.hpp"
+#include "storage/table/table_info.hpp"
 
 #include <memory>
 #include <string>
@@ -27,6 +27,8 @@ public:
 		}
 		EnsureTableFilesExist();
 	}
+
+	table_oid_t TryCreateTable(const std::string &table_name, const Schema &schema);
 
 	table_oid_t CreateTable(const std::string &table_name, const Schema &schema);
 
@@ -52,11 +54,21 @@ public:
 	}
 
 	void PersistToDisk() {
+		// persist the catalog to disk
 		std::filesystem::path catalog_path = FilePathManager::GetInstance().GetSystemCatalogPath();
-		// CreateFileIfNotExists(catalog_path);
+		// CreateFileIfNotExists(catalog_path)
 		auto catalog_fs = FileStream(catalog_path);
 		BinarySerializer serializer(catalog_fs);
 		Serialize(serializer);
+
+		// persist all table meta to disk
+		for (const auto &[table_oid, table_info] : tables_) {
+			std::filesystem::path table_meta_path = FilePathManager::GetInstance().GetTableMetaPath(table_info->name_);
+			// CreateFileIfNotExists(table_meta_path);
+			auto table_meta_fs = FileStream(table_meta_path);
+			BinarySerializer table_meta_serializer(table_meta_fs);
+			table_info->Serialize(table_meta_serializer);
+		}
 	}
 
 	void Serialize(Serializer &serializer) const {

@@ -1,4 +1,4 @@
-#include "storage/page_guard.hpp"
+#include "storage/page/page_guard.hpp"
 
 #include "buffer/buffer_pool_manager.hpp"
 
