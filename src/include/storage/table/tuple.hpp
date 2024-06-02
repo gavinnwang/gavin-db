@@ -51,7 +51,6 @@ public:
 		return data_.data();
 	}
 
-	// Get length of the tuple, including varchar length
 	inline auto GetStorageSize() const -> uint32_t {
 		return data_.size();
 	}

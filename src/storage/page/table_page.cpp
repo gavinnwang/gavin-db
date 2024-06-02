@@ -1,4 +1,5 @@
 #include "storage/page/table_page.hpp"
+
 #include "common/macros.hpp"
 
 namespace db {
@@ -41,7 +42,7 @@ auto TablePage::InsertTuple(const TupleMeta &meta, const Tuple &tuple) -> std::o
 	tuple_info_[tuple_id] = std::make_tuple(*tuple_offset, tuple.GetStorageSize(), meta);
 	num_tuples_++;
 	ASSERT(*tuple_offset + tuple.GetStorageSize() <= PAGE_SIZE, "tuple out of range");
-	memcpy(page_start_ + *tuple_offset, tuple.data_.data(), tuple.GetStorageSize());
+	memcpy(page_start_ + *tuple_offset, tuple.GetData(), tuple.GetStorageSize());
 	return tuple_id;
 }
 

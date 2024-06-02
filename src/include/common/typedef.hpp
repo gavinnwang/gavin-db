@@ -4,11 +4,12 @@
 #include <cstdint>
 namespace db {
 
-using frame_id_t = int32_t;   // frame id type
-using page_id_t = int32_t;    // page id type
-using slot_offset_t = size_t; // slot offset type
-using table_oid_t = int32_t;
 using idx_t = uint64_t;
+using frame_id_t = int32_t; // frame id type
+using page_id_t = int32_t;  // page id type
+using column_t = uint32_t;
+using table_oid_t = int32_t;
+using slot_offset_t = idx_t; // slot offset type
 using data_t = uint8_t;
 using data_ptr_t = data_t *;
 using const_data_ptr_t = const data_t *;

@@ -41,7 +41,7 @@ private:
 
 	std::mutex latch_;
 	std::list<frame_id_t> free_list_;
-	std::unordered_map<PageId, frame_id_t, PageId_hash> page_table_;
+	std::unordered_map<PageId, frame_id_t, PageId_Hash> page_table_;
 	std::vector<Page> pages_;
 
 	std::shared_ptr<CatalogManager> catalog_manager_;
