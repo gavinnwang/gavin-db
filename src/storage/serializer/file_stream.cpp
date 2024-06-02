@@ -4,6 +4,7 @@
 #include "common/exception.hpp"
 
 #include <cassert>
+#include <sstream>
 #include <string>
 
 namespace db {
@@ -34,11 +35,26 @@ void FileStream::WriteData(const_data_ptr_t buffer, idx_t write_size) {
 	if (!file.write(const_char_ptr_cast(buffer), write_size)) {
 		throw Exception("Failed to write data to file");
 	}
+	file.flush();
 }
 
 void FileStream::ReadData(data_ptr_t buffer, idx_t read_size) {
 	if (!file.read(reinterpret_cast<char *>(buffer), read_size)) {
-		throw Exception("Failed to read data from file");
+		std::ostringstream error_msg;
+		error_msg << "Failed to read data from file. ";
+
+		// Check the stream state and append relevant messages
+		if (file.eof()) {
+			error_msg << "Reason: End of file reached.";
+		} else if (file.fail()) {
+			error_msg << "Reason: Logical error on i/o operation.";
+		} else if (file.bad()) {
+			error_msg << "Reason: Read/writing error on i/o operation.";
+		} else {
+			error_msg << "Reason: Unknown error.";
+		}
+
+		throw Exception(error_msg.str());
 	}
 }
 

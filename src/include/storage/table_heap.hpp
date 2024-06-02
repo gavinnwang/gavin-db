@@ -1,4 +1,5 @@
 #include "buffer/buffer_pool_manager.hpp"
+#include "common/typedef.hpp"
 #include "storage/table_info.hpp"
 #include "storage/tuple.hpp"
 
@@ -9,15 +10,14 @@ class TableHeap {
 	// in memory representation of table heap
 public:
 	explicit TableHeap(std::shared_ptr<BufferPoolManager> bpm, std::shared_ptr<TableInfo> table_info);
-	auto InsertTuple(const TupleMeta &meta, const Tuple &tuple) -> std::optional<RID>;
+	std::optional<RID> InsertTuple(const TupleMeta &meta, const Tuple &tuple);
 	void UpdateTupleMeta(const TupleMeta &meta, RID rid);
-	auto GetTuple(RID rid) -> std::pair<TupleMeta, Tuple>;
-	auto GetTupleMeta(RID rid) -> TupleMeta;
-	auto GetFirstPageId() const -> page_id_t;
+	std::pair<TupleMeta, Tuple> GetTuple(RID rid);
+	TupleMeta GetTupleMeta(RID rid);
+	page_id_t GetFirstPageId() const;
 
 private:
-  std::shared_ptr<BufferPoolManager> bpm_;
-
+	std::shared_ptr<BufferPoolManager> bpm_;
 	std::shared_ptr<TableInfo> table_info_;
 	std::mutex latch_;
 

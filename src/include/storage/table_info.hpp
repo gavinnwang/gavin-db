@@ -1,7 +1,7 @@
 #pragma once
+#include "catalog/schema.hpp"
 #include "common/config.hpp"
 #include "storage/serializer/serializer.hpp"
-#include "storage/table_page.hpp"
 
 #include <cstdint>
 #include <memory>
@@ -12,7 +12,7 @@ struct TableInfo {
 	Schema schema_;
 	std::string name_;
 	table_oid_t table_oid_;
-	page_id_t first_table_page_id_ {INVALID_PAGE_ID};
+	// page_id_t first_table_page_id_ {INVALID_PAGE_ID};
 	page_id_t last_table_page_id_ {INVALID_PAGE_ID};
 
 	explicit TableInfo() {};
@@ -25,6 +25,8 @@ struct TableInfo {
 		serializer.WriteProperty(100, "table_name", name_);
 		serializer.WriteProperty(101, "table_oid", table_oid_);
 		serializer.WriteProperty(102, "table_schema", schema_);
+		// serializer.WriteProperty(103, "first_table_page_id", first_table_page_id_);
+		serializer.WriteProperty(104, "last_table_page_id", last_table_page_id_);
 	}
 
 	static std::unique_ptr<TableInfo> Deserialize(Deserializer &deserializer) {
@@ -32,6 +34,8 @@ struct TableInfo {
 		deserializer.ReadProperty(100, "table_name", info->name_);
 		deserializer.ReadProperty(101, "table_oid", info->table_oid_);
 		deserializer.ReadProperty(102, "table_schema", info->schema_);
+		// deserializer.ReadProperty(103, "first_table_page_id", info->first_table_page_id_);
+		deserializer.ReadProperty(104, "last_table_page_id", info->last_table_page_id_);
 		return info;
 	}
 
@@ -57,7 +61,7 @@ struct TableInfo {
 		offset += sizeof(uint32_t);
 		std::string table_name(storage + offset, table_name_size);
 		offset += table_name_size;
-		uint32_t table_oid = *reinterpret_cast<const uint32_t *>(storage + offset);
+		table_oid_t table_oid = *reinterpret_cast<const uint32_t *>(storage + offset);
 
 		return {schema, table_name, table_oid};
 	}
@@ -67,17 +71,17 @@ struct TableInfo {
 		return sz;
 	}
 
-	inline auto GetFirstTablePageId() const -> page_id_t {
-		return first_table_page_id_;
-	}
+	// inline auto GetFirstTablePageId() const -> page_id_t {
+	// 	return first_table_page_id_;
+	// }
 	inline auto GetLastTablePageId() const -> page_id_t {
 		return last_table_page_id_;
 	}
-	inline void SetFirstTablePageId(page_id_t first_table_page_id) {
-		first_table_page_id_ = first_table_page_id;
-	}
+	// inline void SetFirstTablePageId(page_id_t first_table_page_id) {
+	// 	first_table_page_id_ = first_table_page_id;
+	// }
 	inline void SetLastTablePageId(page_id_t last_table_page_id) {
 		last_table_page_id_ = last_table_page_id;
 	}
 };
-}
+} // namespace db

@@ -62,9 +62,9 @@ file(GLOB_RECURSE SOURCE_FILES "${PROJECT_SOURCE_DIR}/src/*/*.cpp")
 
 add_library(gavindb ${SOURCE_FILES})
 
-# Shell
-add_executable(gavindb_shell src/shell.cpp)
-target_link_libraries(gavindb_shell gavindb)
+# # Shell
+# add_executable(gavindb_shell src/shell.cpp)
+# target_link_libraries(gavindb_shell gavindb)
 
 # Include
 set(SRC_INCLUDE_DIR ${PROJECT_SOURCE_DIR}/src/include)
