@@ -35,6 +35,7 @@ struct Foo {
 	int32_t c;
 	TypeId type;
 	std::vector<std::unique_ptr<Bar>> bars;
+	std::unordered_map<int32_t, std::unique_ptr<Bar>> bar_map;
 	Value value {TypeId::INTEGER, 10};
 
 	void Serialize(Serializer &serializer) const {
@@ -44,6 +45,7 @@ struct Foo {
 		serializer.WriteProperty<TypeId>(4, "type", type);
 		serializer.WriteProperty<std::vector<std::unique_ptr<Bar>>>(5, "bars", bars);
 		serializer.WriteProperty<Value>(6, "value", value);
+		serializer.WriteProperty(7, "bar_map", bar_map);
 	}
 
 	static std::unique_ptr<Foo> Deserialize(Deserializer &deserializer) {
@@ -54,6 +56,7 @@ struct Foo {
 		deserializer.ReadProperty<TypeId>(4, "type", result->type);
 		deserializer.ReadProperty<std::vector<std::unique_ptr<Bar>>>(5, "bars", result->bars);
 		deserializer.ReadProperty<Value>(6, "value", result->value);
+		deserializer.ReadProperty(7, "bar_map", result->bar_map);
 
 		return result;
 	}
@@ -75,6 +78,9 @@ TEST(StorageTest, SerializerTest) {
 	foo_in.bars.emplace_back(std::make_unique<Bar>(create_bar(44)));
 	foo_in.bars.emplace_back(std::make_unique<Bar>(create_bar(45)));
 	foo_in.bars.emplace_back(std::make_unique<Bar>(create_bar(46)));
+	foo_in.bar_map[1] = std::make_unique<Bar>(create_bar(47));
+	foo_in.bar_map[2] = std::make_unique<Bar>(create_bar(48));
+	foo_in.bar_map[120338] = std::make_unique<Bar>(create_bar(120338));
 	std::vector<std::string> vec_str = {"a", "a", "a", "b", "c", "d", "a", "a", "a"};
 	foo_in.bar->vec = vec_str;
 	foo_in.c = 44;
@@ -99,6 +105,12 @@ TEST(StorageTest, SerializerTest) {
 		EXPECT_EQ(foo_in.bars[i]->b, foo_out.bars[i]->b);
 	}
 	EXPECT_EQ(value_str, foo_out.value.ToString());
+	// std::cout << std::endl;
+	for (const auto &[key, value] : foo_in.bar_map) {
+		// std::cout << key << " " << value->b << std::endl;
+		EXPECT_EQ(value->b, foo_out.bar_map[key]->b);
+	}
+	// std::cout << std::endl;
 
 	foo_in.bar = nullptr;
 

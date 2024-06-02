@@ -25,4 +25,10 @@ public:
 	}
 };
 
+class IOException : public Exception {
+public:
+	explicit IOException(const std::string &msg) : Exception(msg) {
+	}
+};
+
 } // namespace db

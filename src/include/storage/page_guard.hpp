@@ -26,7 +26,7 @@ public:
   // clear all content and unpin page
   void Drop();
 
-  auto PageId() -> page_id_t { return page_->GetPageId(); }
+  auto PageId() -> page_id_t { return page_->GetPageId().page_number_; }
   auto GetData() -> const char * { return page_->GetData(); }
   template <class T> auto As() -> const T * {
     return reinterpret_cast<const T *>(GetData());

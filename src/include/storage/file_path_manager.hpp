@@ -25,16 +25,24 @@ public:
 		db_path_ = db_name;
 	}
 
+	fs::path GetDatabaseRootPath() {
+		return db_path_;
+	}
+
 	fs::path GetTableMetaPath(const std::string &table_name) {
 		fs::path table_path = table_name;
-		fs::path meta_path = db_path_ / table_path / "meta";
+		fs::path meta_path = db_path_ / "tables" / table_path / "meta";
 		return meta_path;
 	}
 
 	fs::path GetTableDataPath(const std::string &table_name) {
 		fs::path table_path = table_name;
-		fs::path data_path = db_path_ / table_path / "data";
+		fs::path data_path = db_path_ / "tables" / table_path / "data";
 		return data_path;
+	}
+
+	fs::path GetSystemCatalogPath() {
+		return db_path_ / "system_catalog";
 	}
 
 private:

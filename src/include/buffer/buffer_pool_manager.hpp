@@ -1,8 +1,9 @@
 #pragma once
 
 #include "buffer/replacer.hpp"
-#include "common/config.hpp"
+#include "catalog/catalog_manager.hpp"
 #include "common/macros.hpp"
+#include "common/page_id.hpp"
 #include "storage/disk_manager.hpp"
 #include "storage/page.hpp"
 #include "storage/page_guard.hpp"
@@ -11,33 +12,38 @@
 #include <memory>
 #include <vector>
 namespace db {
-
 class BufferPoolManager {
 public:
-	BufferPoolManager(size_t pool_size, std::unique_ptr<DiskManager> disk_manager, page_id_t next_page_id);
+	BufferPoolManager(size_t pool_size, std::shared_ptr<DiskManager> disk_manager,
+	                  std::shared_ptr<CatalogManager> catalog_manager);
 	DISALLOW_COPY(BufferPoolManager);
-	auto FlushPage(page_id_t page_id) -> bool;
+	bool FlushPage(PageId page_id);
 	void FlushAllPages();
-	auto FetchPageBasic(page_id_t page_id) -> BasicPageGuard;
-	auto FetchPageRead(page_id_t page_id) -> ReadPageGuard;
-	auto FetchPageWrite(page_id_t page_id) -> WritePageGuard;
-	auto NewPageGuarded(page_id_t &page_id) -> BasicPageGuard;
-	auto UnpinPage(page_id_t page_id, bool is_dirty) -> bool;
+	BasicPageGuard FetchPageBasic(PageId page_id);
+	ReadPageGuard FetchPageRead(PageId page_id);
+	WritePageGuard FetchPageWrite(PageId page_id);
+	BasicPageGuard NewPageGuarded(PageId &page_id);
+	bool UnpinPage(PageId page_id, bool is_dirty);
 
 private:
-	auto DeletePage(page_id_t page_id) -> bool;
-	auto NewPage(page_id_t &page_id) -> Page &;
-	auto FetchPage(page_id_t page_id) -> Page &;
-	auto AllocatePage() -> page_id_t;
-	auto AllocateFrame(frame_id_t &frame_id) -> bool;
+	bool DeletePage(PageId page_id);
+	Page &NewPage(PageId &page_id);
+	Page &FetchPage(PageId page_id);
+	PageId AllocatePage(table_oid_t table_id);
+	bool AllocateFrame(frame_id_t &frame_id);
 
 	const frame_id_t pool_size_;
-	std::atomic<page_id_t> next_page_id_;
+
+	// std::atomic<page_id_t> next_page_id_;
+
 	std::unique_ptr<Replacer> replacer_;
-	std::unique_ptr<DiskManager> disk_manager_;
+	std::shared_ptr<DiskManager> disk_manager_;
+
 	std::mutex latch_;
 	std::list<frame_id_t> free_list_;
-	std::unordered_map<page_id_t, frame_id_t> page_table_;
+	std::unordered_map<PageId, frame_id_t, PageId_hash> page_table_;
 	std::vector<Page> pages_;
+
+	std::shared_ptr<CatalogManager> catalog_manager_;
 };
 } // namespace db

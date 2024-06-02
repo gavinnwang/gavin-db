@@ -1,4 +1,5 @@
 #include "buffer/buffer_pool_manager.hpp"
+#include "common/fs_utils.hpp"
 #include "storage/table_heap.hpp"
 #include "storage/table_info_page.hpp"
 #include "storage/tuple.hpp"
@@ -8,9 +9,12 @@
 #include <random>
 
 TEST(StorageTest, TableHeapSimpleTest) {
+  
+	db::DeletePathIfExists(db::FilePathManager::GetInstance().GetDatabaseRootPath());
 	const size_t buffer_pool_size = 10;
-	auto dm = std::make_unique<db::DiskManager>("test.db");
-	auto bpm = std::make_shared<db::BufferPoolManager>(buffer_pool_size, std::move(dm), 0);
+	auto cm = std::make_shared<db::CatalogManager>();
+	auto dm = std::make_shared<db::DiskManager>(cm);
+	auto bpm = std::make_shared<db::BufferPoolManager>(buffer_pool_size, dm, cm);
 	// db::page_id_t table_info_page_id;
 	// auto guard = bpm->NewPageGuarded(table_info_page_id);
 	// ASSERT_NE(table_info_page_id, db::INVALID_PAGE_ID);
@@ -25,7 +29,8 @@ TEST(StorageTest, TableHeapSimpleTest) {
 	// table_info_page->Init(table_name, schema, 0);
 	// table_info_wpg.Drop();
 
-	auto table_info = std::make_shared<db::TableInfo>(schema, table_name, 0);
+	cm->CreateTable(table_name, schema);
+	auto table_info = cm->GetTable(table_name);
 	auto table_heap = new db::TableHeap(bpm, table_info);
 	int32_t int_val = 2392;
 	std::string str_val = "hhihi";
@@ -80,9 +85,11 @@ std::string generateRandomString(int a, int b) {
 }
 
 TEST(StorageTest, TableHeapManyInsertionTest) {
+	db::DeletePathIfExists(db::FilePathManager::GetInstance().GetDatabaseRootPath());
 	const size_t buffer_pool_size = 25;
-	auto dm = std::make_unique<db::DiskManager>("test.db");
-	auto bpm = std::make_shared<db::BufferPoolManager>(buffer_pool_size, std::move(dm), 0);
+	auto cm = std::make_shared<db::CatalogManager>();
+	auto dm = std::make_shared<db::DiskManager>(cm);
+	auto bpm = std::make_shared<db::BufferPoolManager>(buffer_pool_size, dm, cm);
 
 	// db::page_id_t table_info_page_id;
 	// auto guard = bpm->NewPageGuarded(table_info_page_id);
@@ -98,7 +105,9 @@ TEST(StorageTest, TableHeapManyInsertionTest) {
 	// table_info_page->Init(table_name, schema, 0);
 	// table_info_wpg.Drop();
 
-	auto table_info = std::make_shared<db::TableInfo>(schema, table_name, 0);
+  cm->CreateTable(table_name, schema);
+	auto table_info = cm->GetTable(table_name);
+    // auto table_info = std::make_shared<db::TableInfo>(schema, table_name, 0);
 	auto table_heap = new db::TableHeap(bpm, table_info);
 
 	std::vector<db::RID> rids;
@@ -118,7 +127,7 @@ TEST(StorageTest, TableHeapManyInsertionTest) {
 		ASSERT_EQ(rid.has_value(), true);
 		rids.push_back(*rid);
 		ans.push_back("(" + std::to_string(int_val) + ", " + std::move(str_val) + ")");
-		std::cout << "rid: " << rid->GetPageId() << " " << rid->GetSlotNum() << std::endl;
+		std::cout << "rid: " << rid->GetPageId().page_number_ << " " << rid->GetSlotNum() << std::endl;
 	}
 
 	for (int i = 0; i < 200000; ++i) {

@@ -8,20 +8,21 @@
 #include <memory>
 #include <vector>
 namespace db {
-BufferPoolManager::BufferPoolManager(size_t pool_size, std::unique_ptr<DiskManager> disk_manager,
-                                     page_id_t next_page_id)
-    : pool_size_(pool_size), next_page_id_(next_page_id), replacer_(std::make_unique<RandomBogoReplacer>()),
-      disk_manager_(std::move(disk_manager)), pages_(pool_size) {
+BufferPoolManager::BufferPoolManager(size_t pool_size, std::shared_ptr<DiskManager> disk_manager,
+                                     std::shared_ptr<CatalogManager> catalog_manager)
+    : pool_size_(pool_size), replacer_(std::make_unique<RandomBogoReplacer>()), disk_manager_(std::move(disk_manager)),
+      pages_(pool_size), catalog_manager_(std::move(catalog_manager)) {
 	for (frame_id_t i = 0; i < pool_size_; ++i) {
 		free_list_.emplace_back(i);
 	}
 }
 
-auto BufferPoolManager::AllocatePage() -> page_id_t {
-	return next_page_id_++;
+PageId BufferPoolManager::AllocatePage(table_oid_t table_oid) {
+  auto new_page_num = catalog_manager_->GetLastPageId(table_oid) + 1;
+	return {table_oid, new_page_num};
 }
 
-auto BufferPoolManager::AllocateFrame(frame_id_t &frame_id) -> bool {
+bool BufferPoolManager::AllocateFrame(frame_id_t &frame_id) {
 	if (free_list_.empty()) {
 		// gotta evict a random frame because
 		if (!replacer_->Evict(frame_id)) {
@@ -29,7 +30,7 @@ auto BufferPoolManager::AllocateFrame(frame_id_t &frame_id) -> bool {
 		}
 		if (pages_[frame_id].is_dirty_) {
 			auto &evict_page = pages_[frame_id];
-			disk_manager_->WritePage(evict_page.page_id_, evict_page.GetData());
+			disk_manager_->WritePage(evict_page.GetPageId(), evict_page.GetData());
 		}
 		return true;
 	}
@@ -38,7 +39,7 @@ auto BufferPoolManager::AllocateFrame(frame_id_t &frame_id) -> bool {
 	return true;
 }
 
-auto BufferPoolManager::NewPage(page_id_t &page_id) -> Page & {
+Page &BufferPoolManager::NewPage(PageId &page_id) {
 	std::lock_guard<std::mutex> lock(latch_);
 	frame_id_t frame_id = -1;
 	if (!AllocateFrame(frame_id)) {
@@ -57,8 +58,11 @@ auto BufferPoolManager::NewPage(page_id_t &page_id) -> Page & {
 	auto page_id_to_replace = pages_[frame_id].page_id_;
 	page_table_.erase(page_id_to_replace);
 
-	page_id = AllocatePage();
+	// assign passed in page_id to the new page
+	page_id = AllocatePage(page_id.table_id_);
 	page_table_[page_id] = frame_id;
+  ASSERT(page_table_.at(page_id) == frame_id, "page table should have the new page id");
+  ASSERT(page_table_.contains(page_id_to_replace) == false, "page table should not have the old page id");
 	// reset the memory and metadata for the new page
 	Page &page = pages_[frame_id];
 	page.page_id_ = page_id;
@@ -68,7 +72,8 @@ auto BufferPoolManager::NewPage(page_id_t &page_id) -> Page & {
 
 	return page;
 }
-auto BufferPoolManager::FetchPage(page_id_t page_id) -> Page & {
+
+Page &BufferPoolManager::FetchPage(PageId page_id) {
 	std::lock_guard<std::mutex> lock(latch_);
 	if (page_table_.find(page_id) != page_table_.end()) {
 		frame_id_t frame_id = page_table_[page_id];
@@ -96,7 +101,7 @@ auto BufferPoolManager::FetchPage(page_id_t page_id) -> Page & {
 	return page;
 }
 
-auto BufferPoolManager::UnpinPage(page_id_t page_id, bool is_dirty) -> bool {
+bool BufferPoolManager::UnpinPage(PageId page_id, bool is_dirty) {
 	std::lock_guard<std::mutex> lock(latch_);
 	if (page_table_.find(page_id) == page_table_.end()) {
 		return false;
@@ -116,7 +121,7 @@ auto BufferPoolManager::UnpinPage(page_id_t page_id, bool is_dirty) -> bool {
 	return true;
 }
 
-auto BufferPoolManager::FlushPage(page_id_t page_id) -> bool {
+bool BufferPoolManager::FlushPage(PageId page_id) {
 	std::lock_guard<std::mutex> lock(latch_);
 	if (page_table_.find(page_id) == page_table_.end()) {
 		return false;
@@ -134,7 +139,7 @@ void BufferPoolManager::FlushAllPages() {
 	}
 }
 
-auto BufferPoolManager::DeletePage(page_id_t page_id) -> bool {
+bool BufferPoolManager::DeletePage(PageId page_id) {
 	std::lock_guard<std::mutex> lock(latch_);
 	if (page_table_.find(page_id) == page_table_.end()) {
 		return true;
@@ -148,30 +153,30 @@ auto BufferPoolManager::DeletePage(page_id_t page_id) -> bool {
 	free_list_.push_back(frame_id);
 
 	pages_[frame_id].ResetMemory();
-	page.page_id_ = INVALID_PAGE_ID;
+	page.page_id_.page_number_ = INVALID_PAGE_ID;
 	page.pin_count_ = 0;
 	page.is_dirty_ = false;
 	return true;
 }
 
-auto BufferPoolManager::FetchPageBasic(page_id_t page_id) -> BasicPageGuard {
+BasicPageGuard BufferPoolManager::FetchPageBasic(PageId page_id) {
 	auto &page = FetchPage(page_id);
 	return {*this, page};
 }
 
-auto BufferPoolManager::FetchPageRead(page_id_t page_id) -> ReadPageGuard {
+ReadPageGuard BufferPoolManager::FetchPageRead(PageId page_id) {
 	auto &page = FetchPage(page_id);
 	page.RLatch();
 	return {*this, page};
 }
 
-auto BufferPoolManager::FetchPageWrite(page_id_t page_id) -> WritePageGuard {
+WritePageGuard BufferPoolManager::FetchPageWrite(PageId page_id) {
 	auto &page = FetchPage(page_id);
 	page.WLatch();
 	return {*this, page};
 }
 
-auto BufferPoolManager::NewPageGuarded(page_id_t &page_id) -> BasicPageGuard {
+BasicPageGuard BufferPoolManager::NewPageGuarded(PageId &page_id) {
 	auto &page = NewPage(page_id);
 	return {*this, page};
 }

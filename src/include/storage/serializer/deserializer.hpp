@@ -135,6 +135,25 @@ private:
 
 	template <typename T>
 	inline T Read()
+	    requires IsUnorderedMap<T>
+	{
+		using KEY_TYPE = typename T::key_type;
+		using VALUE_TYPE = typename T::mapped_type;
+		T map;
+		auto size = OnListBegin();
+		for (idx_t i = 0; i < size; i++) {
+			OnObjectBegin();
+			auto key = ReadProperty<KEY_TYPE>(0, "key");
+			auto value = ReadProperty<VALUE_TYPE>(1, "value");
+			OnObjectEnd();
+			map[std::move(key)] = std::move(value);
+		}
+		OnListEnd();
+		return map;
+	}
+
+	template <typename T>
+	inline T Read()
 	    requires IsMap<T>
 	{
 		using KEY_TYPE = typename T::key_type;

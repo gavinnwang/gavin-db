@@ -22,7 +22,11 @@ bool BinaryDeserializer::OnOptionalPropertyBegin(const field_id_t field_id, cons
 	auto present = next_field == field_id;
 	if (present) {
 		ConsumeField();
+	} else {
+		std::cout << "Failed to deserialize: field id mismatch, expected: " << field_id << ", but got: " << next_field
+		          << std::endl;
 	}
+
 	return present;
 }
 
