@@ -66,26 +66,10 @@ TEST(StorageTest, TablePersistTest) {
 		std::cout << tuple.ToString(schema) << std::endl;
 		// ASSERT_EQ(tuple.ToString(schema), ans[i]);
 	}
-
-	// generate rid for first 20 pages
-
-	std::vector<db::RID> generated_rids;
-
-	for (db::page_id_t i = 0; i < 18; i++) {
-		db::PageId page_id = db::PageId(table_oid, i);
-		for (int j = 0; j < 20; j++) {
-			db::RID rid = db::RID {page_id, static_cast<uint32_t>(j)};
-			generated_rids.push_back(rid);
-		}
-	}
-
-	for (auto const &rid : generated_rids) {
-		auto ret = table_heap2->GetTuple(rid);
-		if (!ret.has_value()) {
-			std::cout << "Doesn't exist: " << rid.GetPageId().page_number_ << " " << rid.GetSlotNum() << std::endl;
-			continue;
-		}
-		auto [meta, tuple] = *ret;
+	auto it = table_heap2->MakeIterator();
+	while (!it.IsEnd()) {
+		auto [meta, tuple] = *it.GetTuple();
 		std::cout << tuple.ToString(schema) << std::endl;
+		++it;
 	}
 }

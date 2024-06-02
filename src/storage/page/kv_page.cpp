@@ -1,4 +1,5 @@
 #include "storage/page/kv_page.hpp"
+
 #include "common/config.hpp"
 
 #include <cstdint>
@@ -7,6 +8,8 @@
 #include <optional>
 #include <string>
 namespace db {
+
+/* NOT USED  */
 
 void KVPage::Init() {
 	num_keys_ = 0;

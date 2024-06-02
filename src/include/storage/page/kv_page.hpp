@@ -3,6 +3,9 @@
 #include <cstdint>
 #include <optional>
 #include <string>
+
+/* NOT USED  */
+
 namespace db {
 static constexpr uint16_t KV_META_SIZE = 1;
 struct KVMeta {

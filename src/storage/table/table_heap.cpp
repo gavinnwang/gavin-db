@@ -4,8 +4,9 @@
 #include "buffer/buffer_pool_manager.hpp"
 #include "common/macros.hpp"
 #include "common/page_id.hpp"
-#include "storage/table/table_info.hpp"
 #include "storage/page/table_page.hpp"
+#include "storage/table/table_info.hpp"
+#include "storage/table/table_iterator.hpp"
 
 #include <memory>
 namespace db {
@@ -105,6 +106,21 @@ TupleMeta TableHeap::GetTupleMeta(RID rid) {
 	auto page = page_guard.As<TablePage>();
 	return page->GetTupleMeta(rid);
 };
+
+TableIterator TableHeap::MakeIterator() {
+	std::unique_lock<std::mutex> guard(latch_);
+	auto table_oid = table_info_->table_oid_;
+	auto last_page_id = table_info_->GetLastTablePageId();
+	guard.unlock();
+
+	auto page_guard = bpm_->FetchPageRead({table_oid, last_page_id});
+
+	auto page = page_guard.As<TablePage>();
+	auto num_tuples = page->GetNumTuples();
+	page_guard.Drop();
+	// iterate from rid 0, 0 to last_page_id and num_tuples
+	return {this, {{table_oid, 0}, 0}, {{table_oid, last_page_id}, num_tuples}};
+}
 
 // auto TableHeap::GetFirstPageId() const -> page_id_t {
 // 	auto page_guard = bpm_->FetchPageRead(table_info_id_);
