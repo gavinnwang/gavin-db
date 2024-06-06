@@ -73,7 +73,9 @@ public:
 	}
 
 private:
+	// name of col
 	std::string column_name_;
+	// type of col
 	TypeId column_type_;
 	// size of col
 	uint32_t length_;

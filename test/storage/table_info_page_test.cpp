@@ -14,7 +14,7 @@ TEST(StorageTest, SimpleTableInfoPageTest) {
 	auto cm = std::make_shared<db::CatalogManager>();
 	auto dm = std::make_shared<db::DiskManager>(cm);
 	db::table_oid_t table_oid = 0;
-	auto bpm = std::make_shared<db::BufferPoolManager>(buffer_pool_size, std::move(dm), cm);
+	auto bpm = std::make_shared<db::BufferPoolManager>(buffer_pool_size, std::move(dm));
 	auto c1 = db::Column("user_id", db::TypeId::INTEGER);
 	auto c2 = db::Column("user_name", db::TypeId::VARCHAR, 256);
 	auto schema = db::Schema({c1, c2});
@@ -28,7 +28,7 @@ TEST(StorageTest, DuplicateTableNameTest) {
 	auto cm = std::make_shared<db::CatalogManager>();
 	auto dm = std::make_shared<db::DiskManager>(cm);
 	db::table_oid_t table_oid = 0;
-	auto bpm = std::make_shared<db::BufferPoolManager>(buffer_pool_size, std::move(dm), cm);
+	auto bpm = std::make_shared<db::BufferPoolManager>(buffer_pool_size, std::move(dm));
 	auto c1 = db::Column("user_id", db::TypeId::INTEGER);
 	auto c2 = db::Column("user_name", db::TypeId::VARCHAR, 256);
 	auto schema = db::Schema({c1, c2});

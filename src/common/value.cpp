@@ -65,7 +65,7 @@ Value Value::Deserialize(Deserializer &deserializer) {
 	return new_value;
 };
 
-void Value::SerializeTo(char *storage) const {
+void Value::SerializeTo(data_ptr_t storage) const {
 	switch (type_id_) {
 	case TypeId::BOOLEAN: {
 		ASSERT(std::holds_alternative<int8_t>(value_), "Invalid variant type for BOOLEAN Value");

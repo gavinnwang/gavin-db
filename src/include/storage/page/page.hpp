@@ -51,7 +51,7 @@ public:
 
 private:
 	inline void ResetMemory() {
-		std::fill(data_.begin(), data_.end(), 0);
+		// std::fill(;
 	}
 	PageId page_id_;
 	bool is_dirty_ = false;

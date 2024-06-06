@@ -9,8 +9,8 @@ namespace db {
 #define ENSURE(expr, message)                                                                                          \
 	if (!(expr)) {                                                                                                     \
 		std::cerr << "ERROR: " << (message) << std::endl;                                                              \
-		std::terminate();                                                                                              \
-	}
+		exit(1);                                                                                                       \
+	} // namespace db
 
 // Macros to disable copying and moving
 #define DISALLOW_COPY(cname)                                                                                           \

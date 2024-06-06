@@ -1,5 +1,7 @@
 #include "storage/table/tuple.hpp"
 
+#include "common/typedef.hpp"
+
 #include <sstream>
 namespace db {
 
@@ -45,28 +47,25 @@ Tuple::Tuple(std::vector<Value> values, const Schema &schema) {
 	}
 }
 
-// void Tuple::SerializeTo(char *storage) const {
-//   int32_t size = data_.size();
-//   memcpy(storage, &size, sizeof(int32_t));
-//   memcpy(storage + sizeof(int32_t), data_.data(), size);
-// }
-//
-// void Tuple::DeserializeFrom(const char *storage) {
-//   uint32_t size = *reinterpret_cast<const uint32_t *>(storage);
-//   this->data_.resize(size);
-//   memcpy(this->data_.data(), storage + sizeof(int32_t), size);
-// }
-
-auto Tuple::GetValue(const Schema &schema, uint32_t column_idx) const -> Value {
-	const TypeId column_type = schema.GetColumn(column_idx).GetType();
-	const char *data_ptr = GetDataPtr(schema, column_idx);
-	// the third parameter "is_inlined" is unused
-	return Value::DeserializeFrom(data_ptr, column_type);
+void Tuple::SerializeTo(char *storage) const {
+	memcpy(storage, data_.data(), data_.size());
 }
 
-auto Tuple::GetDataPtr(const Schema &schema, uint32_t column_idx) const -> const char * {
-	// assert(schema);
+void Tuple::DeserializeFrom(const char *storage, uint32_t size) {
+	memcpy(this->data_.data(), storage, size);
+}
+
+Value Tuple::GetValue(const Column &col) const {
+	const_data_ptr_t data_ptr = GetDataPtr(col);
+	return Value::DeserializeFrom(data_ptr, col.GetType());
+}
+
+Value Tuple::GetValue(const Schema &schema, uint32_t column_idx) const {
 	const auto &col = schema.GetColumn(column_idx);
+	return GetValue(col);
+}
+
+const_data_ptr_t Tuple::GetDataPtr(const Column &col) const {
 	bool is_inlined = col.IsInlined();
 	if (is_inlined) {
 		ASSERT(col.GetOffset() < data_.size(), "offset out of range");

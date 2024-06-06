@@ -14,15 +14,15 @@ using SchemaRef = std::shared_ptr<const Schema>;
 
 class Schema {
 public:
-	Schema() = default;
+	explicit Schema() = default;
 	explicit Schema(const std::vector<Column> &columns);
-	const std::vector<Column> &GetColumns() const {
+	[[nodiscard]] const std::vector<Column> &GetColumns() const {
 		return columns_;
 	}
-	const Column &GetColumn(const uint32_t col_idx) const {
+	[[nodiscard]] const Column &GetColumn(const uint32_t col_idx) const {
 		return columns_[col_idx];
 	}
-	std::optional<column_t> TryGetColIdx(const std::string &col_name) const {
+	[[nodiscard]] std::optional<column_t> TryGetColIdx(const std::string &col_name) const {
 		for (uint32_t i = 0; i < columns_.size(); ++i) {
 			if (columns_[i].GetName() == col_name) {
 				return std::optional {i};
@@ -30,16 +30,16 @@ public:
 		}
 		return std::nullopt;
 	}
-	uint32_t GetColumnCount() const {
+	[[nodiscard]] uint32_t GetColumnCount() const {
 		return static_cast<uint32_t>(columns_.size());
 	}
-	const std::vector<uint32_t> &GetUnlinedColumns() const {
+	[[nodiscard]] const std::vector<uint32_t> &GetUnlinedColumns() const {
 		return uninlined_columns_;
 	}
-	uint32_t GetUnlinedColumnCount() const {
+	[[nodiscard]] uint32_t GetUnlinedColumnCount() const {
 		return static_cast<uint32_t>(uninlined_columns_.size());
 	}
-	uint32_t GetTupleInlinePartStorageSize() const {
+	[[nodiscard]] uint32_t GetTupleInlinePartStorageSize() const {
 		return tuple_inline_part_storage_size_;
 	}
 	// void SerializeTo(char *storage) const;
@@ -59,7 +59,7 @@ public:
 		return result;
 	}
 
-	std::string ToString() const {
+	[[nodiscard]] std::string ToString() const {
 		std::string str = "Schema(";
 		for (const auto &col : columns_) {
 			str += col.ToString() + ", ";

@@ -1,30 +1,15 @@
 message("hello world")
 cmake_minimum_required(VERSION 3.10)
-set(CMAKE_EXPORT_COMPILE_COMMANDS ON) # For clang-tidy.
-set(BUILD_SHARED_LIBS OFF) # We expect external libraries to be linked statically.
-set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+set(BUILD_SHARED_LIBS OFF)
+set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
-set(CMAKE_C_COMPILER clang)
-set(CMAKE_CXX_COMPILER clang++)
 
 project(GavinDB
         VERSION 2024.03
         DESCRIPTION "Gavin's Relational Database Management System" 
         LANGUAGES C CXX
 )
-
-# if(NOT WIN32)
-#   string(ASCII 27 Esc)
-#   set(ColorReset   "${Esc}[m")
-#   set(ColorBold    "${Esc}[1m")
-#   set(ColorRed     "${Esc}[31m")
-#   set(ColorGreen   "${Esc}[32m")
-#   set(ColorYellow  "${Esc}[33m")
-#   set(ColorBlue    "${Esc}[34m")
-#   set(ColorMagenta "${Esc}[35m")
-#   set(ColorCyan    "${Esc}[36m")
-#   set(ColorWhite   "${Esc}[37m")
-# endif()
 
 if(NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
         message(STATUS "Setting build type to `Debug` as none was specified.")
@@ -43,7 +28,7 @@ endif()
 message("Build mode: ${CMAKE_BUILD_TYPE}")
 
 # Compiler flags.
-set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -Wall -Wextra")
+set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -Wall -Wextra -stdlib=libc++ -std=c++23")
 set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -O0 -ggdb -fno-omit-frame-pointer -fno-optimize-sibling-calls")
 set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -fsanitize=address -fsanitize=undefined -fno-sanitize=alignment")
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)

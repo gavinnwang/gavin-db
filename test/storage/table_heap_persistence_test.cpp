@@ -14,7 +14,7 @@ TEST(StorageTest, TablePersistTest) {
 	const size_t buffer_pool_size = 10;
 	auto cm = std::make_shared<db::CatalogManager>();
 	auto dm = std::make_shared<db::DiskManager>(cm);
-	auto bpm = std::make_shared<db::BufferPoolManager>(buffer_pool_size, dm, cm);
+	auto bpm = std::make_shared<db::BufferPoolManager>(buffer_pool_size, dm);
 
 	auto c1 = db::Column("user_id", db::TypeId::INTEGER);
 	auto c2 = db::Column("user_name", db::TypeId::VARCHAR, 256);
@@ -49,7 +49,7 @@ TEST(StorageTest, TablePersistTest) {
 
 	auto cm2 = std::make_shared<db::CatalogManager>();
 	auto dm2 = std::make_shared<db::DiskManager>(cm);
-	auto bpm2 = std::make_shared<db::BufferPoolManager>(buffer_pool_size, dm, cm);
+	auto bpm2 = std::make_shared<db::BufferPoolManager>(buffer_pool_size, dm);
 
 	auto table_info2 = cm2->GetTable(table_name);
 	std::cout << table_info2->name_ << std::endl;

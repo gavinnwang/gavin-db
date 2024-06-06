@@ -4,23 +4,23 @@
 #include "common/config.hpp"
 #include "common/macros.hpp"
 #include "storage/page/page_guard.hpp"
+#include "storage/page_allocator.hpp"
 
 #include <memory>
 #include <vector>
 namespace db {
-BufferPoolManager::BufferPoolManager(size_t pool_size, std::shared_ptr<DiskManager> disk_manager,
-                                     std::shared_ptr<CatalogManager> catalog_manager)
+BufferPoolManager::BufferPoolManager(size_t pool_size, std::shared_ptr<DiskManager> disk_manager)
     : pool_size_(pool_size), replacer_(std::make_unique<RandomBogoReplacer>()), disk_manager_(std::move(disk_manager)),
-      pages_(pool_size), catalog_manager_(std::move(catalog_manager)) {
+      pages_(pool_size) {
 	for (frame_id_t i = 0; i < pool_size_; ++i) {
 		free_list_.emplace_back(i);
 	}
 }
 
-PageId BufferPoolManager::AllocatePage(table_oid_t table_oid) {
-  auto new_page_num = catalog_manager_->GetLastPageId(table_oid) + 1;
-	return {table_oid, new_page_num};
-}
+// PageId BufferPoolManager::AllocatePage(table_oid_t table_oid) {
+//   auto new_page_num = catalog_manager_->GetLastPageId(table_oid) + 1;
+// 	return {table_oid, new_page_num};
+// }
 
 bool BufferPoolManager::AllocateFrame(frame_id_t &frame_id) {
 	if (free_list_.empty()) {
@@ -39,7 +39,7 @@ bool BufferPoolManager::AllocateFrame(frame_id_t &frame_id) {
 	return true;
 }
 
-Page &BufferPoolManager::NewPage(PageId &page_id) {
+Page &BufferPoolManager::NewPage(std::shared_ptr<PageAllocator> page_allocator, PageId &page_id) {
 	std::lock_guard<std::mutex> lock(latch_);
 	frame_id_t frame_id = -1;
 	if (!AllocateFrame(frame_id)) {
@@ -59,7 +59,8 @@ Page &BufferPoolManager::NewPage(PageId &page_id) {
 	page_table_.erase(page_id_to_replace);
 
 	// assign passed in page_id to the new page
-	page_id = AllocatePage(page_id.table_id_);
+	// page_id = AllocatePage(page_id.table_id_);
+  page_id = page_allocator->AllocatePage();
 	page_table_[page_id] = frame_id;
   ASSERT(page_table_.at(page_id) == frame_id, "page table should have the new page id");
   ASSERT(page_table_.contains(page_id_to_replace) == false, "page table should not have the old page id");
@@ -74,6 +75,7 @@ Page &BufferPoolManager::NewPage(PageId &page_id) {
 }
 
 Page &BufferPoolManager::FetchPage(PageId page_id) {
+  ASSERT(page_id.page_number_ != INVALID_PAGE_ID, "page number should be valid");
 	std::lock_guard<std::mutex> lock(latch_);
 	if (page_table_.find(page_id) != page_table_.end()) {
 		frame_id_t frame_id = page_table_[page_id];
@@ -83,11 +85,12 @@ Page &BufferPoolManager::FetchPage(PageId page_id) {
 		return page;
 	}
 
-	frame_id_t frame_id = 0;
+	frame_id_t frame_id = -1;
 	if (!AllocateFrame(frame_id)) {
 		throw std::runtime_error("Failed to allocate frame");
 		// return nullptr;
 	}
+ASSERT(frame_id != -1, "frame id has to be assigned a valid value here");
 
 	page_table_.erase(pages_[frame_id].page_id_);
 	page_table_.insert({page_id, frame_id});
@@ -176,8 +179,8 @@ WritePageGuard BufferPoolManager::FetchPageWrite(PageId page_id) {
 	return {*this, page};
 }
 
-BasicPageGuard BufferPoolManager::NewPageGuarded(PageId &page_id) {
-	auto &page = NewPage(page_id);
+BasicPageGuard BufferPoolManager::NewPageGuarded(std::shared_ptr<PageAllocator> page_allocator, PageId &page_id) {
+	auto &page = NewPage(page_allocator, page_id);
 	return {*this, page};
 }
 } // namespace db

@@ -11,7 +11,7 @@ enum class PageType : uint8_t { INVALID_PAGE = 0, DATA_PAGE = 1, HASH_INDEX_PAGE
 struct PageId {
 	page_id_t page_number_;
 	table_oid_t table_id_;
-	PageType page_type_;
+	PageType page_type_ {PageType::DATA_PAGE};
 
 	explicit PageId() : page_number_(INVALID_PAGE_ID), table_id_(INVALID_TABLE_OID) {
 	}
@@ -25,7 +25,7 @@ struct PageId {
 
 struct PageId_Hash {
 	std::size_t operator()(const PageId &page_id) const {
-		return std::hash<int>()(page_id.table_id_) ^ std::hash<int>()(page_id.page_number_);
+		return page_id.table_id_ << 32 | page_id.page_number_ << 1 | static_cast<int>(page_id.page_type_);
 	}
 };
 

@@ -27,14 +27,13 @@ public:
 		return is_null_;
 	}
 
-	void SerializeTo(char *storage) const;
-
+	void SerializeTo(data_ptr_t storage) const;
 	auto ToString() const -> std::string;
 
 	void Serialize(Serializer &serializer) const;
 	static Value Deserialize(Deserializer &deserializer);
 
-	static auto DeserializeFrom(const char *storage, const TypeId type_id) -> Value {
+	static auto DeserializeFrom(const_data_ptr_t storage, const TypeId type_id) -> Value {
 		switch (type_id) {
 		case TypeId::BOOLEAN: {
 
@@ -53,7 +52,7 @@ public:
 			uint32_t var_len = *reinterpret_cast<const uint32_t *>(storage);
 
 			ASSERT(var_len < PAGE_SIZE, "Invalid varchar length");
-			return {type_id, std::string(storage + sizeof(uint32_t), var_len)};
+			return {type_id, std::string(reinterpret_cast<const char *>(storage) + sizeof(uint32_t), var_len)};
 		}
 		case TypeId::INVALID: {
 			UNREACHABLE("Value has invalid type id");

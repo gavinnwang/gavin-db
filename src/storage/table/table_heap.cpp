@@ -11,12 +11,12 @@
 #include <memory>
 namespace db {
 TableHeap::TableHeap(std::shared_ptr<BufferPoolManager> bpm, std::shared_ptr<TableInfo> table_info)
-    : bpm_(bpm), table_info_(std::move(table_info)) {
+    : bpm_(bpm), table_info_(table_info) {
 	assert(table_info_ != nullptr);
 	if (table_info_->GetLastTablePageId() == INVALID_PAGE_ID) {
 		// page_id_t new_page_id;
 		PageId new_page_id {table_info_->table_oid_};
-		auto guard = bpm->NewPageGuarded(new_page_id);
+		auto guard = bpm->NewPageGuarded(table_info_, new_page_id);
 		ASSERT(new_page_id.page_number_ != INVALID_PAGE_ID && new_page_id.page_number_ >= 0,
 		       "table heap create page failed");
 
@@ -24,7 +24,7 @@ TableHeap::TableHeap(std::shared_ptr<BufferPoolManager> bpm, std::shared_ptr<Tab
 		first_page->Init();
 		// set the first and last page id to new page
 		// table_info_->SetFirstTablePageId(new_page_id.page_number_);
-		table_info_->SetLastTablePageId(new_page_id.page_number_);
+		// table_info_->SetLastTablePageId(new_page_id.page_number_);
 	}
 	ASSERT(table_info_->GetLastTablePageId() != INVALID_PAGE_ID && table_info_->GetLastTablePageId() >= 0,
 	       "table heap last page is invalid");
@@ -32,9 +32,6 @@ TableHeap::TableHeap(std::shared_ptr<BufferPoolManager> bpm, std::shared_ptr<Tab
 
 std::optional<RID> TableHeap::InsertTuple(const TupleMeta &meta, const Tuple &tuple) {
 	std::unique_lock<std::mutex> guard(latch_);
-
-	// auto table_info_pg = bpm_->FetchPageWrite(table_info_id_);
-	// auto table_info = table_info_pg.AsMut<TableInfoPage>();
 	PageId new_page_id {table_info_->table_oid_, table_info_->GetLastTablePageId()};
 	auto page_guard = bpm_->FetchPageWrite(new_page_id);
 	while (true) {
@@ -44,32 +41,20 @@ std::optional<RID> TableHeap::InsertTuple(const TupleMeta &meta, const Tuple &tu
 		}
 		// tuple page is empty and still cannot insert
 		ENSURE(page->GetNumTuples() != 0, "tuple is too large");
-
 		// allocate a new page for the tuple because the current page is full
 		// page_id_t next_page_id = INVALID_PAGE_ID;
 		PageId next_page_id {table_info_->table_oid_};
-		auto npg = bpm_->NewPageGuarded(next_page_id);
+		auto npg = bpm_->NewPageGuarded(table_info_, next_page_id);
 		ENSURE(next_page_id.page_number_ != INVALID_PAGE_ID, "cannot allocate page");
-		// ENSURE(next_page_id.page_number_ != INVALID_PAGE_ID, "cannot allocate page");
-
 		// construct the linked list
 		page->SetNextPageId(next_page_id.page_number_);
-		table_info_->SetLastTablePageId(next_page_id.page_number_);
-
 		// initialize the next page
-		// auto next_page = reinterpret_cast<TablePage *>(npg->GetData());
 		auto next_page = npg.AsMut<TablePage>();
 		next_page->Init();
-
 		// drop the current page
 		page_guard.Drop();
-
 		// fetch the next page
 		auto next_page_guard = npg.UpgradeWrite();
-		// update the last page id
-
-		// last_page_id_ = next_page_id;
-		// table_info_->SetLastTablePageId(next_page_id.page_number_);
 		page_guard = std::move(next_page_guard);
 	}
 	auto last_page_id = table_info_->GetLastTablePageId();
@@ -77,8 +62,9 @@ std::optional<RID> TableHeap::InsertTuple(const TupleMeta &meta, const Tuple &tu
 	auto page = page_guard.AsMut<TablePage>();
 	auto slot_id = *page->InsertTuple(meta, tuple);
 	guard.unlock();
-
 	page_guard.Drop();
+
+	table_info_->IncreaseTupleCount();
 	return RID({table_info_->table_oid_, last_page_id}, slot_id);
 };
 

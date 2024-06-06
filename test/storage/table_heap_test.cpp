@@ -12,7 +12,7 @@ TEST(StorageTest, TableHeapSimpleTest) {
 	const size_t buffer_pool_size = 10;
 	auto cm = std::make_shared<db::CatalogManager>();
 	auto dm = std::make_shared<db::DiskManager>(cm);
-	auto bpm = std::make_shared<db::BufferPoolManager>(buffer_pool_size, dm, cm);
+	auto bpm = std::make_shared<db::BufferPoolManager>(buffer_pool_size, dm);
 
 	auto c1 = db::Column("user_id", db::TypeId::INTEGER);
 	auto c2 = db::Column("user_name", db::TypeId::VARCHAR, 256);
@@ -55,7 +55,7 @@ TEST(StorageTest, TableHeapManyInsertionTest) {
 	const size_t buffer_pool_size = 25;
 	auto cm = std::make_shared<db::CatalogManager>();
 	auto dm = std::make_shared<db::DiskManager>(cm);
-	auto bpm = std::make_shared<db::BufferPoolManager>(buffer_pool_size, dm, cm);
+	auto bpm = std::make_shared<db::BufferPoolManager>(buffer_pool_size, dm);
 
 	// db::page_id_t table_info_page_id;
 	// auto guard = bpm->NewPageGuarded(table_info_page_id);
@@ -79,7 +79,7 @@ TEST(StorageTest, TableHeapManyInsertionTest) {
 	std::vector<db::RID> rids;
 	std::vector<std::string> ans;
 	// insert 200,000 tuples
-	for (int i = 0; i < 200000; ++i) {
+	for (int i = 0; i < 300000; ++i) {
 		int32_t int_val = i;
 		std::string str_val = db::GenerateRandomString(10, 256);
 
@@ -96,7 +96,7 @@ TEST(StorageTest, TableHeapManyInsertionTest) {
 		std::cout << "rid: " << rid->GetPageId().page_number_ << " " << rid->GetSlotNum() << std::endl;
 	}
 
-	for (int i = 0; i < 200000; ++i) {
+	for (int i = 0; i < 300000; ++i) {
 		auto ret = table_heap->GetTuple(rids[i]);
 		if (!ret.has_value()) {
 			std::cout << "Error: " << i << std::endl;

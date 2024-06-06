@@ -1,6 +1,7 @@
 #pragma once
 #include "catalog/schema.hpp"
 #include "common/config.hpp"
+#include "storage/page_allocator.hpp"
 #include "storage/serializer/serializer.hpp"
 
 #include <cstdint>
@@ -8,14 +9,14 @@
 
 namespace db {
 
-struct TableInfo {
+struct TableInfo : public PageAllocator {
 	Schema schema_;
 	std::string name_;
-	table_oid_t table_oid_;
+	table_oid_t table_oid_ {INVALID_TABLE_OID};
 	page_id_t last_table_page_id_ {INVALID_PAGE_ID};
 	uint64_t tuple_count_ {0};
 
-	explicit TableInfo() {};
+	explicit TableInfo() = default;
 
 	TableInfo(Schema schema, std::string name, table_oid_t table_oid)
 	    : schema_ {std::move(schema)}, name_ {std::move(name)}, table_oid_ {table_oid} {
@@ -28,7 +29,7 @@ struct TableInfo {
 		serializer.WriteProperty(103, "last_table_page_id", last_table_page_id_);
 	}
 
-	static std::unique_ptr<TableInfo> Deserialize(Deserializer &deserializer) {
+	[[nodiscard]] static std::unique_ptr<TableInfo> Deserialize(Deserializer &deserializer) {
 		auto info = std::make_unique<TableInfo>();
 		deserializer.ReadProperty(100, "table_name", info->name_);
 		deserializer.ReadProperty(101, "table_oid", info->table_oid_);
@@ -37,7 +38,7 @@ struct TableInfo {
 		return info;
 	}
 
-	inline auto GetLastTablePageId() const -> page_id_t {
+	[[nodiscard]] inline auto GetLastTablePageId() const -> page_id_t {
 		return last_table_page_id_;
 	}
 
@@ -45,36 +46,13 @@ struct TableInfo {
 		last_table_page_id_ = last_table_page_id;
 	}
 
-	// auto GetSerializationSize() const -> uint32_t {
-	// 	auto sz = schema_.GetSerializationSize() + sizeof(uint32_t) + name_.size() + sizeof(table_oid_);
-	// 	return sz;
-	// }
-	//
-	// void SerializeTo(char *storage) const {
-	// 	uint32_t offset = 0;
-	// 	schema_.SerializeTo(storage + offset);
-	// 	offset += schema_.GetSerializationSize();
-	// 	// now serialize the table name length and string
-	// 	uint32_t table_name_size = name_.size();
-	// 	memcpy(storage + offset, &table_name_size, sizeof(uint32_t));
-	// 	offset += sizeof(uint32_t);
-	// 	memcpy(storage + offset, name_.data(), table_name_size);
-	// 	offset += table_name_size;
-	// 	memcpy(storage + offset, &table_oid_, sizeof(uint32_t));
-	// }
-	//
-	// static auto DeserializeFrom(const char *storage) -> TableInfo {
-	// 	auto schema = Schema();
-	// 	uint32_t offset = 0;
-	// 	schema.DeserializeFrom(storage + offset);
-	// 	offset += schema.GetSerializationSize();
-	// 	uint32_t table_name_size = *reinterpret_cast<const uint32_t *>(storage + offset);
-	// 	offset += sizeof(uint32_t);
-	// 	std::string table_name(storage + offset, table_name_size);
-	// 	offset += table_name_size;
-	// 	table_oid_t table_oid = *reinterpret_cast<const uint32_t *>(storage + offset);
-	//
-	// 	return {schema, table_name, table_oid};
-	// }
+	PageId AllocatePage() final {
+		last_table_page_id_++;
+		return {table_oid_, last_table_page_id_};
+	}
+
+	void IncreaseTupleCount() {
+		tuple_count_++;
+	}
 };
 } // namespace db

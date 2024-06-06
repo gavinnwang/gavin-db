@@ -1,8 +1,10 @@
 #pragma once
 #include "catalog/schema.hpp"
 #include "common/rid.hpp"
+#include "common/typedef.hpp"
 #include "common/value.hpp"
 
+#include <malloc/_malloc.h>
 #include <string>
 namespace db {
 
@@ -38,16 +40,16 @@ public:
 	Tuple(Tuple &&other) noexcept = default;
 	// assign operator, deep copy
 	auto operator=(const Tuple &other) -> Tuple & = default;
-	// // serialize tuple data
-	// void SerializeTo(char *storage) const;
-	// // deserialize tuple data(deep copy)
-	// void DeserializeFrom(const char *storage);
+	// serialize tuple data
+	void SerializeTo(char *storage) const;
+	// deserialize tuple data(deep copy)
+	void DeserializeFrom(const char *storage, uint32_t size);
 
 	inline auto SetRid(RID rid) {
 		rid_ = rid;
 	}
 
-	inline auto GetData() const -> const char * {
+	const_data_ptr_t GetData() const {
 		return data_.data();
 	}
 
@@ -55,17 +57,19 @@ public:
 		return data_.size();
 	}
 
-	auto GetValue(const Schema &schema, uint32_t column_idx) const -> Value;
+	Value GetValue(const Column &col) const;
+
+	Value GetValue(const Schema &schema, uint32_t column_idx) const;
 
 	auto ToString(const Schema &schema) const -> std::string;
 
 private:
 	// Get the starting storage address of specific column
-	auto GetDataPtr(const Schema &schema, uint32_t column_idx) const -> const char *;
+	const_data_ptr_t GetDataPtr(const Column &col) const;
 
 	RID rid_ {};
 
 	// char *data_;
-	std::vector<char> data_;
+	std::vector<data_t> data_;
 };
 } // namespace db

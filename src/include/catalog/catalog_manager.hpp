@@ -97,6 +97,5 @@ private:
 	};
 	std::unordered_map<table_oid_t, std::shared_ptr<TableInfo>> tables_;
 	std::unordered_map<std::string, table_oid_t> table_names_;
-	// std::shared_ptr<DiskManager> dm_;
 };
 } // namespace db
