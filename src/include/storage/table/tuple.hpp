@@ -2,9 +2,7 @@
 #include "catalog/schema.hpp"
 #include "common/rid.hpp"
 #include "common/typedef.hpp"
-#include "common/value.hpp"
 
-#include <malloc/_malloc.h>
 #include <string>
 namespace db {
 

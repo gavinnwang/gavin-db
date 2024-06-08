@@ -12,7 +12,7 @@ table_oid_t CatalogManager::CreateTable(const std::string &table_name, const Sch
 	table_oid_t table_oid = tables_.size();
 	table_names_.emplace(table_name, table_oid);
 
-	tables_.emplace(table_oid, std::make_shared<TableInfo>(schema, table_name, table_oid));
+	tables_.emplace(table_oid, std::make_shared<TableMeta>(schema, table_name, table_oid));
 
 	CreateFileIfNotExists(FilePathManager::GetInstance().GetTableMetaPath(table_name));
 	CreateFileIfNotExists(FilePathManager::GetInstance().GetTableDataPath(table_name));

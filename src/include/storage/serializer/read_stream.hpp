@@ -2,6 +2,7 @@
 #pragma once
 
 #include "common/config.hpp"
+#include "common/typedef.hpp"
 
 #include <type_traits>
 

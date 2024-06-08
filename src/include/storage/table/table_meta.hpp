@@ -6,19 +6,14 @@
 
 #include <cstdint>
 #include <memory>
+#include <mutex>
 
 namespace db {
 
-struct TableInfo : public PageAllocator {
-	Schema schema_;
-	std::string name_;
-	table_oid_t table_oid_ {INVALID_TABLE_OID};
-	page_id_t last_table_page_id_ {INVALID_PAGE_ID};
-	uint64_t tuple_count_ {0};
+struct TableMeta : public PageAllocator {
+	explicit TableMeta() = default;
 
-	explicit TableInfo() = default;
-
-	TableInfo(Schema schema, std::string name, table_oid_t table_oid)
+	TableMeta(Schema schema, std::string name, table_oid_t table_oid)
 	    : schema_ {std::move(schema)}, name_ {std::move(name)}, table_oid_ {table_oid} {
 	}
 
@@ -29,8 +24,8 @@ struct TableInfo : public PageAllocator {
 		serializer.WriteProperty(103, "last_table_page_id", last_table_page_id_);
 	}
 
-	[[nodiscard]] static std::unique_ptr<TableInfo> Deserialize(Deserializer &deserializer) {
-		auto info = std::make_unique<TableInfo>();
+	[[nodiscard]] static std::unique_ptr<TableMeta> Deserialize(Deserializer &deserializer) {
+		auto info = std::make_unique<TableMeta>();
 		deserializer.ReadProperty(100, "table_name", info->name_);
 		deserializer.ReadProperty(101, "table_oid", info->table_oid_);
 		deserializer.ReadProperty(102, "table_schema", info->schema_);
@@ -54,5 +49,12 @@ struct TableInfo : public PageAllocator {
 	void IncreaseTupleCount() {
 		tuple_count_++;
 	}
+
+	Schema schema_;
+	std::string name_;
+	table_oid_t table_oid_ {INVALID_TABLE_OID};
+	page_id_t last_table_page_id_ {INVALID_PAGE_ID};
+	uint64_t tuple_count_ {0};
+  std::mutex latch_;
 };
 } // namespace db

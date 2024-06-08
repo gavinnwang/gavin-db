@@ -6,7 +6,7 @@
 #include "storage/serializer/binary_serializer.hpp"
 #include "storage/serializer/deserializer.hpp"
 #include "storage/serializer/file_stream.hpp"
-#include "storage/table/table_info.hpp"
+#include "storage/table/table_meta.hpp"
 
 #include "gtest/gtest.h"
 #include <memory>
@@ -144,13 +144,13 @@ TEST(StorageTest, SerializeValueTest) {
 	auto c8 = Column("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", db::TypeId::INTEGER);
 	auto schema = Schema({c1, c2, c3, c4, c5, c6, c7, c8});
 
-	auto table_info = TableInfo {schema, "table_name", 1};
+	auto table_meta = TableMeta {schema, "table_name", 1};
 	FileStream stream("schema_test_file", std::ios::in | std::ios::out | std::ios::binary | std::ios::trunc);
-	BinarySerializer::Serialize(table_info, stream, false);
+	BinarySerializer::Serialize(table_meta, stream, false);
 	stream.Print();
 	stream.Rewind();
 
-	auto out = BinaryDeserializer::Deserialize<TableInfo>(stream);
+	auto out = BinaryDeserializer::Deserialize<TableMeta>(stream);
 	std::cout << out->schema_.ToString() << std::endl;
 	std::cout << out->name_;
 }

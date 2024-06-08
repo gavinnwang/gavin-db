@@ -9,7 +9,7 @@
 #include "storage/serializer/binary_serializer.hpp"
 #include "storage/serializer/file_stream.hpp"
 #include "storage/serializer/serialization_traits.hpp"
-#include "storage/table/table_info.hpp"
+#include "storage/table/table_meta.hpp"
 
 #include <memory>
 #include <string>
@@ -32,7 +32,7 @@ public:
 
 	table_oid_t CreateTable(const std::string &table_name, const Schema &schema);
 
-	std::shared_ptr<TableInfo> GetTable(const std::string &table_name) const {
+	std::shared_ptr<TableMeta> GetTable(const std::string &table_name) const {
 		if (table_names_.find(table_name) == table_names_.end()) {
 			throw Exception("Table not found when getting table info");
 		}
@@ -62,25 +62,25 @@ public:
 		Serialize(serializer);
 
 		// persist all table meta to disk
-		for (const auto &[table_oid, table_info] : tables_) {
-			std::filesystem::path table_meta_path = FilePathManager::GetInstance().GetTableMetaPath(table_info->name_);
+		for (const auto &[table_oid, table_meta] : tables_) {
+			std::filesystem::path table_meta_path = FilePathManager::GetInstance().GetTableMetaPath(table_meta->name_);
 			// CreateFileIfNotExists(table_meta_path);
 			auto table_meta_fs = FileStream(table_meta_path);
 			BinarySerializer table_meta_serializer(table_meta_fs);
-			table_info->Serialize(table_meta_serializer);
+			table_meta->Serialize(table_meta_serializer);
 		}
 	}
 
 	void Serialize(Serializer &serializer) const {
 		serializer.WritePropertyWithDefault(100, "tables", tables_,
-		                                    std::unordered_map<table_oid_t, std::shared_ptr<TableInfo>>());
+		                                    std::unordered_map<table_oid_t, std::shared_ptr<TableMeta>>());
 		serializer.WritePropertyWithDefault(101, "table_names", table_names_,
 		                                    std::unordered_map<std::string, table_oid_t>());
 	}
 
 	void Deserialize(Deserializer &deserializer) {
 		deserializer.ReadPropertyWithDefault(100, "tables", tables_,
-		                                     std::unordered_map<table_oid_t, std::shared_ptr<TableInfo>>());
+		                                     std::unordered_map<table_oid_t, std::shared_ptr<TableMeta>>());
 		deserializer.ReadPropertyWithDefault(101, "table_names", table_names_,
 		                                     std::unordered_map<std::string, table_oid_t>());
 	}
@@ -95,7 +95,7 @@ private:
 			}
 		}
 	};
-	std::unordered_map<table_oid_t, std::shared_ptr<TableInfo>> tables_;
+	std::unordered_map<table_oid_t, std::shared_ptr<TableMeta>> tables_;
 	std::unordered_map<std::string, table_oid_t> table_names_;
 };
 } // namespace db

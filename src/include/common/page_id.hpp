@@ -6,12 +6,12 @@
 #include <functional>
 namespace db {
 
-enum class PageType : uint8_t { INVALID_PAGE = 0, DATA_PAGE = 1, HASH_INDEX_PAGE = 2, BTREE_INDEX_PAGE = 3 };
+// enum class PageType : uint8_t { INVALID_PAGE = 0, DATA_PAGE = 1, HASH_INDEX_PAGE = 2, BTREE_INDEX_PAGE = 3 };
 
 struct PageId {
 	page_id_t page_number_;
 	table_oid_t table_id_;
-	PageType page_type_ {PageType::DATA_PAGE};
+	// PageType page_type_ {PageType::DATA_PAGE};
 
 	explicit PageId() : page_number_(INVALID_PAGE_ID), table_id_(INVALID_TABLE_OID) {
 	}
@@ -25,7 +25,7 @@ struct PageId {
 
 struct PageId_Hash {
 	std::size_t operator()(const PageId &page_id) const {
-		return page_id.table_id_ << 32 | page_id.page_number_ << 1 | static_cast<int>(page_id.page_type_);
+		return page_id.table_id_ << 31 | page_id.page_number_;
 	}
 };
 

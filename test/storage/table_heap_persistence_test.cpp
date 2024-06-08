@@ -2,6 +2,7 @@
 #include "common/fs_utils.hpp"
 #include "common/test_utils.hpp"
 #include "common/typedef.hpp"
+#include "common/value.hpp"
 #include "storage/table/table_heap.hpp"
 #include "storage/table/tuple.hpp"
 
@@ -22,8 +23,8 @@ TEST(StorageTest, TablePersistTest) {
 	auto table_name = "usr";
 
 	auto table_oid = cm->TryCreateTable(table_name, schema);
-	auto table_info = cm->GetTable(table_name);
-	auto table_heap = new db::TableHeap(bpm, table_info);
+	auto table_meta = cm->GetTable(table_name);
+	auto table_heap = new db::TableHeap(bpm, table_meta);
 
 	std::vector<db::RID> rids;
 	for (int i = 0; i < 200; ++i) {
@@ -51,10 +52,10 @@ TEST(StorageTest, TablePersistTest) {
 	auto dm2 = std::make_shared<db::DiskManager>(cm);
 	auto bpm2 = std::make_shared<db::BufferPoolManager>(buffer_pool_size, dm);
 
-	auto table_info2 = cm2->GetTable(table_name);
-	std::cout << table_info2->name_ << std::endl;
+	auto table_meta2 = cm2->GetTable(table_name);
+	std::cout << table_meta2->name_ << std::endl;
 
-	auto table_heap2 = new db::TableHeap(bpm2, table_info2);
+	auto table_heap2 = new db::TableHeap(bpm2, table_meta2);
 
 	for (int i = 0; i < 200; ++i) {
 		auto ret = table_heap2->GetTuple(rids[i]);

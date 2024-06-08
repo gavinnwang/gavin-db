@@ -1,5 +1,7 @@
 #include "catalog/schema.hpp"
+#include "common/value.hpp"
 #include "storage/table/tuple.hpp"
+
 
 #include "gtest/gtest.h"
 TEST(StorageTest, TupleTest) {

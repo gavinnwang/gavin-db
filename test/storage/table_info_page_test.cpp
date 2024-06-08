@@ -8,7 +8,7 @@
 #include <stdexcept>
 
 
-TEST(StorageTest, SimpleTableInfoPageTest) {
+TEST(StorageTest, SimpleTableMetaPageTest) {
 	db::DeletePathIfExists(db::FilePathManager::GetInstance().GetDatabaseRootPath());
 	const size_t buffer_pool_size = 10;
 	auto cm = std::make_shared<db::CatalogManager>();

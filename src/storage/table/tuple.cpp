@@ -1,6 +1,7 @@
 #include "storage/table/tuple.hpp"
 
 #include "common/typedef.hpp"
+#include "common/value.hpp"
 
 #include <sstream>
 namespace db {

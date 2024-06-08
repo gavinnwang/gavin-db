@@ -6,6 +6,7 @@
 #include "common/macros.hpp"
 #include "common/rid.hpp"
 #include "common/typedef.hpp"
+#include "common/value.hpp"
 #include "storage/table/tuple.hpp"
 
 #include <unordered_set>
@@ -35,35 +36,36 @@ public:
 class Index {
 
 public:
-	Index() = default;
-	DISALLOW_COPY_AND_MOVE(Index);
-	Index(std::shared_ptr<IndexMeta> meta) : meta_(meta) {
-	}
+	Index() = delete;
+  DISALLOW_COPY(Index);
+	Index(std::shared_ptr<IndexMeta> index_meta, std::shared_ptr<TableMeta> table_meta) : index_meta_(index_meta), table_meta_(table_meta) 
+{}
 
 	bool InsertRecord(const Tuple &tuple, const RID rid) {
 		auto key = ConvertTupleToKey(tuple);
-		return InternalInsertRecord(key, rid);
+		return InternalInsertRecord(std::move(key), rid);
 	}
 	bool DeleteRecord(const Tuple &tuple) {
 		auto key = ConvertTupleToKey(tuple);
-		return InternalDeleteRecord(key);
+		return InternalDeleteRecord(std::move(key));
 	}
 
 	bool ScanKey(const Tuple &tuple, std::vector<RID> &rids) {
 		auto key = ConvertTupleToKey(tuple);
-		return InternalScanKey(key, rids);
+		return InternalScanKey(std::move(key), rids);
 	}
 
 protected:
-	virtual bool InternalInsertRecord(const Value &key, const RID rid) = 0;
-	virtual bool InternalDeleteRecord(const Value &key) = 0;
-	virtual bool InternalScanKey(const Value &key, std::vector<RID> &rids) = 0;
+	virtual bool InternalInsertRecord(const IndexKeyType key, const RID rid) = 0;
+	virtual bool InternalDeleteRecord(const IndexKeyType key) = 0;
+	virtual bool InternalScanKey(const IndexKeyType key, std::vector<RID> &rids) = 0;
 
 private:
-	Value ConvertTupleToKey(const Tuple &tuple) {
-		return Value(tuple.GetValue(meta_->key_col_));
+	const IndexKeyType ConvertTupleToKey(const Tuple &tuple) {
+		return tuple.GetValue(index_meta_->key_col_).ConvertToIndexKeyType();
 	}
-	std::shared_ptr<IndexMeta> meta_;
+	std::shared_ptr<IndexMeta> index_meta_;
+  std::shared_ptr<TableMeta> table_meta_;
 };
 
 } // namespace db

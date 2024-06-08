@@ -1,18 +1,20 @@
 
 #pragma once
-#include "storage/table/table_info.hpp"
+#include "storage/table/table_meta.hpp"
 
 #include <cstdint>
 namespace db {
-static constexpr uint64_t TABLE_INFO_PAGE_HEADER_SIZE = 12;
+static constexpr uint64_t TABLE_META_PAGE_HEADER_SIZE = 12;
 
-class TableInfoPage {
+class TableMetaPage {
 	// stores the schema and table name info to disk
 	friend class TablePage;
 
 public:
+	TableMetaPage() = delete;
+	~TableMetaPage() = delete;
 	void Init(const std::string name, const Schema &schema, const table_oid_t table_oid);
-	auto GetTableInfo() const -> TableInfo;
+	auto GetTableMeta() const -> TableMeta;
 	void UpdateTableSchema(const Schema &schema);
 	inline auto GetFirstTablePageId() const -> page_id_t {
 		return first_table_page_id_;
@@ -28,12 +30,12 @@ public:
 	}
 
 private:
-	void StoreTableInfo(const TableInfo &table_info);
+	void StoreTableMeta(const TableMeta &table_meta);
 	char page_start_[0];
 	page_id_t first_table_page_id_;
 	page_id_t last_table_page_id_;
-	uint32_t table_info_offset_ {0};
+	uint32_t table_meta_offset_ {0};
 };
 
-static_assert(sizeof(TableInfoPage) == TABLE_INFO_PAGE_HEADER_SIZE);
+static_assert(sizeof(TableMetaPage) == TABLE_META_PAGE_HEADER_SIZE);
 } // namespace db

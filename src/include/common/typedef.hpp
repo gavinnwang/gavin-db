@@ -1,5 +1,8 @@
 #pragma once
 
+#include "common/config.hpp"
+
+#include <array>
 #include <cstddef>
 #include <cstdint>
 namespace db {
@@ -13,6 +16,9 @@ using slot_offset_t = idx_t; // slot offset type
 using data_t = uint8_t;
 using data_ptr_t = data_t *;
 using const_data_ptr_t = const data_t *;
+
+using IndexKeyType = std::array<data_t, INDEX_KEY_SIZE>;
+using IndexValueType = std::array<data_t, INDEX_KEY_SIZE>;
 
 template <class SRC>
 data_ptr_t data_ptr_cast(SRC *src) { // NOLINT: naming

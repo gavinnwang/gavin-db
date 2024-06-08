@@ -2,6 +2,7 @@
 
 #include "common/config.hpp"
 #include "common/exception.hpp"
+#include "common/typedef.hpp"
 #include "storage/serializer/serialization_traits.hpp"
 
 #include <memory>

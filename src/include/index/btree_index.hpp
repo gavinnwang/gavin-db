@@ -14,13 +14,19 @@ public:
 	}
 
 protected:
-	bool InternalInsertRecord(const Value &key, const RID rid) override {
+  // if tree is empty, create empty leaf node (also the root)
+  // else find the leaf node that should contain the key value
+  // if key has less than n-1 key values, insert
+  // if has n-1 keys, split the leaf
+  // create node L'
+	bool InternalInsertRecord(const IndexKeyType key, const RID rid) override {
+    // auto header_pg = bpm_->FetchPageRead(header_page_id_);
 		return true;
 	}
-	bool InternalDeleteRecord(const Value &key) override {
+	bool InternalDeleteRecord(const IndexKeyType key) override {
 		return true;
 	}
-	bool InternalScanKey(const Value &key, std::vector<RID> &rids) override {
+	bool InternalScanKey(const IndexKeyType key, std::vector<RID> &rids) override {
 		return true;
 	}
 
