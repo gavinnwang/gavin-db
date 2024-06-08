@@ -1,5 +1,6 @@
 #pragma once
 
+#include "common/typedef.hpp"
 #include "storage/page/btree_page.hpp"
 namespace db {
 class BtreeLeafPage : public BtreePage {
@@ -17,7 +18,8 @@ public:
 	BtreeLeafPage &operator=(BtreeLeafPage &&other) = delete;
 	~BtreeLeafPage() = delete;
 
-	void Init(int max_size = MAX_NODE_SIZE);
+	void Init(idx_t max_size = MAX_NODE_SIZE) {
+  }
 
 	page_id_t GetNextPageId() const {
 		return next_page_id_;

@@ -22,12 +22,12 @@ public:
 	BasicPageGuard FetchPageBasic(PageId page_id);
 	ReadPageGuard FetchPageRead(PageId page_id);
 	WritePageGuard FetchPageWrite(PageId page_id);
-	BasicPageGuard NewPageGuarded(std::shared_ptr<PageAllocator> page_allocator, PageId &page_id);
+	BasicPageGuard NewPageGuarded(PageAllocator& page_allocator, PageId &page_id);
 	bool UnpinPage(PageId page_id, bool is_dirty);
 
 private:
 	bool DeletePage(PageId page_id);
-	Page &NewPage(std::shared_ptr<PageAllocator> page_allocator, PageId &page_id);
+	Page &NewPage(PageAllocator& page_allocator, PageId &page_id);
 	Page &FetchPage(PageId page_id);
 	bool AllocateFrame(frame_id_t &frame_id);
 

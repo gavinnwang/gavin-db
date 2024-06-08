@@ -39,7 +39,7 @@ bool BufferPoolManager::AllocateFrame(frame_id_t &frame_id) {
 	return true;
 }
 
-Page &BufferPoolManager::NewPage(std::shared_ptr<PageAllocator> page_allocator, PageId &page_id) {
+Page &BufferPoolManager::NewPage(PageAllocator& page_allocator, PageId &page_id) {
 	std::lock_guard<std::mutex> lock(latch_);
 	frame_id_t frame_id = -1;
 	if (!AllocateFrame(frame_id)) {
@@ -60,7 +60,7 @@ Page &BufferPoolManager::NewPage(std::shared_ptr<PageAllocator> page_allocator, 
 
 	// assign passed in page_id to the new page
 	// page_id = AllocatePage(page_id.table_id_);
-  page_id = page_allocator->AllocatePage();
+  page_id = page_allocator.AllocatePage();
 	page_table_[page_id] = frame_id;
   ASSERT(page_table_.at(page_id) == frame_id, "page table should have the new page id");
   ASSERT(page_table_.contains(page_id_to_replace) == false, "page table should not have the old page id");
@@ -179,7 +179,7 @@ WritePageGuard BufferPoolManager::FetchPageWrite(PageId page_id) {
 	return {*this, page};
 }
 
-BasicPageGuard BufferPoolManager::NewPageGuarded(std::shared_ptr<PageAllocator> page_allocator, PageId &page_id) {
+BasicPageGuard BufferPoolManager::NewPageGuarded(PageAllocator& page_allocator, PageId &page_id) {
 	auto &page = NewPage(page_allocator, page_id);
 	return {*this, page};
 }

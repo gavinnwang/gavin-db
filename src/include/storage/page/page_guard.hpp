@@ -19,30 +19,30 @@ public:
 	// be usable
 	BasicPageGuard(BasicPageGuard &&that) noexcept;
 	// move assignment operator, this should be dropped and become that
-	auto operator=(BasicPageGuard &&that) noexcept -> BasicPageGuard &;
+	BasicPageGuard &operator=(BasicPageGuard &&that) noexcept;
 	~BasicPageGuard();
 	// basic page guard should be made invalid after this
-	auto UpgradeRead() -> ReadPageGuard;
-	auto UpgradeWrite() -> WritePageGuard;
+	ReadPageGuard UpgradeRead();
+	WritePageGuard UpgradeWrite();
 	// clear all content and unpin page
 	void Drop();
 
-	auto PageId() -> page_id_t {
+	page_id_t PageId() {
 		return page_->GetPageId().page_number_;
 	}
-	auto GetData() -> const char * {
+	const char *GetData() {
 		return page_->GetData();
 	}
 	template <class T>
-	auto As() -> const T * {
+	const T *As() {
 		return reinterpret_cast<const T *>(GetData());
 	}
-	auto GetDataMut() -> char * {
+	char *GetDataMut() {
 		is_dirty_ = true;
 		return page_->GetData();
 	}
 	template <class T>
-	auto AsMut() -> T * {
+	T *AsMut() {
 		return reinterpret_cast<T *>(GetDataMut());
 	}
 
@@ -58,19 +58,19 @@ public:
 	ReadPageGuard(BufferPoolManager &bpm, Page &page) : guard_(bpm, page) {
 	}
 	ReadPageGuard(const ReadPageGuard &) = delete;
-	auto operator=(const ReadPageGuard &) -> ReadPageGuard & = delete;
+	ReadPageGuard &operator=(const ReadPageGuard &) = delete;
 	ReadPageGuard(ReadPageGuard &&that) noexcept;
-	auto operator=(ReadPageGuard &&that) noexcept -> ReadPageGuard &;
+	ReadPageGuard &operator=(ReadPageGuard &&that) noexcept;
 	void Drop();
 	~ReadPageGuard();
-	auto PageId() -> page_id_t {
+	page_id_t PageId() {
 		return guard_.PageId();
 	}
-	auto GetData() -> const char * {
+	const char *GetData() {
 		return guard_.GetData();
 	}
 	template <class T>
-	auto As() -> const T * {
+	const T *As() {
 		return guard_.As<T>();
 	}
 
@@ -83,26 +83,26 @@ public:
 	WritePageGuard(BufferPoolManager &bpm, Page &page) : guard_(bpm, page) {
 	}
 	WritePageGuard(const WritePageGuard &) = delete;
-	auto operator=(const WritePageGuard &) -> WritePageGuard & = delete;
+	WritePageGuard &operator=(const WritePageGuard &) = delete;
 	WritePageGuard(WritePageGuard &&that) noexcept;
-	auto operator=(WritePageGuard &&that) noexcept -> WritePageGuard &;
+	WritePageGuard &operator=(WritePageGuard &&that) noexcept;
 	void Drop();
 	~WritePageGuard();
-	auto PageId() -> page_id_t {
+	page_id_t PageId() {
 		return guard_.PageId();
 	}
-	auto GetData() -> const char * {
+	const char *GetData() {
 		return guard_.GetData();
 	}
 	template <class T>
-	auto As() -> const T * {
+	const T *As() {
 		return guard_.As<T>();
 	}
-	auto GetDataMut() -> char * {
+	char *GetDataMut() {
 		return guard_.GetDataMut();
 	}
 	template <class T>
-	auto AsMut() -> T * {
+	T *AsMut() {
 		return guard_.AsMut<T>();
 	}
 

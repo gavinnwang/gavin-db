@@ -25,12 +25,12 @@ struct TableMeta : public PageAllocator {
 	}
 
 	[[nodiscard]] static std::unique_ptr<TableMeta> Deserialize(Deserializer &deserializer) {
-		auto info = std::make_unique<TableMeta>();
-		deserializer.ReadProperty(100, "table_name", info->name_);
-		deserializer.ReadProperty(101, "table_oid", info->table_oid_);
-		deserializer.ReadProperty(102, "table_schema", info->schema_);
-		deserializer.ReadProperty(103, "last_table_page_id", info->last_table_page_id_);
-		return info;
+		auto meta = std::make_unique<TableMeta>();
+		deserializer.ReadProperty(100, "table_name", meta->name_);
+		deserializer.ReadProperty(101, "table_oid", meta->table_oid_);
+		deserializer.ReadProperty(102, "table_schema", meta->schema_);
+		deserializer.ReadProperty(103, "last_table_page_id", meta->last_table_page_id_);
+		return meta;
 	}
 
 	[[nodiscard]] inline auto GetLastTablePageId() const -> page_id_t {

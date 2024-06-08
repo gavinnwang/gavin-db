@@ -2,8 +2,10 @@
 
 #include "buffer/buffer_pool_manager.hpp"
 #include "common/rid.hpp"
+#include "common/typedef.hpp"
 #include "common/value.hpp"
 #include "index/index.hpp"
+#include "storage/page/btree_leaf_page.hpp"
 
 #include <memory>
 namespace db {
@@ -21,6 +23,7 @@ protected:
   // create node L'
 	bool InternalInsertRecord(const IndexKeyType key, const RID rid) override {
     // auto header_pg = bpm_->FetchPageRead(header_page_id_);
+  
 		return true;
 	}
 	bool InternalDeleteRecord(const IndexKeyType key) override {
@@ -31,7 +34,17 @@ protected:
 	}
 
 private:
+
+  void Init();
+  
+  void CreateNewRoot(const IndexKeyType &key, const IndexValueType& value) {
+    auto root_page_id = PageId{table_meta_->table_oid_};
+    auto leaf_wpg = bpm_->NewPageGuarded(*table_meta_, root_page_id).UpgradeWrite();
+    auto leaf_page = leaf_wpg.AsMut<BtreeLeafPage>();
+    leaf_page->Init();
+  }
+
+
 	std::shared_ptr<BufferPoolManager> bpm_;
-	page_id_t header_page_id_ = 0;
 };
 } // namespace db

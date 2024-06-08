@@ -16,7 +16,7 @@ TableHeap::TableHeap(std::shared_ptr<BufferPoolManager> bpm, std::shared_ptr<Tab
 	if (table_meta_->GetLastTablePageId() == INVALID_PAGE_ID) {
 		// page_id_t new_page_id;
 		PageId new_page_id {table_meta_->table_oid_};
-		auto guard = bpm->NewPageGuarded(table_meta_, new_page_id);
+		auto guard = bpm->NewPageGuarded(*table_meta_, new_page_id);
 		ASSERT(new_page_id.page_number_ != INVALID_PAGE_ID && new_page_id.page_number_ >= 0,
 		       "table heap create page failed");
 
@@ -44,7 +44,7 @@ std::optional<RID> TableHeap::InsertTuple(const TupleMeta &meta, const Tuple &tu
 		// allocate a new page for the tuple because the current page is full
 		// page_id_t next_page_id = INVALID_PAGE_ID;
 		PageId next_page_id {table_meta_->table_oid_};
-		auto npg = bpm_->NewPageGuarded(table_meta_, next_page_id);
+		auto npg = bpm_->NewPageGuarded(*table_meta_, next_page_id);
 		ENSURE(next_page_id.page_number_ != INVALID_PAGE_ID, "cannot allocate page");
 		// construct the linked list
 		page->SetNextPageId(next_page_id.page_number_);
