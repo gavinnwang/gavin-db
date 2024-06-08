@@ -10,7 +10,7 @@ namespace db {
 
 class BTreeIndex : public Index {
 public:
-	BTreeIndex(std::shared_ptr<IndexMeta> meta, std::shared_ptr<BufferPoolManager> bpm) : Index(meta), bpm_(bpm) {
+	BTreeIndex(std::shared_ptr<IndexMeta> index_meta, std::shared_ptr<TableMeta> table_meta, std::shared_ptr<BufferPoolManager> bpm) : Index(index_meta, table_meta), bpm_(bpm) {
 	}
 
 protected:
