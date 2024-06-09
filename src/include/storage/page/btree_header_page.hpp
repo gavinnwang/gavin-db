@@ -1,7 +1,7 @@
 #pragma once
 
 #include "common/typedef.hpp"
-namespace bustub {
+namespace db {
 
 class BtreeHeaderPage {
 public:
@@ -12,7 +12,12 @@ public:
 	BtreeHeaderPage(BtreeHeaderPage &&other) = delete;
 	BtreeHeaderPage &operator=(BtreeHeaderPage &&other) = delete;
 
+	void SetRootPageId(const db::page_id_t &root_page_id) {
+		root_page_id_ = root_page_id;
+	}
+
+private:
 	db::page_id_t root_page_id_;
 };
 
-} // namespace bustub
+} // namespace db

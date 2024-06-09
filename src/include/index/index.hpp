@@ -21,7 +21,7 @@ enum class IndexConstraintType : uint8_t {
 
 struct IndexMeta {
 public:
-  explicit IndexMeta() = default;
+	explicit IndexMeta() = default;
 	IndexMeta(const std::string &name, table_oid_t table_id, const Column key_col, const column_t key_col_id,
 	          IndexConstraintType index_constraint_type)
 	    : name_(name), table_id_(table_id), key_col_(key_col), key_col_id_(key_col_id),
@@ -33,37 +33,39 @@ public:
 	Column key_col_;
 	column_t key_col_id_;
 	IndexConstraintType index_constraint_type_;
-  page_id_t header_page_id_ = 0;
+	page_id_t header_page_id_ {INVALID_PAGE_ID};
 
-  void Serialize(Serializer &serializer) const {
-    serializer.WriteProperty(100, "index_name", name_);
-    serializer.WriteProperty(101, "table_id", table_id_);
-    serializer.WriteProperty(102, "key_col", key_col_);
-    serializer.WriteProperty(103, "key_col_id", key_col_id_);
-    serializer.WriteProperty(104, "index_constraint_type", index_constraint_type_);
-    serializer.WriteProperty(105, "header_page_id", header_page_id_);
-  }
-  
-  [[nodiscard]] static std::unique_ptr<IndexMeta> Deserialize(Deserializer &deserializer) {
-    auto meta  = std::make_unique<IndexMeta>();
-    deserializer.ReadProperty(100, "table_name", meta->name_);
-    deserializer.ReadProperty(101, "table_id", meta->table_id_);
-    deserializer.ReadProperty(102, "key_col", meta->key_col_);
-    deserializer.ReadProperty(103, "key_col_id", meta->key_col_id_);
-    deserializer.ReadProperty(104, "index_constraint_type", meta->index_constraint_type_);
-    deserializer.ReadProperty(105, "header_page_id", meta->header_page_id_);
-    return meta;
-  }
+	void Serialize(Serializer &serializer) const {
+		serializer.WriteProperty(100, "index_name", name_);
+		serializer.WriteProperty(101, "table_id", table_id_);
+		serializer.WriteProperty(102, "key_col", key_col_);
+		serializer.WriteProperty(103, "key_col_id", key_col_id_);
+		serializer.WriteProperty(104, "index_constraint_type", index_constraint_type_);
+		serializer.WriteProperty(105, "header_page_id", header_page_id_);
+	}
 
+	[[nodiscard]] static std::unique_ptr<IndexMeta> Deserialize(Deserializer &deserializer) {
+		auto meta = std::make_unique<IndexMeta>();
+		deserializer.ReadProperty(100, "table_name", meta->name_);
+		deserializer.ReadProperty(101, "table_id", meta->table_id_);
+		deserializer.ReadProperty(102, "key_col", meta->key_col_);
+		deserializer.ReadProperty(103, "key_col_id", meta->key_col_id_);
+		deserializer.ReadProperty(104, "index_constraint_type", meta->index_constraint_type_);
+		deserializer.ReadProperty(105, "header_page_id", meta->header_page_id_);
+		return meta;
+	}
 };
 
+using Comparator = std::function<bool(const IndexKeyType &, const IndexKeyType &)>;
 class Index {
 
 public:
 	Index() = delete;
-  DISALLOW_COPY(Index);
-	Index(std::shared_ptr<IndexMeta> index_meta, std::shared_ptr<TableMeta> table_meta) : index_meta_(index_meta), table_meta_(table_meta) 
-{}
+	DISALLOW_COPY(Index);
+	Index(std::shared_ptr<IndexMeta> index_meta, std::shared_ptr<TableMeta> table_meta)
+	    : index_meta_(index_meta), table_meta_(table_meta) {
+	}
+
 
 	bool InsertRecord(const Tuple &tuple, const RID rid) {
 		auto key = ConvertTupleToKey(tuple);
@@ -84,8 +86,46 @@ protected:
 	virtual bool InternalDeleteRecord(const IndexKeyType key) = 0;
 	virtual bool InternalScanKey(const IndexKeyType key, std::vector<RID> &rids) = 0;
 	std::shared_ptr<IndexMeta> index_meta_;
-  std::shared_ptr<TableMeta> table_meta_;
+	std::shared_ptr<TableMeta> table_meta_;
+	// comparator used to determine the order of keys
+	Comparator comparator_;
+
 private:
+	static Comparator GetComparator(TypeId type_id) {
+		switch (type_id) {
+		case TypeId::BOOLEAN:
+			return CompareBoolean;
+		case TypeId::INTEGER:
+			return CompareInteger;
+		case TypeId::TIMESTAMP:
+			return CompareTimestamp;
+		case TypeId::VARCHAR:
+			return CompareString;
+		default:
+			throw std::invalid_argument("Unsupported type for indexing");
+		}
+	}
+
+	static bool CompareBoolean(const IndexKeyType &a, const IndexKeyType &b) {
+		bool valA = *reinterpret_cast<const bool *>(a.data());
+		bool valB = *reinterpret_cast<const bool *>(b.data());
+		return valA < valB;
+	}
+	static bool CompareInteger(const IndexKeyType &a, const IndexKeyType &b) {
+		int32_t valA = *reinterpret_cast<const int32_t *>(a.data());
+		int32_t valB = *reinterpret_cast<const int32_t *>(b.data());
+		return valA < valB;
+	}
+	static bool CompareTimestamp(const IndexKeyType &a, const IndexKeyType &b) {
+		uint64_t valA = *reinterpret_cast<const uint64_t *>(a.data());
+		uint64_t valB = *reinterpret_cast<const uint64_t *>(b.data());
+		return valA < valB;
+	}
+	static bool CompareString(const IndexKeyType &a, const IndexKeyType &b) {
+		// idk if this works but looks good
+		return std::lexicographical_compare(a.begin(), a.end(), b.begin(), b.end());
+	}
+
 	const IndexKeyType ConvertTupleToKey(const Tuple &tuple) {
 		return tuple.GetValue(index_meta_->key_col_).ConvertToIndexKeyType();
 	}

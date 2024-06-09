@@ -24,20 +24,20 @@ public:
 		size_ += amount;
 	}
 
-	int GetMaxSize() const {
+	idx_t GetMaxSize() const {
 		return max_size_;
 	}
 	void SetMaxSize(int max_size) {
 		max_size_ = max_size;
 	}
-	int GetMinSize() const {
+	idx_t GetMinSize() const {
 		return max_size_ / 2;
 	}
 
 private:
 	IndexPageType page_type_;
-	int size_;
-	int max_size_;
+	idx_t size_;
+	idx_t max_size_;
 };
 
 } // namespace db
