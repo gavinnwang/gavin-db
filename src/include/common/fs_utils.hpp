@@ -3,7 +3,6 @@
 #include "common/exception.hpp"
 #include <filesystem>
 #include <fstream>
-#include <iostream>
 #include <sys/stat.h>
 namespace db {
 namespace fs = std::filesystem;

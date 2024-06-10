@@ -3,6 +3,7 @@
 #include "buffer/buffer_pool_manager.hpp"
 #include "catalog/column.hpp"
 #include "catalog/schema.hpp"
+#include "common/logger.hpp"
 #include "common/macros.hpp"
 #include "common/rid.hpp"
 #include "common/typedef.hpp"
@@ -81,7 +82,7 @@ public:
 		return InternalScanKey(std::move(key), rids);
 	}
 
-  virtual ~Index() = default;
+	virtual ~Index() = default;
 
 protected:
 	virtual bool InternalInsertRecord(const IndexKeyType key, const RID rid) = 0;
@@ -120,9 +121,9 @@ private:
 	}
 
 	const IndexKeyType ConvertTupleToKey(const Tuple &tuple) {
-		auto value =  tuple.GetValue(index_meta_->key_col_);
-    std::cout << value.ToString();
-    return value.ConvertToIndexKeyType();
+		auto value = tuple.GetValue(index_meta_->key_col_);
+		LOG_TRACE("inserting value %s", value.ToString().c_str());
+		return value.ConvertToIndexKeyType();
 	}
 };
 

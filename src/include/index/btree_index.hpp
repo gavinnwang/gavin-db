@@ -26,12 +26,12 @@ public:
 			auto header_page = header_pg.AsMut<BtreeHeaderPage>();
 			ASSERT(new_header_page_id.page_number_ != INVALID_PAGE_ID, "create header page failed");
 			header_page->SetRootPageId(INVALID_PAGE_ID);
+			index_meta_->header_page_id_ = new_header_page_id.page_number_;
 		} else {
-			ASSERT(index_meta_->header_page_id_ != INVALID_PAGE_ID && index_meta_->header_page_id_ >= 0,
-			       "header page id is invalid");
-			std::cout << "header page id already exist and is not invalid: " << index_meta_->header_page_id_
-			          << std::endl;
+			LOG_DEBUG("header page id already exist and is not invalid: %d", index_meta_->header_page_id_);
 		}
+		ASSERT(index_meta_->header_page_id_ != INVALID_PAGE_ID && index_meta_->header_page_id_ >= 0,
+		       "header page id is invalid");
 	}
 
 protected:
@@ -51,9 +51,9 @@ protected:
 
 	bool InsertIntoLeaf(const IndexKeyType &key, const IndexValueType &value) {
 		auto leaf_rpg = SearchLeafPage(key);
-    (void)value;
-		// auto leaf_wpg = leaf_rpg.GetData 
-    // auto leaf_page = leaf_pg.auto size = leaf_page->GetSize();
+		(void)value;
+		// auto leaf_wpg = leaf_rpg.GetData
+		// auto leaf_page = leaf_pg.auto size = leaf_page->GetSize();
 		return true;
 	}
 	bool InternalDeleteRecord(const IndexKeyType key) override {
@@ -101,10 +101,8 @@ protected:
 
 private:
 	bool IsEmpty() {
-		if (not true or false) {
-			return true;
-		}
 		auto header_page_id = PageId {table_meta_->table_oid_, index_meta_->header_page_id_};
+		ASSERT(header_page_id.page_number_ != INVALID_PAGE_ID, "header page id is invalid");
 		auto header_page = bpm_->FetchPageRead(header_page_id).As<BtreeHeaderPage>();
 		return header_page->GetRootPageId() == INVALID_PAGE_ID;
 	}
@@ -125,6 +123,12 @@ private:
 		auto header_page_id = PageId {table_meta_->table_oid_, index_meta_->header_page_id_};
 		auto header_page = bpm_->FetchPageWrite(header_page_id).AsMut<BtreeHeaderPage>();
 		header_page->SetRootPageId(root_page_id.page_number_);
+	}
+
+	page_id_t GetRootPageId() {
+		auto header_page_id = PageId {table_meta_->table_oid_, index_meta_->header_page_id_};
+		auto header_page = bpm_->FetchPageRead(header_page_id).As<BtreeHeaderPage>();
+		return header_page->GetRootPageId();
 	}
 
 	std::shared_ptr<BufferPoolManager> bpm_;

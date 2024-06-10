@@ -2,6 +2,7 @@
 
 #include "common/config.hpp"
 #include "common/exception.hpp"
+#include "common/logger.hpp"
 #include "common/macros.hpp"
 #include "common/type.hpp"
 #include "storage/serializer/deserializer.hpp"
@@ -9,7 +10,6 @@
 
 #include <cstdint>
 #include <cstring>
-#include <stdexcept>
 #include <variant>
 
 namespace db {
@@ -38,6 +38,8 @@ public:
 	template <typename T>
 	Value(TypeId type, T &&i) : type_id_(type), value_(std::forward<T>(i)), is_null_(false) {
 		if (!ValueIsCorrectType<T>(type)) {
+			LOG_ERROR("Value isn't assigned to the correct type id, expected %s, got %s",
+			          Type::TypeIdToString(type).c_str(), typeid(T).name());
 			throw RuntimeException("Value isn't assigned to the correct type id");
 		}
 	};

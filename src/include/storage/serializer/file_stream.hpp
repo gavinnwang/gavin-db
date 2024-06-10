@@ -50,7 +50,6 @@ public:
 	// Debugging function to print the file content in hexadecimal format.
 	void Print() {
 		std::streampos current_pos = file.tellg();
-		std::cout << "Printing file with size " << current_pos << std::endl;
 
 		// Move to the beginning of the file
 		file.seekg(0, std::ios::beg);

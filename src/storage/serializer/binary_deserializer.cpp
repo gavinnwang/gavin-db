@@ -1,6 +1,7 @@
 #include "storage/serializer/binary_deserializer.hpp"
 
 #include "common/exception.hpp"
+#include "common/logger.hpp"
 
 #include <memory>
 namespace db {
@@ -8,6 +9,7 @@ namespace db {
 void BinaryDeserializer::OnPropertyBegin(const field_id_t field_id, const char *) {
 	auto field = NextField();
 	if (field != field_id) {
+		LOG_ERROR("Failed to deserialize: field id mismatch, expected: %d, but got: %d", field_id, field);
 		throw SerializationException("Failed to deserialize: field id mismatch, expected: " + std::to_string(field_id) +
 		                             ", but got: " + std::to_string(field));
 	}
@@ -22,9 +24,6 @@ bool BinaryDeserializer::OnOptionalPropertyBegin(const field_id_t field_id, cons
 	auto present = next_field == field_id;
 	if (present) {
 		ConsumeField();
-	} else {
-		std::cout << "Failed to deserialize: field id mismatch, expected: " << field_id << ", but got: " << next_field
-		          << std::endl;
 	}
 
 	return present;

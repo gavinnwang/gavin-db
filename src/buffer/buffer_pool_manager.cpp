@@ -30,7 +30,6 @@ bool BufferPoolManager::AllocateFrame(frame_id_t &frame_id) {
 		}
 		if (pages_[frame_id].is_dirty_) {
 			auto &evict_page = pages_[frame_id];
-			// std::cout << "evicting page " << evict_page.page_id_.page_number_ << std::endl;
 			disk_manager_->WritePage(evict_page.GetPageId(), evict_page.GetData());
 		}
 		return true;

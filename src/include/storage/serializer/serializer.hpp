@@ -33,7 +33,6 @@ public:
 	void WritePropertyWithDefault(const field_id_t field_id, const char *tag, const T &value, const T &&default_value) {
 		// If current value is default, don't write it
 		if (!serialize_default_values && (value == default_value)) {
-			// std::cout << "Skipping default value" << std::endl;
 			OnOptionalPropertyBegin(field_id, tag, false);
 			OnOptionalPropertyEnd(false);
 			return;

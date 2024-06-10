@@ -38,6 +38,7 @@ TEST(IndexTest, IndexTest) {
 	auto meta = db::TupleMeta {false};
 
 	auto rid = table_heap->InsertTuple(meta, tuple);
+
 	if (rid.has_value()) {
 		btree_index->InsertRecord(tuple, *rid);
 	}
