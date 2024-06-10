@@ -2,6 +2,7 @@
 
 #include "common/macros.hpp"
 
+#include <cstdint>
 #include <string>
 namespace db {
 enum class TypeId : uint8_t { INVALID = 0, BOOLEAN, INTEGER, TIMESTAMP, VARCHAR };

@@ -16,7 +16,7 @@ typedef uint16_t field_id_t;
 const field_id_t MESSAGE_TERMINATOR_FIELD_ID = 0xFFFF;
 
 template <typename T>
-concept HasSerialize = requires(T t, db::Serializer &serializer) {
+concept HasSerialize = requires(T t, Serializer &serializer) {
 	                       { t.Serialize(serializer) } -> std::same_as<void>;
                        };
 

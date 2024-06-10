@@ -1,6 +1,7 @@
 #pragma once
 
 #include "common/config.hpp"
+#include "common/exception.hpp"
 #include "common/macros.hpp"
 #include "common/type.hpp"
 #include "storage/serializer/deserializer.hpp"
@@ -8,9 +9,26 @@
 
 #include <cstdint>
 #include <cstring>
+#include <stdexcept>
 #include <variant>
 
 namespace db {
+template <typename T>
+bool ValueIsCorrectType(TypeId type) {
+	switch (type) {
+	case TypeId::BOOLEAN:
+		return typeid(T) == typeid(uint8_t);
+	case TypeId::INTEGER:
+		return typeid(T) == typeid(int32_t);
+	case TypeId::TIMESTAMP:
+		return typeid(T) == typeid(uint64_t);
+	case TypeId::VARCHAR:
+		return typeid(T) == typeid(std::string);
+	default:
+		return false;
+	}
+}
+
 class Value {
 public:
 	// create an value with type_id
@@ -18,7 +36,11 @@ public:
 	}
 
 	template <typename T>
-	Value(TypeId type, T &&i) : type_id_(type), value_(std::forward<T>(i)), is_null_(false) {};
+	Value(TypeId type, T &&i) : type_id_(type), value_(std::forward<T>(i)), is_null_(false) {
+		if (!ValueIsCorrectType<T>(type)) {
+			throw RuntimeException("Value isn't assigned to the correct type id");
+		}
+	};
 
 	// Get the length of the variable length data
 	inline auto GetStorageSize() const -> uint32_t {

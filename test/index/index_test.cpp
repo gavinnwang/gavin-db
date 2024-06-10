@@ -4,6 +4,7 @@
 #include "storage/table/table_heap.hpp"
 
 #include "gtest/gtest.h"
+#include <cstdint>
 namespace db {
 
 TEST(IndexTest, IndexTest) {
@@ -25,7 +26,7 @@ TEST(IndexTest, IndexTest) {
 
 	auto btree_index = std::make_unique<BTreeIndex>(index_meta, table_meta, bpm);
 
-	uint32_t int_val = 1;
+	int32_t int_val = 1;
 	std::string str_val = "hi";
 
 	auto table_heap = std::make_unique<TableHeap>(bpm, table_meta);

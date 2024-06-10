@@ -2,6 +2,7 @@
 #include "storage/table/tuple.hpp"
 
 #include <cstdint>
+#include <optional>
 #include <tuple>
 namespace db {
 static constexpr uint64_t TABLE_PAGE_HEADER_SIZE = 8;

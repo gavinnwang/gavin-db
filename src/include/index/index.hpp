@@ -120,7 +120,9 @@ private:
 	}
 
 	const IndexKeyType ConvertTupleToKey(const Tuple &tuple) {
-		return tuple.GetValue(index_meta_->key_col_).ConvertToIndexKeyType();
+		auto value =  tuple.GetValue(index_meta_->key_col_);
+    std::cout << value.ToString();
+    return value.ConvertToIndexKeyType();
 	}
 };
 
