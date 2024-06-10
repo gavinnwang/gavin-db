@@ -22,7 +22,7 @@ TEST(StorageTest, TableHeapSimpleTest) {
 
 	cm->CreateTable(table_name, schema);
 	auto table_meta = cm->GetTable(table_name);
-	auto table_heap = new db::TableHeap(bpm, table_meta);
+	auto table_heap = std::make_unique<db::TableHeap>(bpm, table_meta);
 	int32_t int_val = 2392;
 	std::string str_val = "hhihi";
 	auto v1 = db::Value(db::TypeId::INTEGER, int_val);
@@ -58,24 +58,14 @@ TEST(StorageTest, TableHeapManyInsertionTest) {
 	auto dm = std::make_shared<db::DiskManager>(cm);
 	auto bpm = std::make_shared<db::BufferPoolManager>(buffer_pool_size, dm);
 
-	// db::page_id_t table_meta_page_id;
-	// auto guard = bpm->NewPageGuarded(table_meta_page_id);
-	// ASSERT_NE(table_meta_page_id, db::INVALID_PAGE_ID);
-
 	auto c1 = db::Column("user_id", db::TypeId::INTEGER);
 	auto c2 = db::Column("user_name", db::TypeId::VARCHAR, 256);
 	auto schema = db::Schema({c1, c2});
 	auto table_name = "usr";
-	//
-	// auto table_meta_wpg = guard.UpgradeWrite();
-	// auto table_meta_page = table_meta_wpg.AsMut<db::TableMetaPage>();
-	// table_meta_page->Init(table_name, schema, 0);
-	// table_meta_wpg.Drop();
 
 	cm->CreateTable(table_name, schema);
 	auto table_meta = cm->GetTable(table_name);
-	// auto table_meta = std::make_shared<db::TableMeta>(schema, table_name, 0);
-	auto table_heap = new db::TableHeap(bpm, table_meta);
+	auto table_heap = std::make_unique<db::TableHeap>(bpm, table_meta);
 
 	std::vector<db::RID> rids;
 	std::vector<std::string> ans;

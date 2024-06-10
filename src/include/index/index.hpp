@@ -7,6 +7,7 @@
 #include "common/rid.hpp"
 #include "common/typedef.hpp"
 #include "common/value.hpp"
+#include "storage/page/btree_page.hpp"
 #include "storage/serializer/serializer.hpp"
 #include "storage/table/tuple.hpp"
 
@@ -79,6 +80,8 @@ public:
 		auto key = ConvertTupleToKey(tuple);
 		return InternalScanKey(std::move(key), rids);
 	}
+
+  virtual ~Index() = default;
 
 protected:
 	virtual bool InternalInsertRecord(const IndexKeyType key, const RID rid) = 0;
