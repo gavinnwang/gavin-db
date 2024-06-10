@@ -30,6 +30,7 @@ bool BufferPoolManager::AllocateFrame(frame_id_t &frame_id) {
 		}
 		if (pages_[frame_id].is_dirty_) {
 			auto &evict_page = pages_[frame_id];
+			// std::cout << "evicting page " << evict_page.page_id_.page_number_ << std::endl;
 			disk_manager_->WritePage(evict_page.GetPageId(), evict_page.GetData());
 		}
 		return true;
@@ -39,7 +40,7 @@ bool BufferPoolManager::AllocateFrame(frame_id_t &frame_id) {
 	return true;
 }
 
-Page &BufferPoolManager::NewPage(PageAllocator& page_allocator, PageId &page_id) {
+Page &BufferPoolManager::NewPage(PageAllocator &page_allocator, PageId &page_id) {
 	std::lock_guard<std::mutex> lock(latch_);
 	frame_id_t frame_id = -1;
 	if (!AllocateFrame(frame_id)) {
@@ -60,10 +61,10 @@ Page &BufferPoolManager::NewPage(PageAllocator& page_allocator, PageId &page_id)
 
 	// assign passed in page_id to the new page
 	// page_id = AllocatePage(page_id.table_id_);
-  page_id = page_allocator.AllocatePage();
+	page_id = page_allocator.AllocatePage();
 	page_table_[page_id] = frame_id;
-  ASSERT(page_table_.at(page_id) == frame_id, "page table should have the new page id");
-  ASSERT(page_table_.contains(page_id_to_replace) == false, "page table should not have the old page id");
+	ASSERT(page_table_.at(page_id) == frame_id, "page table should have the new page id");
+	ASSERT(page_table_.contains(page_id_to_replace) == false, "page table should not have the old page id");
 	// reset the memory and metadata for the new page
 	Page &page = pages_[frame_id];
 	page.page_id_ = page_id;
@@ -75,7 +76,7 @@ Page &BufferPoolManager::NewPage(PageAllocator& page_allocator, PageId &page_id)
 }
 
 Page &BufferPoolManager::FetchPage(PageId page_id) {
-  ASSERT(page_id.page_number_ != INVALID_PAGE_ID, "page number should be valid");
+	ASSERT(page_id.page_number_ != INVALID_PAGE_ID, "page number should be valid");
 	std::lock_guard<std::mutex> lock(latch_);
 	if (page_table_.find(page_id) != page_table_.end()) {
 		frame_id_t frame_id = page_table_[page_id];
@@ -90,7 +91,7 @@ Page &BufferPoolManager::FetchPage(PageId page_id) {
 		throw std::runtime_error("Failed to allocate frame");
 		// return nullptr;
 	}
-ASSERT(frame_id != -1, "frame id has to be assigned a valid value here");
+	ASSERT(frame_id != -1, "frame id has to be assigned a valid value here");
 
 	page_table_.erase(pages_[frame_id].page_id_);
 	page_table_.insert({page_id, frame_id});
@@ -179,7 +180,7 @@ WritePageGuard BufferPoolManager::FetchPageWrite(PageId page_id) {
 	return {*this, page};
 }
 
-BasicPageGuard BufferPoolManager::NewPageGuarded(PageAllocator& page_allocator, PageId &page_id) {
+BasicPageGuard BufferPoolManager::NewPageGuarded(PageAllocator &page_allocator, PageId &page_id) {
 	auto &page = NewPage(page_allocator, page_id);
 	return {*this, page};
 }

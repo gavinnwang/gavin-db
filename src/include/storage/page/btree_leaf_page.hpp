@@ -4,6 +4,8 @@
 #include "common/typedef.hpp"
 #include "index/index.hpp"
 #include "storage/page/btree_page.hpp"
+
+#include <optional>
 namespace db {
 class BtreeLeafPage : public BtreePage {
 	using LeafNode = std::pair<IndexKeyType, IndexValueType>;
@@ -24,6 +26,7 @@ public:
 		SetSize(0);
 		SetMaxSize(max_size);
 		SetNextPageId(INVALID_PAGE_ID);
+		SetPageType(IndexPageType::LEAF_PAGE);
 	}
 
 	page_id_t GetNextPageId() const {
@@ -60,6 +63,13 @@ public:
 		}
 
 		return left;
+	}
+	std::optional<IndexValueType> Lookup(const IndexKeyType &key, const Comparator &comparator) const {
+		idx_t target_index = FindKeyIndex(key, comparator);
+		if (target_index < GetSize() && node_array_[target_index].first == key) {
+			return node_array_[target_index].second;
+		}
+		return std::nullopt;
 	}
 
 private:

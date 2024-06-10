@@ -19,7 +19,7 @@ public:
 	[[nodiscard]] const std::vector<Column> &GetColumns() const {
 		return columns_;
 	}
-	[[nodiscard]] const Column &GetColumn(const uint32_t col_idx) const {
+	[[nodiscard]] const Column &GetColumn(const column_t col_idx) const {
 		return columns_[col_idx];
 	}
 	[[nodiscard]] std::optional<column_t> TryGetColIdx(const std::string &col_name) const {

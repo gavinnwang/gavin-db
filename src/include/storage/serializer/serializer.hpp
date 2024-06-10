@@ -50,7 +50,11 @@ public:
 	                                     const Value &&default_value) {
 		// If current value is default, don't write it
 		// TODO
-		throw Exception("Not implemented");
+		(void)field_id;
+		(void)tag;
+		(void)value;
+		(void)default_value;
+		throw NotImplementedException("WritePropertyWithDefault<Value> not implemented");
 	}
 
 protected:
@@ -163,6 +167,7 @@ protected:
 	// Handle primitive types, a serializer needs to implement these.
 	virtual void WriteNull() = delete;
 	virtual void WriteValue(char value) {
+		(void)value;
 		throw Exception("Write char value not implemented");
 		// throw NotImplementedException("Write char value not implemented");
 	}

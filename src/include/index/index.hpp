@@ -22,16 +22,16 @@ enum class IndexConstraintType : uint8_t {
 struct IndexMeta {
 public:
 	explicit IndexMeta() = default;
-	IndexMeta(const std::string &name, table_oid_t table_id, const Column key_col, const column_t key_col_id,
+	IndexMeta(const std::string &name, table_oid_t table_id, const Column key_col,
 	          IndexConstraintType index_constraint_type)
-	    : name_(name), table_id_(table_id), key_col_(key_col), key_col_id_(key_col_id),
+	    : name_(name), table_id_(table_id), key_col_(std::move(key_col)),
 	      index_constraint_type_(index_constraint_type) {
 	}
 
 	std::string name_;
 	table_oid_t table_id_;
 	Column key_col_;
-	column_t key_col_id_;
+	// column_t key_col_id_;
 	IndexConstraintType index_constraint_type_;
 	page_id_t header_page_id_ {INVALID_PAGE_ID};
 
@@ -39,7 +39,7 @@ public:
 		serializer.WriteProperty(100, "index_name", name_);
 		serializer.WriteProperty(101, "table_id", table_id_);
 		serializer.WriteProperty(102, "key_col", key_col_);
-		serializer.WriteProperty(103, "key_col_id", key_col_id_);
+		// serializer.WriteProperty(103, "key_col_id", key_col_id_);
 		serializer.WriteProperty(104, "index_constraint_type", index_constraint_type_);
 		serializer.WriteProperty(105, "header_page_id", header_page_id_);
 	}
@@ -49,14 +49,14 @@ public:
 		deserializer.ReadProperty(100, "table_name", meta->name_);
 		deserializer.ReadProperty(101, "table_id", meta->table_id_);
 		deserializer.ReadProperty(102, "key_col", meta->key_col_);
-		deserializer.ReadProperty(103, "key_col_id", meta->key_col_id_);
+		// deserializer.ReadProperty(103, "key_col_id", meta->key_col_id_);
 		deserializer.ReadProperty(104, "index_constraint_type", meta->index_constraint_type_);
 		deserializer.ReadProperty(105, "header_page_id", meta->header_page_id_);
 		return meta;
 	}
 };
 
-using Comparator = std::function<bool(const IndexKeyType &, const IndexKeyType &)>;
+using Comparator = std::function<int(const IndexKeyType &, const IndexKeyType &)>;
 class Index {
 
 public:
@@ -65,7 +65,6 @@ public:
 	Index(std::shared_ptr<IndexMeta> index_meta, std::shared_ptr<TableMeta> table_meta)
 	    : index_meta_(index_meta), table_meta_(table_meta) {
 	}
-
 
 	bool InsertRecord(const Tuple &tuple, const RID rid) {
 		auto key = ConvertTupleToKey(tuple);
@@ -94,35 +93,26 @@ private:
 	static Comparator GetComparator(TypeId type_id) {
 		switch (type_id) {
 		case TypeId::BOOLEAN:
-			return CompareBoolean;
+			return Compare<uint8_t>;
 		case TypeId::INTEGER:
-			return CompareInteger;
+			return Compare<int32_t>;
 		case TypeId::TIMESTAMP:
-			return CompareTimestamp;
+			return Compare<uint64_t>;
 		case TypeId::VARCHAR:
-			return CompareString;
+			return Compare<std::string>;
 		default:
 			throw std::invalid_argument("Unsupported type for indexing");
 		}
 	}
 
-	static bool CompareBoolean(const IndexKeyType &a, const IndexKeyType &b) {
-		bool valA = *reinterpret_cast<const bool *>(a.data());
-		bool valB = *reinterpret_cast<const bool *>(b.data());
-		return valA < valB;
+	template <typename T>
+	static int Compare(const IndexKeyType &a, const IndexKeyType &b) {
+		T lhs = *reinterpret_cast<const T *>(a.data());
+		T rhs = *reinterpret_cast<const T *>(b.data());
+		return (lhs < rhs) ? -1 : (lhs > rhs) ? 1 : 0;
 	}
-	static bool CompareInteger(const IndexKeyType &a, const IndexKeyType &b) {
-		int32_t valA = *reinterpret_cast<const int32_t *>(a.data());
-		int32_t valB = *reinterpret_cast<const int32_t *>(b.data());
-		return valA < valB;
-	}
-	static bool CompareTimestamp(const IndexKeyType &a, const IndexKeyType &b) {
-		uint64_t valA = *reinterpret_cast<const uint64_t *>(a.data());
-		uint64_t valB = *reinterpret_cast<const uint64_t *>(b.data());
-		return valA < valB;
-	}
-	static bool CompareString(const IndexKeyType &a, const IndexKeyType &b) {
-		// idk if this works but looks good
+	template <>
+	int Compare<std::string>(const IndexKeyType &a, const IndexKeyType &b) {
 		return std::lexicographical_compare(a.begin(), a.end(), b.begin(), b.end());
 	}
 

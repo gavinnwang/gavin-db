@@ -1,6 +1,7 @@
 #pragma once
 
 #include "common/config.hpp"
+#include "common/macros.hpp"
 #include "common/page_id.hpp"
 #include "common/rwlatch.hpp"
 
@@ -13,8 +14,11 @@ class Page {
 public:
 	explicit Page() : data_(PAGE_SIZE, 0) {
 	}
-	Page(Page &&other) noexcept;            // Move constructor
-	Page &operator=(Page &&other) noexcept; // Move assignment operator
+	// Page(Page &&other) noexcept;            // Move constructor
+	// Page &operator=(Page &&other) noexcept; // Move assignment operator
+
+	DISALLOW_COPY_AND_MOVE(Page);
+	// ~Page() = delete;
 
 	inline auto GetData() -> char * {
 		return data_.data();

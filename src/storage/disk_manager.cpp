@@ -49,7 +49,8 @@ void DiskManager::ReadPage(PageId page_id, char *page_data) {
 	size_t offset = page_id.page_number_ * PAGE_SIZE;
 	auto data_file_path = FilePathManager::GetInstance().GetTableDataPath(cm_->GetTableName(page_id.table_id_));
 	if (offset > GetFileSize(data_file_path)) {
-		throw IOException("read page out of file size" + std::to_string(offset) + " " + std::to_string(GetFileSize(data_file_path)));
+		throw IOException("read page out of file size" + std::to_string(offset) + " " +
+		                  std::to_string(GetFileSize(data_file_path)));
 	} else {
 		auto &data_fs = table_data_files_.at(page_id.table_id_);
 		data_fs.seekp(offset);

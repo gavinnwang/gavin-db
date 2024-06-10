@@ -22,7 +22,7 @@ TEST(StorageTest, TablePersistTest) {
 	auto schema = db::Schema({c1, c2});
 	auto table_name = "usr";
 
-	auto table_oid = cm->TryCreateTable(table_name, schema);
+	cm->TryCreateTable(table_name, schema);
 	auto table_meta = cm->GetTable(table_name);
 	auto table_heap = new db::TableHeap(bpm, table_meta);
 

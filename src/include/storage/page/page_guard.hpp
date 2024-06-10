@@ -22,8 +22,8 @@ public:
 	BasicPageGuard &operator=(BasicPageGuard &&that) noexcept;
 	~BasicPageGuard();
 	// basic page guard should be made invalid after this
-	ReadPageGuard UpgradeRead();
-	WritePageGuard UpgradeWrite();
+	[[nodiscard]] ReadPageGuard UpgradeRead();
+	[[nodiscard]] WritePageGuard UpgradeWrite();
 	// clear all content and unpin page
 	void Drop();
 
@@ -34,15 +34,15 @@ public:
 		return page_->GetData();
 	}
 	template <class T>
-	const T *As() {
+	[[nodiscard]] const T *As() {
 		return reinterpret_cast<const T *>(GetData());
 	}
-	char *GetDataMut() {
+	[[nodiscard]] char *GetDataMut() {
 		is_dirty_ = true;
 		return page_->GetData();
 	}
 	template <class T>
-	T *AsMut() {
+	[[nodiscard]] T *AsMut() {
 		return reinterpret_cast<T *>(GetDataMut());
 	}
 
@@ -51,31 +51,6 @@ private:
 	BufferPoolManager *bpm_ {nullptr};
 	Page *page_ {nullptr};
 	bool is_dirty_ {false};
-};
-class ReadPageGuard {
-public:
-	ReadPageGuard() = default;
-	ReadPageGuard(BufferPoolManager &bpm, Page &page) : guard_(bpm, page) {
-	}
-	ReadPageGuard(const ReadPageGuard &) = delete;
-	ReadPageGuard &operator=(const ReadPageGuard &) = delete;
-	ReadPageGuard(ReadPageGuard &&that) noexcept;
-	ReadPageGuard &operator=(ReadPageGuard &&that) noexcept;
-	void Drop();
-	~ReadPageGuard();
-	page_id_t PageId() {
-		return guard_.PageId();
-	}
-	const char *GetData() {
-		return guard_.GetData();
-	}
-	template <class T>
-	const T *As() {
-		return guard_.As<T>();
-	}
-
-private:
-	BasicPageGuard guard_;
 };
 class WritePageGuard {
 public:
@@ -95,15 +70,45 @@ public:
 		return guard_.GetData();
 	}
 	template <class T>
-	const T *As() {
+	[[nodiscard]] const T *As() {
 		return guard_.As<T>();
 	}
-	char *GetDataMut() {
+	[[nodiscard]] char *GetDataMut() {
 		return guard_.GetDataMut();
 	}
 	template <class T>
-	T *AsMut() {
+	[[nodiscard]] T *AsMut() {
 		return guard_.AsMut<T>();
+	}
+
+private:
+	BasicPageGuard guard_;
+};
+class ReadPageGuard {
+public:
+	ReadPageGuard() = default;
+	ReadPageGuard(BufferPoolManager &bpm, Page &page) : guard_(bpm, page) {
+	}
+	ReadPageGuard(const ReadPageGuard &) = delete;
+	ReadPageGuard &operator=(const ReadPageGuard &) = delete;
+	ReadPageGuard(ReadPageGuard &&that) noexcept;
+	ReadPageGuard &operator=(ReadPageGuard &&that) noexcept;
+	void Drop();
+	~ReadPageGuard();
+
+	WritePageGuard UpgradeWrite() {
+		guard_.page_->RUnlatch();
+		return guard_.UpgradeWrite();
+	}
+	[[nodiscard]] page_id_t PageId() {
+		return guard_.PageId();
+	}
+	[[nodiscard]] const char *GetData() {
+		return guard_.GetData();
+	}
+	template <class T>
+	[[nodiscard]] const T *As() {
+		return guard_.As<T>();
 	}
 
 private:
