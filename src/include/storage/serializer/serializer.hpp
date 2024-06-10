@@ -62,7 +62,7 @@ protected:
 	void WriteValue(const T value)
 	    requires std::is_enum_v<T>
 	{
-		WriteValue(static_cast<std::underlying_type<T>::type>(value));
+		WriteValue(static_cast<typename std::underlying_type<T>::type>(value));
 	}
 	// Unique Pointer Ref
 	template <typename T>

@@ -51,7 +51,9 @@ protected:
 
 	bool InsertIntoLeaf(const IndexKeyType &key, const IndexValueType &value) {
 		auto leaf_rpg = SearchLeafPage(key);
-		auto leaf_wpg = leaf_rpg.GetData auto leaf_page = leaf_pg.auto size = leaf_page->GetSize();
+    (void)value;
+		// auto leaf_wpg = leaf_rpg.GetData 
+    // auto leaf_page = leaf_pg.auto size = leaf_page->GetSize();
 		return true;
 	}
 	bool InternalDeleteRecord(const IndexKeyType key) override {
@@ -59,7 +61,7 @@ protected:
 		return true;
 	}
 
-	BasicPageGuard SearchLeafPage(const IndexKeyType &key) {
+	ReadPageGuard SearchLeafPage(const IndexKeyType &key) {
 		auto root_page_id = PageId {table_meta_->table_oid_, index_meta_->header_page_id_};
 		auto node_pg = bpm_->FetchPageRead(root_page_id);
 		auto page = node_pg.As<BtreePage>();

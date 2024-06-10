@@ -6,8 +6,8 @@
 #include "storage/file_path_manager.hpp"
 
 #include <cstdlib>
+#include <cstring>
 #include <iostream>
-#include <sys/stat.h>
 
 namespace db {
 

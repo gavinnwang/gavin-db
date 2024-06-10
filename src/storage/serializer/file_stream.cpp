@@ -9,10 +9,10 @@
 
 namespace db {
 
-FileStream::FileStream(const std::string &file_path, std::ios::openmode mode) : file_path(file_path), owns_file(true) {
+FileStream::FileStream(const std::filesystem::path &file_path, std::ios::openmode mode) : file_path(file_path), owns_file(true) {
 	file.open(file_path, mode);
 	if (!file.is_open()) {
-		throw Exception("Failed to open file: " + file_path);
+		throw Exception("Failed to open file: " + file_path.string());
 	}
 	file.clear(); // Clear any error state
 	file.seekg(0, std::ios::beg);

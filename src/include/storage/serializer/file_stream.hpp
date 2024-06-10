@@ -3,6 +3,7 @@
 #include "storage/serializer/read_stream.hpp"
 #include "storage/serializer/write_stream.hpp"
 
+#include <filesystem>
 #include <fstream>
 #include <iostream>
 #include <string>
@@ -17,7 +18,7 @@ private:
 
 public:
 	// Create a new FileStream with the specified file path. The stream will own the file and handle its closing.
-	explicit FileStream(const std::string &file_path,
+	explicit FileStream(const std::filesystem::path &file_path,
 	                    std::ios::openmode mode = std::ios::in | std::ios::out | std::ios::binary);
 
 	// Create a new FileStream over an existing file stream.

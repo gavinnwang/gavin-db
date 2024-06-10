@@ -1,10 +1,11 @@
 #pragma once
 
-#include <__atomic/atomic.h>
 #include <cstdint>
 #include <memory>
 #include <optional>
 #include <set>
+#include <map>
+#include <vector>
 #include <type_traits>
 #include <unordered_map>
 #include <unordered_set>
@@ -69,23 +70,20 @@ concept IsUnorderedSet = requires {
 	                         requires std::same_as<T, std::unordered_set<typename T::value_type>>;
                          };
 
-template <typename T>
-concept IsUnorderedMap =
-    requires {
-	    typename T::key_type;
-	    typename T::mapped_type;
-	    requires std::same_as<T, std::unordered_map<typename T::key_type, typename T::mapped_type>>;
-    };
+// template <typename T>
+// concept IsUnorderedMap =
+//     requires {
+// 	    typename T::key_type;
+// 	    typename T::mapped_type;
+//     };
 
 template <typename T>
 concept IsMap = requires {
-	                typename T::key_type;
-	                typename T::mapped_type;
-	                typename T::key_compare;
-	                typename T::allocator_type;
-	                requires std::same_as<T, std::map<typename T::key_type, typename T::mapped_type,
-	                                                  typename T::key_compare, typename T::allocator_type>>;
-                };
+    typename T::key_type;
+    typename T::mapped_type;
+    requires std::is_same_v<T, std::map<typename T::key_type, typename T::mapped_type>> || 
+             std::is_same_v<T, std::unordered_map<typename T::key_type, typename T::mapped_type>>;
+};
 
 template <typename T>
 concept IsSet = requires {
@@ -99,9 +97,11 @@ concept IsAtomic = requires {
 	                   requires std::same_as<T, std::atomic<typename T::value_type>>;
                    };
 
+
 template <typename T>
 concept IsVector = requires {
-	                   typename T::value_type;
-	                   requires std::same_as<T, std::vector<typename T::value_type>>;
-                   };
+    typename T::value_type;
+    requires std::is_same_v<T, std::vector<typename T::value_type>>;
+};
+
 }; // namespace db
