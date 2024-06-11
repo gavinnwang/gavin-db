@@ -1,31 +1,36 @@
 #pragma once
 
 #include "common/config.hpp"
+#include "common/macros.hpp"
 #include "common/page_id.hpp"
 #include "common/rwlatch.hpp"
-
-#include <vector>
 
 namespace db {
 class Page {
 	friend class BufferPoolManager;
 
 public:
-	explicit Page() : data_(PAGE_SIZE, 0) {
+	explicit Page() {
+		ResetMemory();
 	}
-	Page(Page &&other) noexcept;            // Move constructor
-	Page &operator=(Page &&other) noexcept; // Move assignment operator
+	// Page(Page &&other) noexcept;            // Move constructor
+	// Page &operator=(Page &&other) noexcept; // Move assignment operator
+
+	DISALLOW_COPY_AND_MOVE(Page);
+
+	~Page() = default;
+	// ~Page() = delete;
 
 	inline auto GetData() -> char * {
-		return data_.data();
+		return data_;
 	}
 	inline auto GetPageId() -> PageId {
 		return page_id_;
 	}
 
 	template <class T>
-	auto As() -> const T * {
-		return reinterpret_cast<const T *>(GetData());
+	auto As() -> const T & {
+		return reinterpret_cast<const T &>(*GetData());
 	}
 
 	auto GetDataMut() -> char * {
@@ -33,8 +38,8 @@ public:
 	}
 
 	template <class T>
-	auto AsMut() -> T * {
-		return reinterpret_cast<T *>(GetDataMut());
+	auto AsMut() -> T & {
+		return reinterpret_cast<T &>(*GetDataMut());
 	}
 	inline void WLatch() {
 		rwlatch_.WLock();
@@ -50,14 +55,13 @@ public:
 	}
 
 private:
-	inline void ResetMemory() {
-		std::fill(data_.begin(), data_.end(), 0);
+	void ResetMemory() {
+		memset(data_, 0, PAGE_SIZE);
 	}
 	PageId page_id_;
 	bool is_dirty_ = false;
 	uint16_t pin_count_ = 0;
 	ReaderWriterLatch rwlatch_;
-
-	std::vector<char> data_;
+	char data_[PAGE_SIZE] {};
 };
 } // namespace db

@@ -26,28 +26,6 @@ Checks:     '
             performance-*,
             portability-*,
             readability-*,
-            -bugprone-easily-swappable-parameters,
-            -bugprone-implicit-widening-of-multiplication-result,
-            -bugprone-narrowing-conversions,
-            -bugprone-reserved-identifier,
-            -bugprone-signed-char-misuse,
-            -bugprone-suspicious-include,
-            -bugprone-unhandled-self-assignment,
-            -clang-analyzer-cplusplus.NewDelete,
-            -clang-analyzer-cplusplus.NewDeleteLeaks,
-            -clang-analyzer-security.insecureAPI.rand,
-            -clang-diagnostic-implicit-int-float-conversion,
-            -google-readability-avoid-underscore-in-googletest-name,
-            -modernize-avoid-c-arrays,
-            -modernize-use-nodiscard,
-            -readability-convert-member-functions-to-static,
-            -readability-identifier-length,
-            -readability-function-cognitive-complexity,
-            -readability-magic-numbers,
-            -readability-make-member-function-const,
-            -readability-qualified-auto,
-            -readability-redundant-access-specifiers,
-            -bugprone-exception-escape,
             '
 CheckOptions:
   - { key: readability-identifier-naming.ClassCase,           value: CamelCase  }
@@ -94,4 +72,4 @@ AnalyzeTemporaryDtors: true
 #     These were previously disabled for not being available in clang-tidy-8. They are now available on our clang-tidy-12, 
 #     and potentially worth investigating/fixing.
 # -bugprone-exception-escape
-#     Weird. No idea how to resolve.
+#     Weird. No idea how to resolve.odernize-use-trailing-return-type

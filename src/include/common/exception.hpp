@@ -31,4 +31,10 @@ public:
 	}
 };
 
+class RuntimeException : public Exception {
+public:
+	explicit RuntimeException(const std::string &msg) : Exception(msg) {
+	}
+};
+
 } // namespace db

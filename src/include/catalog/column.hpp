@@ -53,18 +53,15 @@ public:
 		return column_type_ != TypeId::VARCHAR;
 	}
 	auto ToString(bool simplified = true) const -> std::string;
-	void SerializeTo(char *storage) const;
-	void DeserializeFrom(const char *storage);
-	auto GetSerializationSize() const -> uint32_t;
+	// void SerializeTo(char *storage) const;
+	// void DeserializeFrom(const char *storage);
+	// auto GetSerializationSize() const -> uint32_t;
 
 	void Serialize(Serializer &serializer) const {
 		serializer.WriteProperty(100, "column_name", column_name_);
 		serializer.WriteProperty(101, "column_type", column_type_);
 		serializer.WriteProperty(102, "length", length_);
 		serializer.WriteProperty(103, "column_offset", column_offset_);
-		// serializer.WriteProperty(100, "columns", columns_);
-		// serializer.WriteProperty(101, "uninlined_columns", uninlined_columns_);
-		// serializer.WriteProperty(102, "tuple_inline_part_storage_size", tuple_inline_part_storage_size_);
 	}
 	static Column Deserialize(Deserializer &deserializer) {
 		auto result = Column();
@@ -76,7 +73,9 @@ public:
 	}
 
 private:
+	// name of col
 	std::string column_name_;
+	// type of col
 	TypeId column_type_;
 	// size of col
 	uint32_t length_;

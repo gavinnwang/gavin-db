@@ -1,12 +1,13 @@
 #include "catalog/column.hpp"
 #include "catalog/schema.hpp"
+#include "common/logger.hpp"
 #include "common/type.hpp"
 #include "common/value.hpp"
 #include "storage/serializer/binary_deserializer.hpp"
 #include "storage/serializer/binary_serializer.hpp"
 #include "storage/serializer/deserializer.hpp"
 #include "storage/serializer/file_stream.hpp"
-#include "storage/table/table_info.hpp"
+#include "storage/table/table_meta.hpp"
 
 #include "gtest/gtest.h"
 #include <memory>
@@ -67,7 +68,7 @@ TEST(StorageTest, SerializerTest) {
 	foo_in.a = 42;
 	foo_in.bar = std::make_unique<Bar>();
 	foo_in.bar->b = 43;
-	auto value_str = "hello";
+	std::string value_str = "hello";
 	foo_in.value = Value(TypeId::VARCHAR, value_str);
 	// lambda to create a bar
 	auto create_bar = [](uint32_t b) {
@@ -105,12 +106,9 @@ TEST(StorageTest, SerializerTest) {
 		EXPECT_EQ(foo_in.bars[i]->b, foo_out.bars[i]->b);
 	}
 	EXPECT_EQ(value_str, foo_out.value.ToString());
-	// std::cout << std::endl;
 	for (const auto &[key, value] : foo_in.bar_map) {
-		// std::cout << key << " " << value->b << std::endl;
 		EXPECT_EQ(value->b, foo_out.bar_map[key]->b);
 	}
-	// std::cout << std::endl;
 
 	foo_in.bar = nullptr;
 
@@ -128,7 +126,8 @@ TEST(StorageTest, SerializerTest) {
 	EXPECT_EQ(foo_in.c, foo_out2.c);
 	EXPECT_EQ(foo_in.type, foo_out2.type);
 	EXPECT_EQ(value_str, foo_out2.value.ToString());
-	std::cout << pos1 << " " << pos2 << std::endl;
+
+	LOG_DEBUG("pos1: %llu, pos2: %llu", pos1, pos2);
 	// should not write the default value
 	EXPECT_TRUE(pos1 > pos2);
 }
@@ -144,14 +143,14 @@ TEST(StorageTest, SerializeValueTest) {
 	auto c8 = Column("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", db::TypeId::INTEGER);
 	auto schema = Schema({c1, c2, c3, c4, c5, c6, c7, c8});
 
-	auto table_info = TableInfo {schema, "table_name", 1};
+	auto table_meta = TableMeta {schema, "table_name", 1};
 	FileStream stream("schema_test_file", std::ios::in | std::ios::out | std::ios::binary | std::ios::trunc);
-	BinarySerializer::Serialize(table_info, stream, false);
+	BinarySerializer::Serialize(table_meta, stream, false);
 	stream.Print();
 	stream.Rewind();
 
-	auto out = BinaryDeserializer::Deserialize<TableInfo>(stream);
-	std::cout << out->schema_.ToString() << std::endl;
-	std::cout << out->name_;
+	auto out = BinaryDeserializer::Deserialize<TableMeta>(stream);
+	LOG_DEBUG("schema: %s", out->schema_.ToString().c_str());
+	LOG_DEBUG("name: %s", out->name_.c_str());
 }
 } // namespace db

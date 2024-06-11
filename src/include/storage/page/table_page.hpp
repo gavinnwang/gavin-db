@@ -2,11 +2,14 @@
 #include "storage/table/tuple.hpp"
 
 #include <cstdint>
+#include <optional>
 #include <tuple>
 namespace db {
 static constexpr uint64_t TABLE_PAGE_HEADER_SIZE = 8;
 class TablePage {
 public:
+	TablePage() = delete;
+	~TablePage() = delete;
 	void Init();
 	auto GetNumTuples() const -> uint32_t {
 		return num_tuples_;
@@ -29,6 +32,7 @@ private:
 	// header format:  NextPageId (4)| NumTuples(2) | NumDeletedTuples(2)
 	// tuple 1 offset+size+meta | tuple 2 offset+size+meta
 	using TupleInfo = std::tuple<uint16_t, uint16_t, TupleMeta>;
+
 	char page_start_[0];
 	page_id_t next_page_id_;
 	uint16_t num_tuples_;
@@ -36,6 +40,9 @@ private:
 	TupleInfo tuple_info_[0];
 
 	static constexpr size_t TUPLE_INFO_SIZE = 6;
+	static_assert(std::is_trivially_copyable_v<TupleMeta> == true);
+	static_assert(std::is_trivially_copyable_v<uint16_t> == true);
+	// static_assert(std::is_trivially_copyable_v<TupleInfo> == true);
 	static_assert(sizeof(TupleInfo) == TUPLE_INFO_SIZE);
 	static_assert(sizeof(page_id_t) == 4);
 };

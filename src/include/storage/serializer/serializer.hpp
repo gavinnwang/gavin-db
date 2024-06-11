@@ -2,6 +2,7 @@
 
 #include "common/config.hpp"
 #include "common/exception.hpp"
+#include "common/typedef.hpp"
 #include "storage/serializer/serialization_traits.hpp"
 
 #include <memory>
@@ -32,7 +33,6 @@ public:
 	void WritePropertyWithDefault(const field_id_t field_id, const char *tag, const T &value, const T &&default_value) {
 		// If current value is default, don't write it
 		if (!serialize_default_values && (value == default_value)) {
-			// std::cout << "Skipping default value" << std::endl;
 			OnOptionalPropertyBegin(field_id, tag, false);
 			OnOptionalPropertyEnd(false);
 			return;
@@ -49,7 +49,11 @@ public:
 	                                     const Value &&default_value) {
 		// If current value is default, don't write it
 		// TODO
-		throw Exception("Not implemented");
+		(void)field_id;
+		(void)tag;
+		(void)value;
+		(void)default_value;
+		throw NotImplementedException("WritePropertyWithDefault<Value> not implemented");
 	}
 
 protected:
@@ -57,7 +61,7 @@ protected:
 	void WriteValue(const T value)
 	    requires std::is_enum_v<T>
 	{
-		WriteValue(static_cast<std::underlying_type<T>::type>(value));
+		WriteValue(static_cast<typename std::underlying_type<T>::type>(value));
 	}
 	// Unique Pointer Ref
 	template <typename T>
@@ -162,6 +166,7 @@ protected:
 	// Handle primitive types, a serializer needs to implement these.
 	virtual void WriteNull() = delete;
 	virtual void WriteValue(char value) {
+		(void)value;
 		throw Exception("Write char value not implemented");
 		// throw NotImplementedException("Write char value not implemented");
 	}

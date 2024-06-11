@@ -3,6 +3,7 @@
 #include "common/exception.hpp"
 
 #include <cstdlib>
+#include <cstring>
 namespace db {
 
 MemoryStream::MemoryStream(idx_t capacity)

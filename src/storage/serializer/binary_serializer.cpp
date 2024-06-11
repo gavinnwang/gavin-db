@@ -1,6 +1,7 @@
 #include "storage/serializer/binary_serializer.hpp"
 
 #include "common/macros.hpp"
+#include <cstring>
 namespace db {
 
 void BinarySerializer::OnPropertyBegin(const field_id_t field_id, const char *tag) {

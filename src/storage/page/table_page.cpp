@@ -1,5 +1,8 @@
 #include "storage/page/table_page.hpp"
+
 #include "common/macros.hpp"
+
+#include <exception>
 
 namespace db {
 void TablePage::Init() {
@@ -41,7 +44,8 @@ auto TablePage::InsertTuple(const TupleMeta &meta, const Tuple &tuple) -> std::o
 	tuple_info_[tuple_id] = std::make_tuple(*tuple_offset, tuple.GetStorageSize(), meta);
 	num_tuples_++;
 	ASSERT(*tuple_offset + tuple.GetStorageSize() <= PAGE_SIZE, "tuple out of range");
-	memcpy(page_start_ + *tuple_offset, tuple.data_.data(), tuple.GetStorageSize());
+	// memcpy(page_start_ + *tuple_offset, tuple.GetData(), tuple.GetStorageSize());
+	tuple.SerializeTo(page_start_ + *tuple_offset);
 	return tuple_id;
 }
 
@@ -67,7 +71,8 @@ auto TablePage::GetTuple(const RID &rid) const -> std::optional<std::pair<TupleM
 	Tuple tuple;
 	tuple.data_.resize(size);
 	ASSERT(offset + size <= PAGE_SIZE, "tuple out of range");
-	memmove(tuple.data_.data(), page_start_ + offset, size);
+	tuple.DeserializeFrom(page_start_ + offset, size);
+	// memmove(tuple.data_.data(), page_start_ + offset, size);
 	tuple.rid_ = rid;
 	// printData(page_start_, PAGE_SIZE);
 	return std::make_pair(meta, std::move(tuple));

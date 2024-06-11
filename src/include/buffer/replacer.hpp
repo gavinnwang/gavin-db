@@ -1,7 +1,7 @@
 #pragma once
 
-#include "common/config.hpp"
 #include "common/macros.hpp"
+#include "common/typedef.hpp"
 namespace db {
 class Replacer {
 public:
