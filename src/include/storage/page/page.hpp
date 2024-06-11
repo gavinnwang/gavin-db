@@ -30,7 +30,7 @@ public:
 
 	template <class T>
 	auto As() -> const T & {
-		return reinterpret_cast<const T &>(GetData());
+		return reinterpret_cast<const T &>(*GetData());
 	}
 
 	auto GetDataMut() -> char * {
@@ -39,7 +39,7 @@ public:
 
 	template <class T>
 	auto AsMut() -> T & {
-		return reinterpret_cast<T &>(GetDataMut());
+		return reinterpret_cast<T &>(*GetDataMut());
 	}
 	inline void WLatch() {
 		rwlatch_.WLock();

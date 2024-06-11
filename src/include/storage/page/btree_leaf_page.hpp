@@ -6,6 +6,7 @@
 #include "index/index.hpp"
 #include "storage/page/btree_page.hpp"
 
+#include <algorithm>
 #include <optional>
 namespace db {
 class BtreeLeafPage : public BtreePage {
@@ -45,26 +46,23 @@ public:
 		}
 		LOG_TRACE("Inserting into leaf node");
 		auto key_idx = FindKeyIndex(key, comparator);
-		for (idx_t i = key_idx; i < GetSize(); i++) {
-			node_array_[i + 1] = node_array_[i];
+		if (comparator(node_array_[key_idx].first, key) == 0) {
+			return;
 		}
-
-		node_array_[key_idx] = std::make_pair(key, value);
+		if (key_idx == GetSize()) {
+			*(node_array_ + key_idx) = {key, value};
+		} else {
+			// shift everything at and after the key idx back one to make space
+			std::move_backward(node_array_ + key_idx, node_array_ + GetSize(), node_array_ + GetSize() + 1);
+			*(node_array_ + key_idx) = {key, value};
+		}
+		IncreaseSize(1);
 	}
 	idx_t FindKeyIndex(IndexKeyType key, const Comparator &comparator) const {
-		idx_t left = 0;
-		idx_t right = GetSize();
-
-		while (left < right) {
-			idx_t mid = left + (right - left) / 2;
-			if (comparator(node_array_[mid].first, key)) {
-				left = mid + 1;
-			} else {
-				right = mid;
-			}
-		}
-
-		return left;
+		auto target_idx =
+		    std::lower_bound(node_array_, node_array_ + GetSize(), key,
+		                     [&comparator](const auto &pair, auto k) { return comparator(pair.first, k) < 0; });
+		return std::distance(node_array_, target_idx);
 	}
 	std::optional<IndexValueType> Lookup(const IndexKeyType &key, const Comparator &comparator) const {
 		idx_t target_index = FindKeyIndex(key, comparator);

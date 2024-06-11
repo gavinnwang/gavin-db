@@ -35,7 +35,7 @@ public:
 	}
 	template <class T>
 	[[nodiscard]] const T &As() {
-		return reinterpret_cast<const T &>(GetData());
+		return reinterpret_cast<const T &>(*GetData());
 	}
 	[[nodiscard]] char *GetDataMut() {
 		is_dirty_ = true;
@@ -43,7 +43,7 @@ public:
 	}
 	template <class T>
 	[[nodiscard]] T &AsMut() {
-		return reinterpret_cast<T &>(GetDataMut());
+		return reinterpret_cast<T &>(*GetDataMut());
 	}
 
 private:

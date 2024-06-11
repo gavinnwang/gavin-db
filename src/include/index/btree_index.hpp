@@ -91,10 +91,24 @@ protected:
 		leaf_node.Insert(key, value, comparator_);
 		auto new_size = leaf_node.GetSize();
 
-		// auto leaf_wpg = leaf_rpg.GetData
-		// auto leaf_page = leaf_pg.auto size = leaf_page->GetSize();
+		// need to split and push to parent
+		if (new_size >= leaf_node.GetMaxSize()) {
+			// split insert success
+			// auto sibling_leaf_node = Split(node);
+			return true;
+		} else {
+			// don't need to split, release parent write latches one more time and do other clean up
+			ReleaseParentWriteLatches(transaction);
+			leaf_page.WUnlatch();
+			bpm_->UnpinPage(leaf_page.GetPageId(), false);
 
-		return true;
+			if (new_size == size) {
+				// duplicate key
+				return false;
+			}
+			// no split insert success
+			return true;
+		}
 	}
 	bool InternalDeleteRecord(const IndexKeyType key) override {
 		(void)key;
