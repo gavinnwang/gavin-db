@@ -49,9 +49,9 @@ void OutputLogHeader(const char *file, int line, const char *func, int level);
 #define LOG_ERROR_ENABLED
 #define LOG_ERROR(...)                                                                                                 \
 	OutputLogHeader(__SHORT_FILE__, __LINE__, __FUNCTION__, LOG_LEVEL_ERROR);                                          \
-	::fprintf(LOG_OUTPUT_STREAM, __VA_ARGS__);                                                                         \
+	fprintf(LOG_OUTPUT_STREAM, __VA_ARGS__);                                                                           \
 	fprintf(LOG_OUTPUT_STREAM, "\n");                                                                                  \
-	::fflush(stdout)
+	fflush(stdout)
 #else
 #define LOG_ERROR(...) ((void)0)
 #endif
@@ -63,9 +63,9 @@ void OutputLogHeader(const char *file, int line, const char *func, int level);
 #define LOG_WARN_ENABLED
 #define LOG_WARN(...)                                                                                                  \
 	OutputLogHeader(__SHORT_FILE__, __LINE__, __FUNCTION__, LOG_LEVEL_WARN);                                           \
-	::fprintf(LOG_OUTPUT_STREAM, __VA_ARGS__);                                                                         \
+	fprintf(LOG_OUTPUT_STREAM, __VA_ARGS__);                                                                           \
 	fprintf(LOG_OUTPUT_STREAM, "\n");                                                                                  \
-	::fflush(stdout)
+	fflush(stdout)
 #else
 #define LOG_WARN(...) ((void)0)
 #endif
@@ -77,9 +77,9 @@ void OutputLogHeader(const char *file, int line, const char *func, int level);
 #define LOG_INFO_ENABLED
 #define LOG_INFO(...)                                                                                                  \
 	OutputLogHeader(__SHORT_FILE__, __LINE__, __FUNCTION__, LOG_LEVEL_INFO);                                           \
-	::fprintf(LOG_OUTPUT_STREAM, __VA_ARGS__);                                                                         \
+	fprintf(LOG_OUTPUT_STREAM, __VA_ARGS__);                                                                           \
 	fprintf(LOG_OUTPUT_STREAM, "\n");                                                                                  \
-	::fflush(stdout)
+	fflush(stdout)
 #else
 #define LOG_INFO(...) ((void)0)
 #endif
@@ -91,9 +91,9 @@ void OutputLogHeader(const char *file, int line, const char *func, int level);
 #define LOG_DEBUG_ENABLED
 #define LOG_DEBUG(...)                                                                                                 \
 	OutputLogHeader(__SHORT_FILE__, __LINE__, __FUNCTION__, LOG_LEVEL_DEBUG);                                          \
-	::fprintf(LOG_OUTPUT_STREAM, __VA_ARGS__);                                                                         \
+	fprintf(LOG_OUTPUT_STREAM, __VA_ARGS__);                                                                           \
 	fprintf(LOG_OUTPUT_STREAM, "\n");                                                                                  \
-	::fflush(stdout)
+	fflush(stdout)
 #else
 #define LOG_DEBUG(...) ((void)0)
 #endif
@@ -105,9 +105,9 @@ void OutputLogHeader(const char *file, int line, const char *func, int level);
 #define LOG_TRACE_ENABLED
 #define LOG_TRACE(...)                                                                                                 \
 	OutputLogHeader(__SHORT_FILE__, __LINE__, __FUNCTION__, LOG_LEVEL_TRACE);                                          \
-	::fprintf(LOG_OUTPUT_STREAM, __VA_ARGS__);                                                                         \
+	fprintf(LOG_OUTPUT_STREAM, __VA_ARGS__);                                                                           \
 	fprintf(LOG_OUTPUT_STREAM, "\n");                                                                                  \
-	::fflush(stdout)
+	fflush(stdout)
 #else
 #define LOG_TRACE(...) ((void)0)
 #endif
@@ -115,10 +115,10 @@ void OutputLogHeader(const char *file, int line, const char *func, int level);
 // Output log message header in this format: [type] [file:line:function] time -
 // ex: [ERROR] [somefile.cpp:123:doSome()] 2008/07/06 10:00:00 -
 inline void OutputLogHeader(const char *file, int line, const char *func, int level) {
-	time_t t = ::time(nullptr);
+	time_t t = time(nullptr);
 	tm *curTime = localtime(&t); // NOLINT
 	char time_str[32];           // FIXME
-	::strftime(time_str, 32, LOG_LOG_TIME_FORMAT, curTime);
+	strftime(time_str, 32, LOG_LOG_TIME_FORMAT, curTime);
 	const char *type;
 	switch (level) {
 	case LOG_LEVEL_ERROR:
@@ -140,7 +140,7 @@ inline void OutputLogHeader(const char *file, int line, const char *func, int le
 		type = "UNKWN";
 	}
 
-	::fprintf(LOG_OUTPUT_STREAM, "%s [%s:%d:%s] %s - ", time_str, file, line, func, type);
+	fprintf(LOG_OUTPUT_STREAM, "%s [%s:%d:%s] %s - ", time_str, file, line, func, type);
 }
 
 } // namespace db
