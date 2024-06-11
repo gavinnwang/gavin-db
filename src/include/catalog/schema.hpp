@@ -33,10 +33,10 @@ public:
 	[[nodiscard]] uint32_t GetColumnCount() const {
 		return static_cast<uint32_t>(columns_.size());
 	}
-	[[nodiscard]] const std::vector<uint32_t> &GetUnlinedColumns() const {
+	[[nodiscard]] const std::vector<uint32_t> &GetUninlinedColumns() const {
 		return uninlined_columns_;
 	}
-	[[nodiscard]] uint32_t GetUnlinedColumnCount() const {
+	[[nodiscard]] uint32_t GetUninlinedColumnCount() const {
 		return static_cast<uint32_t>(uninlined_columns_.size());
 	}
 	[[nodiscard]] uint32_t GetTupleInlinePartStorageSize() const {

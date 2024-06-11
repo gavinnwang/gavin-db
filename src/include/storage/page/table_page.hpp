@@ -11,10 +11,10 @@ public:
 	TablePage() = delete;
 	~TablePage() = delete;
 	void Init();
-	auto GetNumTuples() const -> uint32_t {
+	[[nodiscard]] auto GetNumTuples() const -> uint32_t {
 		return num_tuples_;
 	}
-	auto GetNextPageId() const -> page_id_t {
+	[[nodiscard]] auto GetNextPageId() const -> page_id_t {
 		return next_page_id_;
 	}
 	void SetNextPageId(page_id_t next_page_id) {
@@ -23,8 +23,8 @@ public:
 	auto GetNextTupleOffset(const Tuple &tuple) const -> std::optional<uint16_t>;
 	auto InsertTuple(const TupleMeta &meta, const Tuple &tuple) -> std::optional<uint16_t>;
 	void UpdateTupleMeta(const TupleMeta &meta, const RID &rid);
-	auto GetTupleMeta(const RID &rid) const -> TupleMeta;
-	auto GetTuple(const RID &rid) const -> std::optional<std::pair<TupleMeta, Tuple>>;
+	[[nodiscard]] auto GetTupleMeta(const RID &rid) const -> TupleMeta;
+	[[nodiscard]] auto GetTuple(const RID &rid) const -> std::optional<std::pair<TupleMeta, Tuple>>;
 	void UpdateTupleInPlaceUnsafe(const TupleMeta &meta, const Tuple &tuple, RID rid);
 
 private:
@@ -40,8 +40,8 @@ private:
 	TupleInfo tuple_info_[0];
 
 	static constexpr size_t TUPLE_INFO_SIZE = 6;
-	static_assert(std::is_trivially_copyable_v<TupleMeta> == true);
-	static_assert(std::is_trivially_copyable_v<uint16_t> == true);
+	static_assert(std::is_trivially_copyable_v<TupleMeta>);
+	static_assert(std::is_trivially_copyable_v<uint16_t>);
 	// static_assert(std::is_trivially_copyable_v<TupleInfo> == true);
 	static_assert(sizeof(TupleInfo) == TUPLE_INFO_SIZE);
 	static_assert(sizeof(page_id_t) == 4);

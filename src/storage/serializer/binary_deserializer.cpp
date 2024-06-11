@@ -4,9 +4,12 @@
 #include "common/logger.hpp"
 
 #include <memory>
+#include <variant>
 namespace db {
+using std::string;
 
-void BinaryDeserializer::OnPropertyBegin(const field_id_t field_id, const char *) {
+void BinaryDeserializer::OnPropertyBegin(field_id_t field_id, const char *tag) {
+	(void)tag;
 	auto field = NextField();
 	if (field != field_id) {
 		LOG_ERROR("Failed to deserialize: field id mismatch, expected: %d, but got: %d", field_id, field);
@@ -18,8 +21,8 @@ void BinaryDeserializer::OnPropertyBegin(const field_id_t field_id, const char *
 void BinaryDeserializer::OnPropertyEnd() {
 }
 
-bool BinaryDeserializer::OnOptionalPropertyBegin(const field_id_t field_id, const char *s) {
-	(void)s;
+bool BinaryDeserializer::OnOptionalPropertyBegin(field_id_t field_id, const char *tag) {
+	(void)tag;
 	auto next_field = PeekField();
 	auto present = next_field == field_id;
 	if (present) {
@@ -39,9 +42,10 @@ void BinaryDeserializer::OnObjectBegin() {
 
 void BinaryDeserializer::OnObjectEnd() {
 	auto next_field = NextField();
-	if (next_field != MESSAGE_TERMINATOR_FIELD_ID)
+	if (next_field != MESSAGE_TERMINATOR_FIELD_ID) {
 		throw SerializationException("Failed to deserialize: expected end of object, but found field id: " +
 		                             std::to_string(next_field));
+	}
 	nesting_level--;
 }
 
@@ -115,11 +119,12 @@ double BinaryDeserializer::ReadDouble() {
 std::string BinaryDeserializer::ReadString() {
 	auto len = ReadPrimitive<uint32_t>();
 	if (len == 0) {
-		return std::string();
+		return {};
 	}
-	auto buffer = std::make_unique<data_t[]>(len);
-	ReadData(buffer.get(), len);
-	return std::string(const_char_ptr_cast(buffer.get()), len);
+
+	std::vector<data_t> buffer(len);
+	ReadData(buffer.data(), len);
+	return {const_char_ptr_cast(buffer.data()), len};
 }
 
 void BinaryDeserializer::ReadDataPtr(data_ptr_t &ptr_p, idx_t count) {

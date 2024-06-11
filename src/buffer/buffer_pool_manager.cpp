@@ -9,7 +9,7 @@
 #include <memory>
 #include <vector>
 namespace db {
-BufferPoolManager::BufferPoolManager(size_t pool_size, std::shared_ptr<DiskManager> disk_manager)
+BufferPoolManager::BufferPoolManager(frame_id_t pool_size, std::shared_ptr<DiskManager> disk_manager)
     : pool_size_(pool_size), replacer_(std::make_unique<RandomBogoReplacer>()), disk_manager_(std::move(disk_manager)),
       pages_(pool_size) {
 	for (frame_id_t i = 0; i < pool_size_; ++i) {

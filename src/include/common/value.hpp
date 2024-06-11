@@ -32,11 +32,11 @@ bool ValueIsCorrectType(TypeId type) {
 class Value {
 public:
 	// create an value with type_id
-	Value(TypeId type) : type_id_(type), is_null_(true) {
+	explicit Value(TypeId type) : type_id_(type) {
 	}
 
 	template <typename T>
-	Value(TypeId type, T &&i) : type_id_(type), value_(std::forward<T>(i)), is_null_(false) {
+	Value(TypeId type, T &&value) : type_id_(type), value_(std::forward<T>(value)) {
 		if (!ValueIsCorrectType<T>(type)) {
 			LOG_ERROR("Value isn't assigned to the correct type id, expected %s, got %s",
 			          Type::TypeIdToString(type).c_str(), typeid(T).name());
@@ -45,16 +45,16 @@ public:
 	};
 
 	// Get the length of the variable length data
-	inline auto GetStorageSize() const -> uint32_t {
+	[[nodiscard]] inline uint32_t GetStorageSize() const {
 		return Type::TypeSize(type_id_, GetVarlenStorageSize());
 	}
 
-	inline auto IsNull() const -> bool {
+	[[nodiscard]] inline bool IsNull() const {
 		return is_null_;
 	}
 
 	void SerializeTo(data_ptr_t storage) const;
-	auto ToString() const -> std::string;
+	[[nodiscard]] std::string ToString() const;
 
 	void Serialize(Serializer &serializer) const;
 	static Value Deserialize(Deserializer &deserializer);
@@ -94,7 +94,7 @@ public:
 		}
 	}
 
-	const IndexKeyType ConvertToIndexKeyType() const {
+	[[nodiscard]] IndexKeyType ConvertToIndexKeyType() const {
 		IndexKeyType ret = {0};
 		switch (type_id_) {
 		case TypeId::BOOLEAN: {
@@ -122,12 +122,11 @@ public:
 	}
 
 private:
-	uint32_t GetVarlenStorageSize() const {
+	[[nodiscard]] uint32_t GetVarlenStorageSize() const {
 		if (type_id_ != TypeId::VARCHAR) {
 			return 0;
-		} else {
-			return std::get<std::string>(value_).size();
 		}
+		return std::get<std::string>(value_).size();
 	}
 	TypeId type_id_;
 
@@ -135,6 +134,6 @@ private:
 	using Val = std::variant<int8_t, int32_t, uint64_t, std::string>;
 
 	Val value_;
-	bool is_null_;
+	bool is_null_ {};
 };
 } // namespace db

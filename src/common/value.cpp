@@ -81,7 +81,7 @@ void Value::SerializeTo(data_ptr_t storage) const {
 		return;
 	}
 	case TypeId::VARCHAR: {
-		auto &varchar_val = std::get<std::string>(value_);
+		const auto &varchar_val = std::get<std::string>(value_);
 		uint32_t var_len = varchar_val.size();
 		memcpy(storage, &var_len, sizeof(uint32_t));
 		memcpy(storage + sizeof(uint32_t), varchar_val.data(), var_len);

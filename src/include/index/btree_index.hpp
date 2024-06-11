@@ -12,6 +12,7 @@
 #include "storage/page/page_guard.hpp"
 
 #include <memory>
+#include <utility>
 namespace db {
 
 class BTreeIndex : public Index {
@@ -20,7 +21,7 @@ class BTreeIndex : public Index {
 public:
 	BTreeIndex(std::shared_ptr<IndexMeta> index_meta, std::shared_ptr<TableMeta> table_meta,
 	           std::shared_ptr<BufferPoolManager> bpm)
-	    : Index(index_meta, table_meta), bpm_(bpm) {
+	    : Index(std::move(index_meta), std::move(table_meta)), bpm_(std::move(bpm)) {
 
 		if (index_meta_->header_page_id_ == INVALID_PAGE_ID) {
 			// Initialize the header page
@@ -45,7 +46,7 @@ protected:
 		Transaction transaction {};
 
 		auto &leaf_raw_page = SearchLeafPage(key, Operation::SEARCH, transaction, header_raw_page);
-		auto &leaf_page = leaf_raw_page.As<BtreeLeafPage>();
+		const auto &leaf_page = leaf_raw_page.As<BtreeLeafPage>();
 
 		auto value = leaf_page.Lookup(key, comparator_);
 
@@ -96,19 +97,12 @@ protected:
 			// split insert success
 			// auto sibling_leaf_node = Split(node);
 			return true;
-		} else {
-			// don't need to split, release parent write latches one more time and do other clean up
-			ReleaseParentWriteLatches(transaction);
-			leaf_page.WUnlatch();
-			bpm_->UnpinPage(leaf_page.GetPageId(), false);
+		} // don't need to split, release parent write latches one more time and do other clean up
+		ReleaseParentWriteLatches(transaction);
+		leaf_page.WUnlatch();
+		bpm_->UnpinPage(leaf_page.GetPageId(), false);
 
-			if (new_size == size) {
-				// duplicate key
-				return false;
-			}
-			// no split insert success
-			return true;
-		}
+		return new_size != size;
 	}
 	bool InternalDeleteRecord(const IndexKeyType key) override {
 		(void)key;
@@ -118,11 +112,11 @@ protected:
 	Page &SearchLeafPage(const IndexKeyType &key, Operation operation, Transaction &transaction, Page &header_page) {
 		// auto root_page_id = PageId {table_meta_->table_oid_, GetRootPageId()};
 
-		auto &header_node = header_page.As<BtreeHeaderPage>();
+		const auto &header_node = header_page.As<BtreeHeaderPage>();
 		auto root_page_id = header_node.GetRootPageId();
 		assert(root_page_id > 0);
 		auto *page = &bpm_->FetchPage({table_meta_->table_oid_, root_page_id});
-		auto *btree_node = &page->As<BtreePage>();
+		const auto *btree_node = &page->As<BtreePage>();
 		assert(page != nullptr);
 		// get latch on first node
 		if (operation == Operation::SEARCH) {
@@ -135,14 +129,14 @@ protected:
 		}
 
 		while (!btree_node->IsLeafPage()) {
-			auto &internal_page = page->As<BtreeInternalPage>();
+			const auto &internal_page = page->As<BtreeInternalPage>();
 			auto child_page_id = internal_page.Lookup(key, comparator_);
 			assert(child_page_id > 0);
 			LOG_TRACE("Search go to child: %d", child_page_id);
 			// move new page to node_pg should trigger the parent page to be released
 			auto *child_page = &bpm_->FetchPage({table_meta_->table_oid_, child_page_id});
 			assert(child_page != nullptr);
-			auto *child_btree_node = &child_page->As<BtreePage>();
+			const auto *child_btree_node = &child_page->As<BtreePage>();
 
 			// latch crabbing
 			if (operation == Operation::SEARCH) {
@@ -166,7 +160,7 @@ protected:
 		return *page;
 	}
 
-	bool IsSafeNode(const BtreePage &node, Operation operation) const {
+	[[nodiscard]] static bool IsSafeNode(const BtreePage &node, Operation operation) {
 		assert(operation != Operation::SEARCH);
 		// -1 because adding one more will not reach the threshold for splitting for leaf
 		if (operation == Operation::INSERT) {

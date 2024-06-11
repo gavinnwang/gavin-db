@@ -9,9 +9,12 @@
 #include "storage/table/table_meta.hpp"
 
 #include <memory>
+#include <utility>
 namespace db {
-TableHeap::TableHeap(std::shared_ptr<BufferPoolManager> bpm, std::shared_ptr<TableMeta> table_meta)
-    : bpm_(bpm), table_meta_(table_meta) {
+using std::shared_ptr;
+
+TableHeap::TableHeap(shared_ptr<BufferPoolManager> bpm, std::shared_ptr<TableMeta> table_meta)
+    : bpm_(bpm), table_meta_(std::move(table_meta)) {
 	assert(table_meta_ != nullptr);
 	if (table_meta_->GetLastTablePageId() == INVALID_PAGE_ID) {
 		// page_id_t new_page_id;
@@ -76,7 +79,7 @@ void TableHeap::UpdateTupleMeta(const TupleMeta &meta, RID rid) {
 
 std::optional<std::pair<TupleMeta, Tuple>> TableHeap::GetTuple(RID rid) {
 	auto page_guard = bpm_->FetchPageRead(rid.GetPageId());
-	auto &page = page_guard.As<TablePage>();
+	const auto &page = page_guard.As<TablePage>();
 	auto ret = page.GetTuple(rid);
 	if (!ret.has_value()) {
 		return std::nullopt;
@@ -89,7 +92,7 @@ std::optional<std::pair<TupleMeta, Tuple>> TableHeap::GetTuple(RID rid) {
 TupleMeta TableHeap::GetTupleMeta(RID rid) {
 
 	auto page_guard = bpm_->FetchPageRead(rid.GetPageId());
-	auto &page = page_guard.As<TablePage>();
+	const auto &page = page_guard.As<TablePage>();
 	return page.GetTupleMeta(rid);
 };
 
@@ -101,7 +104,7 @@ TableIterator TableHeap::MakeIterator() {
 
 	auto page_guard = bpm_->FetchPageRead({table_oid, last_page_id});
 
-	auto &page = page_guard.As<TablePage>();
+	const auto &page = page_guard.As<TablePage>();
 	auto num_tuples = page.GetNumTuples();
 	page_guard.Drop();
 	// iterate from rid 0, 0 to last_page_id and num_tuples

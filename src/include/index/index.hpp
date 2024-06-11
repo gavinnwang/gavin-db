@@ -24,9 +24,8 @@ enum class IndexConstraintType : uint8_t {
 struct IndexMeta {
 public:
 	explicit IndexMeta() = default;
-	IndexMeta(const std::string &name, table_oid_t table_id, const Column key_col,
-	          IndexConstraintType index_constraint_type)
-	    : name_(name), table_id_(table_id), key_col_(std::move(key_col)),
+	IndexMeta(std::string name, table_oid_t table_id, Column key_col, IndexConstraintType index_constraint_type)
+	    : name_(std::move(name)), table_id_(table_id), key_col_(std::move(key_col)),
 	      index_constraint_type_(index_constraint_type) {
 	}
 
