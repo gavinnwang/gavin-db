@@ -41,6 +41,10 @@ TEST(IndexTest, IndexTest) {
 
 	if (rid.has_value()) {
 		btree_index->InsertRecord(tuple, *rid);
+		std::vector<RID> rids;
+		btree_index->ScanKey(tuple, rids);
+		ASSERT_EQ(rids.size(), 1);
+		LOG_DEBUG("rids returneed %d %d", rids[0].GetPageId().page_number_, rids[0].GetSlotNum());
 	}
 }
 } // namespace db

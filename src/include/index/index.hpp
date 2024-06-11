@@ -122,7 +122,7 @@ private:
 
 	const IndexKeyType ConvertTupleToKey(const Tuple &tuple) {
 		auto value = tuple.GetValue(index_meta_->key_col_);
-		LOG_TRACE("inserting value %s", value.ToString().c_str());
+		LOG_TRACE("converted to key: %s", value.ToString().c_str());
 		return value.ConvertToIndexKeyType();
 	}
 };

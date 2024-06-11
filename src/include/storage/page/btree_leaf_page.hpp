@@ -1,5 +1,6 @@
 #pragma once
 
+#include "common/exception.hpp"
 #include "common/macros.hpp"
 #include "common/typedef.hpp"
 #include "index/index.hpp"
@@ -40,8 +41,9 @@ public:
 	}
 	void Insert(IndexKeyType key, IndexValueType value, const Comparator &comparator) {
 		if (GetSize() == GetMaxSize()) {
-			UNREACHABLE("Leaf node is full, shouldve split");
+			throw RuntimeException("Leaf node is full, shouldve split bruh");
 		}
+		LOG_TRACE("Inserting into leaf node");
 		auto key_idx = FindKeyIndex(key, comparator);
 		for (idx_t i = key_idx; i < GetSize(); i++) {
 			node_array_[i + 1] = node_array_[i];

@@ -34,16 +34,16 @@ public:
 		return page_->GetData();
 	}
 	template <class T>
-	[[nodiscard]] const T *As() {
-		return reinterpret_cast<const T *>(GetData());
+	[[nodiscard]] const T &As() {
+		return reinterpret_cast<const T &>(GetData());
 	}
 	[[nodiscard]] char *GetDataMut() {
 		is_dirty_ = true;
 		return page_->GetData();
 	}
 	template <class T>
-	[[nodiscard]] T *AsMut() {
-		return reinterpret_cast<T *>(GetDataMut());
+	[[nodiscard]] T &AsMut() {
+		return reinterpret_cast<T &>(GetDataMut());
 	}
 
 private:
@@ -70,14 +70,14 @@ public:
 		return guard_.GetData();
 	}
 	template <class T>
-	[[nodiscard]] const T *As() {
+	[[nodiscard]] const T &As() {
 		return guard_.As<T>();
 	}
 	[[nodiscard]] char *GetDataMut() {
 		return guard_.GetDataMut();
 	}
 	template <class T>
-	[[nodiscard]] T *AsMut() {
+	[[nodiscard]] T &AsMut() {
 		return guard_.AsMut<T>();
 	}
 
@@ -107,7 +107,7 @@ public:
 		return guard_.GetData();
 	}
 	template <class T>
-	[[nodiscard]] const T *As() {
+	[[nodiscard]] const T &As() {
 		return guard_.As<T>();
 	}
 

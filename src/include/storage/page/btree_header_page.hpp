@@ -20,6 +20,10 @@ public:
 		return root_page_id_;
 	}
 
+	bool TreeIsEmpty() const {
+		return root_page_id_ == INVALID_PAGE_ID;
+	}
+
 private:
 	page_id_t root_page_id_ {INVALID_PAGE_ID};
 };

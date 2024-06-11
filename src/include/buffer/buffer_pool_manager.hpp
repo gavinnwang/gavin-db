@@ -1,7 +1,7 @@
 #pragma once
 
-#include "catalog/catalog_manager.hpp"
 #include "buffer/replacer.hpp"
+#include "catalog/catalog_manager.hpp"
 #include "common/macros.hpp"
 #include "common/page_id.hpp"
 #include "storage/disk_manager.hpp"
@@ -22,13 +22,13 @@ public:
 	BasicPageGuard FetchPageBasic(PageId page_id);
 	ReadPageGuard FetchPageRead(PageId page_id);
 	WritePageGuard FetchPageWrite(PageId page_id);
-	BasicPageGuard NewPageGuarded(PageAllocator& page_allocator, PageId &page_id);
+	BasicPageGuard NewPageGuarded(PageAllocator &page_allocator, PageId &page_id);
 	bool UnpinPage(PageId page_id, bool is_dirty);
+	Page &NewPage(PageAllocator &page_allocator, PageId &page_id);
+	Page &FetchPage(PageId page_id);
+	bool DeletePage(PageId page_id);
 
 private:
-	bool DeletePage(PageId page_id);
-	Page &NewPage(PageAllocator& page_allocator, PageId &page_id);
-	Page &FetchPage(PageId page_id);
 	bool AllocateFrame(frame_id_t &frame_id);
 
 	const frame_id_t pool_size_;
