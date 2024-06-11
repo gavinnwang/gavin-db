@@ -1,6 +1,7 @@
 #pragma once
 
 #include "common/exception.hpp"
+
 #include <filesystem>
 #include <fstream>
 #include <sys/stat.h>
@@ -17,21 +18,20 @@ inline void DeletePathIfExists(const std::filesystem::path &path) {
 	}
 }
 
-
 inline size_t GetFileSize(const std::filesystem::path &file_path) {
 	struct stat stat_buf;
-	int rc = stat(file_path.c_str(), &stat_buf);
-	return rc == 0 ? static_cast<int>(stat_buf.st_size) : -1;
+	int stat_code = stat(file_path.c_str(), &stat_buf);
+	return stat_code == 0 ? static_cast<size_t>(stat_buf.st_size) : -1;
 }
 
 inline void CreateFolderIfNotExists(const std::filesystem::path &folder_path) {
 	if (std::filesystem::exists(folder_path)) {
 		return;
 	}
-	std::error_code ec;
-	std::filesystem::create_directories(folder_path, ec);
-	if (ec) {
-		throw IOException("failed to create directories: " + folder_path.string() + ec.message());
+	std::error_code error_code;
+	std::filesystem::create_directories(folder_path, error_code);
+	if (error_code) {
+		throw IOException("failed to create directories: " + folder_path.string() + error_code.message());
 	}
 }
 inline void CreateFileIfNotExists(const std::filesystem::path &file_path) {
@@ -52,4 +52,4 @@ inline void CreateFileIfNotExists(const std::filesystem::path &file_path) {
 	file.close();
 }
 
-}
+} // namespace db

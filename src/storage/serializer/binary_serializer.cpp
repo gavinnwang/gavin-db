@@ -1,10 +1,11 @@
 #include "storage/serializer/binary_serializer.hpp"
 
 #include "common/macros.hpp"
+
 #include <cstring>
 namespace db {
 
-void BinarySerializer::OnPropertyBegin(const field_id_t field_id, const char *tag) {
+void BinarySerializer::OnPropertyBegin(field_id_t field_id, const char *tag) {
 	// Just write the field id straight up
 	ASSERT(field_id != MESSAGE_TERMINATOR_FIELD_ID, "Field id cannot be MESSAGE_TERMINATOR_FIELD_ID");
 	Write<field_id_t>(field_id);
@@ -14,7 +15,7 @@ void BinarySerializer::OnPropertyEnd() {
 	// Nothing to do here
 }
 
-void BinarySerializer::OnOptionalPropertyBegin(const field_id_t field_id, const char *tag, bool present) {
+void BinarySerializer::OnOptionalPropertyBegin(field_id_t field_id, const char *tag, bool present) {
 	// Dont write anything at all if the property is not present
 	if (present) {
 		OnPropertyBegin(field_id, tag);

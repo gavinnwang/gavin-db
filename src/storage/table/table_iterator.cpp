@@ -26,7 +26,7 @@ auto TableIterator::IsEnd() -> bool {
 
 auto TableIterator::operator++() -> TableIterator & {
 	auto page_guard = table_heap_->bpm_->FetchPageRead(rid_.GetPageId());
-	auto &page = page_guard.As<TablePage>();
+	const auto &page = page_guard.As<TablePage>();
 	auto next_tuple_id = rid_.GetSlotNum() + 1;
 
 	if (stop_at_rid_.GetPageId().page_number_ != INVALID_PAGE_ID) {

@@ -90,9 +90,9 @@ private:
 	//===--------------------------------------------------------------------===//
 	// Nested Types Hooks
 	//===--------------------------------------------------------------------===//
-	void OnPropertyBegin(const field_id_t field_id, const char *tag) final;
+	void OnPropertyBegin(field_id_t field_id, const char *tag) final;
 	void OnPropertyEnd() final;
-	bool OnOptionalPropertyBegin(const field_id_t field_id, const char *tag) final;
+	bool OnOptionalPropertyBegin(field_id_t field_id, const char *tag) final;
 	void OnOptionalPropertyEnd(bool present) final;
 	void OnObjectBegin() final;
 	void OnObjectEnd() final;

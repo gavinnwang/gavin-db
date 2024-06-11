@@ -20,8 +20,7 @@ public:
 	// 	WriteData(conata_ptr_cast(&element), sizeof(T));
 	// }
 
-	virtual ~WriteStream() {
-	}
+	virtual ~WriteStream() = default;
 };
 
 } // namespace db

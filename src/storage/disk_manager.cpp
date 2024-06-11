@@ -5,6 +5,7 @@
 #include "common/fs_utils.hpp"
 #include "storage/file_path_manager.hpp"
 
+#include <cstddef>
 #include <cstdlib>
 #include <cstring>
 #include <iostream>
@@ -46,28 +47,27 @@ void DiskManager::WritePage(PageId page_id, const char *page_data) {
 void DiskManager::ReadPage(PageId page_id, char *page_data) {
 	AddTableDataIfNotExist(page_id.table_id_);
 
-	size_t offset = page_id.page_number_ * PAGE_SIZE;
+	size_t offset = static_cast<size_t>(page_id.page_number_) * PAGE_SIZE;
 	auto data_file_path = FilePathManager::GetInstance().GetTableDataPath(cm_->GetTableName(page_id.table_id_));
 	if (offset > GetFileSize(data_file_path)) {
 		throw IOException("read page out of file size" + std::to_string(offset) + " " +
 		                  std::to_string(GetFileSize(data_file_path)));
-	} else {
-		auto &data_fs = table_data_files_.at(page_id.table_id_);
+	}
+	auto &data_fs = table_data_files_.at(page_id.table_id_);
+	data_fs.seekp(offset);
+	data_fs.read(page_data, PAGE_SIZE);
+	if (data_fs.bad()) {
+		throw IOException("failed to read from table data file");
+	}
+	// if file ends before reading PAGE_SIZE
+	int gcount = data_fs.gcount();
+	if (gcount < PAGE_SIZE) {
+		// todo investigate this
+		std::cerr << "io read less than a page, read " << gcount << " rather than " << PAGE_SIZE << std::endl;
+		data_fs.clear();
+		memset(page_data + gcount, 0, PAGE_SIZE - gcount);
 		data_fs.seekp(offset);
-		data_fs.read(page_data, PAGE_SIZE);
-		if (data_fs.bad()) {
-			throw IOException("failed to read from table data file");
-		}
-		// if file ends before reading PAGE_SIZE
-		int gcount = data_fs.gcount();
-		if (gcount < PAGE_SIZE) {
-			// todo investigate this
-			std::cerr << "io read less than a page, read " << gcount << " rather than " << PAGE_SIZE << std::endl;
-			data_fs.clear();
-			memset(page_data + gcount, 0, PAGE_SIZE - gcount);
-			data_fs.seekp(offset);
-			data_fs.write(page_data, PAGE_SIZE);
-		}
+		data_fs.write(page_data, PAGE_SIZE);
 	}
 }
 

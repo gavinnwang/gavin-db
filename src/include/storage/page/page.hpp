@@ -5,6 +5,8 @@
 #include "common/page_id.hpp"
 #include "common/rwlatch.hpp"
 
+#include <cstring>
+
 namespace db {
 class Page {
 	friend class BufferPoolManager;
@@ -21,10 +23,10 @@ public:
 	~Page() = default;
 	// ~Page() = delete;
 
-	inline auto GetData() -> char * {
-		return data_;
+	auto GetData() -> char * {
+		return data_.data();
 	}
-	inline auto GetPageId() -> PageId {
+	auto GetPageId() -> PageId {
 		return page_id_;
 	}
 
@@ -41,27 +43,28 @@ public:
 	auto AsMut() -> T & {
 		return reinterpret_cast<T &>(*GetDataMut());
 	}
-	inline void WLatch() {
+	void WLatch() {
 		rwlatch_.WLock();
 	}
-	inline void WUnlatch() {
+	void WUnlatch() {
 		rwlatch_.WUnlock();
 	}
-	inline void RLatch() {
+	void RLatch() {
 		rwlatch_.RLock();
 	}
-	inline void RUnlatch() {
+	void RUnlatch() {
 		rwlatch_.RUnlock();
 	}
 
 private:
 	void ResetMemory() {
-		memset(data_, 0, PAGE_SIZE);
+		std::memset(data_.data(), 0, PAGE_SIZE);
 	}
 	PageId page_id_;
 	bool is_dirty_ = false;
 	uint16_t pin_count_ = 0;
 	ReaderWriterLatch rwlatch_;
-	char data_[PAGE_SIZE] {};
+	std::array<char, PAGE_SIZE> data_ {};
+	// char data_[PAGE_SIZE] {};
 };
 } // namespace db

@@ -15,14 +15,6 @@ public:
 	// to creat a dummy column
 	Column() = default;
 
-	// Explicitly default the copy operations
-	Column(const Column &) = default;
-	Column &operator=(const Column &) = default;
-
-	// Explicitly default move operations
-	Column(Column &&) noexcept = default; // Ensure it's noexcept
-	Column &operator=(Column &&) noexcept = default;
-
 	// fixed length col
 	Column(std::string column_name, TypeId type)
 	    : column_name_(std::move(column_name)), column_type_(type), length_(Type::TypeSize(type)) {
@@ -37,22 +29,22 @@ public:
 		ASSERT(length_ > 0, "Invalid column length");
 	}
 
-	auto GetName() const -> std::string {
+	[[nodiscard]] auto GetName() const -> std::string {
 		return column_name_;
 	}
-	auto GetStorageSize() const -> uint32_t {
+	[[nodiscard]] auto GetStorageSize() const -> uint32_t {
 		return length_;
 	}
-	auto GetOffset() const -> uint32_t {
+	[[nodiscard]] auto GetOffset() const -> uint32_t {
 		return column_offset_;
 	}
-	auto GetType() const -> TypeId {
+	[[nodiscard]] auto GetType() const -> TypeId {
 		return column_type_;
 	}
-	auto IsInlined() const -> bool {
+	[[nodiscard]] auto IsInlined() const -> bool {
 		return column_type_ != TypeId::VARCHAR;
 	}
-	auto ToString(bool simplified = true) const -> std::string;
+	[[nodiscard]] auto ToString(bool simplified = true) const -> std::string;
 	// void SerializeTo(char *storage) const;
 	// void DeserializeFrom(const char *storage);
 	// auto GetSerializationSize() const -> uint32_t;

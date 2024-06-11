@@ -4,6 +4,7 @@
 #include "catalog/catalog_manager.hpp"
 #include "common/macros.hpp"
 #include "common/page_id.hpp"
+#include "common/typedef.hpp"
 #include "storage/disk_manager.hpp"
 #include "storage/page/page.hpp"
 #include "storage/page/page_guard.hpp"
@@ -15,7 +16,7 @@
 namespace db {
 class BufferPoolManager {
 public:
-	BufferPoolManager(size_t pool_size, std::shared_ptr<DiskManager> disk_manager);
+	BufferPoolManager(frame_id_t pool_size, std::shared_ptr<DiskManager> disk_manager);
 	DISALLOW_COPY(BufferPoolManager);
 	bool FlushPage(PageId page_id);
 	void FlushAllPages();

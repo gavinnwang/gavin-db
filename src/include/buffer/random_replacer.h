@@ -10,10 +10,10 @@ namespace db {
 class RandomBogoReplacer : public Replacer {
 public:
 	explicit RandomBogoReplacer();
-	~RandomBogoReplacer() = default;
-	auto Evict(frame_id_t &frame_id) -> bool;
-	void Pin(frame_id_t frame_id);
-	void Unpin(frame_id_t frame_id);
+	~RandomBogoReplacer() override = default;
+	auto Evict(frame_id_t &frame_id) -> bool override;
+	void Pin(frame_id_t frame_id) override;
+	void Unpin(frame_id_t frame_id) override;
 
 private:
 	std::unordered_map<frame_id_t, uint16_t> frame_store_;

@@ -15,49 +15,49 @@
 namespace db {
 
 struct Bar {
-	uint32_t b;
-	std::vector<std::string> vec;
+	uint32_t b_;
+	std::vector<std::string> vec_;
 	void Serialize(Serializer &serializer) const {
-		serializer.WriteProperty<uint32_t>(1, "b", b);
-		serializer.WritePropertyWithDefault(2, "vec", vec, std::vector<std::string>());
+		serializer.WriteProperty<uint32_t>(1, "b", b_);
+		serializer.WritePropertyWithDefault(2, "vec", vec_, std::vector<std::string>());
 	}
 
 	static std::unique_ptr<Bar> Deserialize(Deserializer &deserializer) {
 		auto result = std::make_unique<Bar>();
-		deserializer.ReadProperty<uint32_t>(1, "b", result->b);
-		deserializer.ReadPropertyWithDefault(2, "vec", result->vec, std::vector<std::string>());
+		deserializer.ReadProperty<uint32_t>(1, "b", result->b_);
+		deserializer.ReadPropertyWithDefault(2, "vec", result->vec_, std::vector<std::string>());
 		return result;
 	}
 };
 
 struct Foo {
-	int32_t a;
-	std::unique_ptr<Bar> bar;
-	int32_t c;
-	TypeId type;
-	std::vector<std::unique_ptr<Bar>> bars;
-	std::unordered_map<int32_t, std::unique_ptr<Bar>> bar_map;
-	Value value {TypeId::INTEGER, 10};
+	int32_t a_;
+	std::unique_ptr<Bar> bar_;
+	int32_t c_;
+	TypeId type_;
+	std::vector<std::unique_ptr<Bar>> bars_;
+	std::unordered_map<int32_t, std::unique_ptr<Bar>> bar_map_;
+	Value value_ {TypeId::INTEGER, 10};
 
 	void Serialize(Serializer &serializer) const {
-		serializer.WriteProperty<int32_t>(1, "a", a);
-		serializer.WritePropertyWithDefault<std::unique_ptr<Bar>>(2, "bar", bar, std::unique_ptr<Bar>());
-		serializer.WriteProperty<int32_t>(3, "c", c);
-		serializer.WriteProperty<TypeId>(4, "type", type);
-		serializer.WriteProperty<std::vector<std::unique_ptr<Bar>>>(5, "bars", bars);
-		serializer.WriteProperty<Value>(6, "value", value);
-		serializer.WriteProperty(7, "bar_map", bar_map);
+		serializer.WriteProperty<int32_t>(1, "a", a_);
+		serializer.WritePropertyWithDefault<std::unique_ptr<Bar>>(2, "bar", bar_, std::unique_ptr<Bar>());
+		serializer.WriteProperty<int32_t>(3, "c", c_);
+		serializer.WriteProperty<TypeId>(4, "type", type_);
+		serializer.WriteProperty<std::vector<std::unique_ptr<Bar>>>(5, "bars", bars_);
+		serializer.WriteProperty<Value>(6, "value", value_);
+		serializer.WriteProperty(7, "bar_map", bar_map_);
 	}
 
 	static std::unique_ptr<Foo> Deserialize(Deserializer &deserializer) {
 		auto result = std::make_unique<Foo>();
-		deserializer.ReadProperty<int32_t>(1, "a", result->a);
-		deserializer.ReadPropertyWithDefault<std::unique_ptr<Bar>>(2, "bar", result->bar, std::unique_ptr<Bar>());
-		deserializer.ReadProperty<int32_t>(3, "c", result->c);
-		deserializer.ReadProperty<TypeId>(4, "type", result->type);
-		deserializer.ReadProperty<std::vector<std::unique_ptr<Bar>>>(5, "bars", result->bars);
-		deserializer.ReadProperty<Value>(6, "value", result->value);
-		deserializer.ReadProperty(7, "bar_map", result->bar_map);
+		deserializer.ReadProperty<int32_t>(1, "a", result->a_);
+		deserializer.ReadPropertyWithDefault<std::unique_ptr<Bar>>(2, "bar", result->bar_, std::unique_ptr<Bar>());
+		deserializer.ReadProperty<int32_t>(3, "c", result->c_);
+		deserializer.ReadProperty<TypeId>(4, "type", result->type_);
+		deserializer.ReadProperty<std::vector<std::unique_ptr<Bar>>>(5, "bars", result->bars_);
+		deserializer.ReadProperty<Value>(6, "value", result->value_);
+		deserializer.ReadProperty(7, "bar_map", result->bar_map_);
 
 		return result;
 	}
@@ -65,27 +65,27 @@ struct Foo {
 
 TEST(StorageTest, SerializerTest) {
 	Foo foo_in;
-	foo_in.a = 42;
-	foo_in.bar = std::make_unique<Bar>();
-	foo_in.bar->b = 43;
+	foo_in.a_ = 42;
+	foo_in.bar_ = std::make_unique<Bar>();
+	foo_in.bar_->b_ = 43;
 	std::string value_str = "hello";
-	foo_in.value = Value(TypeId::VARCHAR, value_str);
+	foo_in.value_ = Value(TypeId::VARCHAR, value_str);
 	// lambda to create a bar
 	auto create_bar = [](uint32_t b) {
 		Bar bar;
-		bar.b = b;
+		bar.b_ = b;
 		return bar;
 	};
-	foo_in.bars.emplace_back(std::make_unique<Bar>(create_bar(44)));
-	foo_in.bars.emplace_back(std::make_unique<Bar>(create_bar(45)));
-	foo_in.bars.emplace_back(std::make_unique<Bar>(create_bar(46)));
-	foo_in.bar_map[1] = std::make_unique<Bar>(create_bar(47));
-	foo_in.bar_map[2] = std::make_unique<Bar>(create_bar(48));
-	foo_in.bar_map[120338] = std::make_unique<Bar>(create_bar(120338));
+	foo_in.bars_.emplace_back(std::make_unique<Bar>(create_bar(44)));
+	foo_in.bars_.emplace_back(std::make_unique<Bar>(create_bar(45)));
+	foo_in.bars_.emplace_back(std::make_unique<Bar>(create_bar(46)));
+	foo_in.bar_map_[1] = std::make_unique<Bar>(create_bar(47));
+	foo_in.bar_map_[2] = std::make_unique<Bar>(create_bar(48));
+	foo_in.bar_map_[120338] = std::make_unique<Bar>(create_bar(120338));
 	std::vector<std::string> vec_str = {"a", "a", "a", "b", "c", "d", "a", "a", "a"};
-	foo_in.bar->vec = vec_str;
-	foo_in.c = 44;
-	foo_in.type = TypeId::VARCHAR;
+	foo_in.bar_->vec_ = vec_str;
+	foo_in.c_ = 44;
+	foo_in.type_ = TypeId::VARCHAR;
 	FileStream stream("test_file", std::ios::in | std::ios::out | std::ios::binary | std::ios::trunc);
 
 	BinarySerializer::Serialize(foo_in, stream, false);
@@ -94,23 +94,23 @@ TEST(StorageTest, SerializerTest) {
 	stream.Rewind();
 
 	auto foo_out_ptr = BinaryDeserializer::Deserialize<Foo>(stream);
-	auto &foo_out = *foo_out_ptr.get();
-	EXPECT_EQ(foo_in.a, foo_out.a);
-	EXPECT_EQ(foo_in.bar->b, foo_out.bar->b);
-	EXPECT_EQ(foo_in.c, foo_out.c);
-	EXPECT_EQ(foo_in.type, foo_out.type);
+	auto &foo_out = *foo_out_ptr;
+	EXPECT_EQ(foo_in.a_, foo_out.a_);
+	EXPECT_EQ(foo_in.bar_->b_, foo_out.bar_->b_);
+	EXPECT_EQ(foo_in.c_, foo_out.c_);
+	EXPECT_EQ(foo_in.type_, foo_out.type_);
 	for (size_t i = 0; i < vec_str.size(); i++) {
-		EXPECT_EQ(vec_str[i], foo_out.bar->vec[i]);
+		EXPECT_EQ(vec_str[i], foo_out.bar_->vec_[i]);
 	}
-	for (size_t i = 0; i < foo_in.bars.size(); i++) {
-		EXPECT_EQ(foo_in.bars[i]->b, foo_out.bars[i]->b);
+	for (size_t i = 0; i < foo_in.bars_.size(); i++) {
+		EXPECT_EQ(foo_in.bars_[i]->b_, foo_out.bars_[i]->b_);
 	}
-	EXPECT_EQ(value_str, foo_out.value.ToString());
-	for (const auto &[key, value] : foo_in.bar_map) {
-		EXPECT_EQ(value->b, foo_out.bar_map[key]->b);
+	EXPECT_EQ(value_str, foo_out.value_.ToString());
+	for (const auto &[key, value] : foo_in.bar_map_) {
+		EXPECT_EQ(value->b_, foo_out.bar_map_[key]->b_);
 	}
 
-	foo_in.bar = nullptr;
+	foo_in.bar_ = nullptr;
 
 	stream.Rewind();
 
@@ -120,14 +120,14 @@ TEST(StorageTest, SerializerTest) {
 	stream.Rewind();
 
 	foo_out_ptr = BinaryDeserializer::Deserialize<Foo>(stream);
-	auto &foo_out2 = *foo_out_ptr.get();
-	EXPECT_EQ(foo_in.a, foo_out2.a);
-	EXPECT_TRUE(foo_in.bar == nullptr && foo_out2.bar == nullptr);
-	EXPECT_EQ(foo_in.c, foo_out2.c);
-	EXPECT_EQ(foo_in.type, foo_out2.type);
-	EXPECT_EQ(value_str, foo_out2.value.ToString());
+	auto &foo_out2 = *foo_out_ptr;
+	EXPECT_EQ(foo_in.a_, foo_out2.a_);
+	EXPECT_TRUE(foo_in.bar_ == nullptr && foo_out2.bar_ == nullptr);
+	EXPECT_EQ(foo_in.c_, foo_out2.c_);
+	EXPECT_EQ(foo_in.type_, foo_out2.type_);
+	EXPECT_EQ(value_str, foo_out2.value_.ToString());
 
-	LOG_DEBUG("pos1: %llu, pos2: %llu", pos1, pos2);
+	LOG_DEBUG("pos1: %lu pos2: %lu", pos1, pos2);
 	// should not write the default value
 	EXPECT_TRUE(pos1 > pos2);
 }

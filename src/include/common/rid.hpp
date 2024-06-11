@@ -12,10 +12,10 @@ public:
 	auto operator==(const RID &other) const -> bool {
 		return page_id_ == other.page_id_ && slot_num_ == other.slot_num_;
 	}
-	inline auto GetPageId() const -> PageId {
+	[[nodiscard]] inline auto GetPageId() const -> PageId {
 		return page_id_;
 	}
-	inline auto GetSlotNum() const -> uint32_t {
+	[[nodiscard]] inline auto GetSlotNum() const -> uint32_t {
 		return slot_num_;
 	}
 

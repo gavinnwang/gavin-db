@@ -52,9 +52,9 @@ protected:
 	//-------------------------------------------------------------------------
 	// We serialize optional values as a message with a "present" flag, followed
 	// by the value.
-	void OnPropertyBegin(const field_id_t field_id, const char *tag) final;
+	void OnPropertyBegin(field_id_t field_id, const char *tag) final;
 	void OnPropertyEnd() final;
-	void OnOptionalPropertyBegin(const field_id_t field_id, const char *tag, bool present) final;
+	void OnOptionalPropertyBegin(field_id_t field_id, const char *tag, bool present) final;
 	void OnOptionalPropertyEnd(bool present) final;
 	void OnListBegin(idx_t count) final;
 	void OnListEnd() final;
