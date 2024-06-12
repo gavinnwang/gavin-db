@@ -10,6 +10,7 @@
 #include "storage/table/table_meta.hpp"
 
 #include "gtest/gtest.h"
+#include <cstdint>
 #include <memory>
 #include <vector>
 namespace db {
@@ -127,8 +128,8 @@ TEST(StorageTest, SerializerTest) {
 	EXPECT_EQ(foo_in.type_, foo_out2.type_);
 	EXPECT_EQ(value_str, foo_out2.value_.ToString());
 
-	LOG_DEBUG("pos1: %lu pos2: %lu", pos1, pos2);
-	// should not write the default value
+	LOG_DEBUG("pos1: %du pos2: %du", static_cast<uint32_t>(pos1), static_cast<uint32_t>(pos2));
+  // should not write the default value
 	EXPECT_TRUE(pos1 > pos2);
 }
 

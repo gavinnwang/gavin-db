@@ -1,8 +1,9 @@
 #pragma once
 
 #include "common/exception.hpp"
-#include "common/macros.hpp"
+#include "common/logger.hpp"
 #include "common/typedef.hpp"
+#include "index/btree_index.hpp"
 #include "index/index.hpp"
 #include "storage/page/btree_page.hpp"
 
@@ -27,6 +28,7 @@ public:
 	void Init(idx_t max_size = MAX_NODE_SIZE) {
 		SetSize(0);
 		SetMaxSize(max_size);
+		LOG_TRACE("Setting size to 0 and max size to %d", static_cast<int>(max_size));
 		SetNextPageId(INVALID_PAGE_ID);
 		SetPageType(IndexPageType::LEAF_PAGE);
 	}
@@ -40,15 +42,22 @@ public:
 	IndexKeyType KeyAt(int index) const {
 		return node_array_[index].first;
 	}
-	void Insert(IndexKeyType key, IndexValueType value, const Comparator &comparator) {
+	void Insert(const IndexKeyType &key, const IndexValueType &value, const Comparator &comparator) {
 		if (GetSize() == GetMaxSize()) {
 			throw RuntimeException("Leaf node is full, shouldve split bruh");
 		}
-		LOG_TRACE("Inserting into leaf node");
+		assert(key[0]);
 		auto key_idx = FindKeyIndex(key, comparator);
+
 		if (comparator(node_array_[key_idx].first, key) == 0) {
+			LOG_TRACE("Key %s already exists, updating value to %s", IndexKeyTypeToString(key).c_str(),
+			          value.ToString().c_str());
+			// todo(gavinnwang): update the value of the key?
 			return;
 		}
+		LOG_TRACE("Inserting key %s at index %d with val: %s", IndexKeyTypeToString(key).c_str(),
+		          static_cast<int>(key_idx), value.ToString().c_str());
+
 		if (key_idx == GetSize()) {
 			*(node_array_ + key_idx) = {key, value};
 		} else {
@@ -58,7 +67,7 @@ public:
 		}
 		IncreaseSize(1);
 	}
-	idx_t FindKeyIndex(IndexKeyType key, const Comparator &comparator) const {
+	idx_t FindKeyIndex(const IndexKeyType &key, const Comparator &comparator) const {
 		auto target_idx =
 		    std::lower_bound(node_array_, node_array_ + GetSize(), key,
 		                     [&comparator](const auto &pair, auto k) { return comparator(pair.first, k) < 0; });

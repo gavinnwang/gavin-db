@@ -15,13 +15,10 @@ public:
 	explicit Page() {
 		ResetMemory();
 	}
-	// Page(Page &&other) noexcept;            // Move constructor
-	// Page &operator=(Page &&other) noexcept; // Move assignment operator
 
 	DISALLOW_COPY_AND_MOVE(Page);
 
 	~Page() = default;
-	// ~Page() = delete;
 
 	auto GetData() -> char * {
 		return data_.data();
@@ -65,6 +62,5 @@ private:
 	uint16_t pin_count_ = 0;
 	ReaderWriterLatch rwlatch_;
 	std::array<char, PAGE_SIZE> data_ {};
-	// char data_[PAGE_SIZE] {};
 };
 } // namespace db

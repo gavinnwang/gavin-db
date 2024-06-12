@@ -1,6 +1,7 @@
 #pragma once
 
 #include "common/config.hpp"
+#include "common/logger.hpp"
 #include "common/macros.hpp"
 #include "common/rid.hpp"
 #include "common/typedef.hpp"
@@ -31,6 +32,7 @@ public:
 	void Init(int max_size = MAX_NODE_SIZE) {
 		SetSize(0);
 		SetMaxSize(max_size);
+		LOG_TRACE("Setting size to 0 and max size to %d", static_cast<int>(max_size));
 		SetPageType(IndexPageType::INTERNAL_PAGE);
 	}
 

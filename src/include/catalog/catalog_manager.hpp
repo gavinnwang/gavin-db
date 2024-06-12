@@ -21,6 +21,7 @@ public:
 		std::filesystem::path catalog_path = FilePathManager::GetInstance().GetSystemCatalogPath();
 		CreateFileIfNotExists(catalog_path);
 		if (GetFileSize(catalog_path) > 0) {
+			LOG_TRACE("Catalog file exists!! loading from disk");
 			auto catalog_fs = FileStream(catalog_path);
 			BinaryDeserializer deserializer(catalog_fs);
 			Deserialize(deserializer);
@@ -28,9 +29,7 @@ public:
 		EnsureTableFilesExist();
 	}
 
-	table_oid_t TryCreateTable(const std::string &table_name, const Schema &schema);
-
-	table_oid_t CreateTable(const std::string &table_name, const Schema &schema);
+	std::optional<table_oid_t> CreateTable(const std::string &table_name, const Schema &schema);
 
 	std::shared_ptr<TableMeta> GetTable(const std::string &table_name) const {
 		if (table_names_.find(table_name) == table_names_.end()) {
@@ -44,13 +43,6 @@ public:
 			throw Exception("Table not found when getting table name");
 		}
 		return tables_.at(table_oid)->name_;
-	}
-	// Get the last page id of the table
-	page_id_t GetLastPageId(const table_oid_t table_oid) const {
-		if (tables_.find(table_oid) == tables_.end()) {
-			throw Exception("Table not found when getting last page id");
-		}
-		return tables_.at(table_oid)->last_table_page_id_;
 	}
 
 	void PersistToDisk() {
@@ -88,6 +80,7 @@ public:
 private:
 	void EnsureTableFilesExist() {
 		for (const auto &[table_name, table_oid] : table_names_) {
+			LOG_TRACE("Checking table files for table %s", table_name.c_str());
 			auto data_exists = std::filesystem::exists(FilePathManager::GetInstance().GetTableDataPath(table_name));
 			auto meta_exists = std::filesystem::exists(FilePathManager::GetInstance().GetTableMetaPath(table_name));
 			if (!data_exists || !meta_exists) {

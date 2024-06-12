@@ -19,6 +19,10 @@ public:
 		return slot_num_;
 	}
 
+	[[nodiscard]] std::string ToString() const {
+		return "RID[" + std::to_string(page_id_.page_number_) + ", " + std::to_string(slot_num_) + "]";
+	}
+
 private:
 	PageId page_id_ {};
 	uint32_t slot_num_ {0}; // logical offset from 0, 1...

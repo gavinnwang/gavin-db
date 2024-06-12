@@ -12,7 +12,10 @@ enum class IsolationLevel { READ_UNCOMMITTED, REPEATABLE_READ, READ_COMMITTED };
 enum class WType { INSERT = 0, DELETE, UPDATE };
 class Transaction {
 public:
-	explicit Transaction() = default;
+	explicit Transaction()
+	    : page_set_(std::make_shared<std::deque<std::reference_wrapper<Page>>>()),
+	      deleted_page_set_(std::make_shared<std::unordered_set<page_id_t>>()) {
+	}
 
 	auto GetPageSet() {
 		return page_set_;
