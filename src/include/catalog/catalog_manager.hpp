@@ -46,12 +46,12 @@ public:
 		return tables_.at(table_oid)->name_;
 	}
 	// Get the last page id of the table
-	page_id_t GetLastPageId(const table_oid_t table_oid) const {
-		if (tables_.find(table_oid) == tables_.end()) {
-			throw Exception("Table not found when getting last page id");
-		}
-		return tables_.at(table_oid)->last_table_page_id_;
-	}
+	// page_id_t GetLastPageId(const table_oid_t table_oid) const {
+	// 	if (tables_.find(table_oid) == tables_.end()) {
+	// 		throw Exception("Table not found when getting last page id");
+	// 	}
+	// 	return -1;
+	// }
 
 	void PersistToDisk() {
 		// persist the catalog to disk

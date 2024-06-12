@@ -1,6 +1,7 @@
 #pragma once
 
 #include "buffer/buffer_pool_manager.hpp"
+#include "common/logger.hpp"
 #include "common/rid.hpp"
 #include "common/typedef.hpp"
 #include "common/value.hpp"
@@ -23,19 +24,22 @@ public:
 	           std::shared_ptr<BufferPoolManager> bpm)
 	    : Index(std::move(index_meta), std::move(table_meta)), bpm_(std::move(bpm)) {
 
+		LOG_TRACE("BTreeIndex constructor called");
+
 		if (index_meta_->header_page_id_ == INVALID_PAGE_ID) {
+			LOG_TRACE("header page id is invalid, creating new header page");
 			// Initialize the header page
 			auto new_header_page_id = PageId {table_meta_->table_oid_};
-			auto header_pg = bpm_->NewPageGuarded(*table_meta_, new_header_page_id).UpgradeWrite();
+			auto header_pg = bpm_->NewPageGuarded(*index_meta_, new_header_page_id).UpgradeWrite();
 			auto &header_page = header_pg.AsMut<BtreeHeaderPage>();
-			ASSERT(new_header_page_id.page_number_ != INVALID_PAGE_ID, "create header page failed");
+			assert(new_header_page_id.page_number_ >= INVALID_PAGE_ID);
 			header_page.SetRootPageId(INVALID_PAGE_ID);
 			index_meta_->header_page_id_ = new_header_page_id.page_number_;
 		} else {
 			LOG_DEBUG("header page id already exist and is not invalid: %d", index_meta_->header_page_id_);
 		}
-		ASSERT(index_meta_->header_page_id_ != INVALID_PAGE_ID && index_meta_->header_page_id_ >= 0,
-		       "header page id is invalid");
+		assert(index_meta_->header_page_id_ >= 0);
+		assert(comparator_ != nullptr);
 	}
 
 protected:
@@ -87,6 +91,8 @@ protected:
 	                    Page &header_page) {
 		auto &leaf_page = SearchLeafPage(key, Operation::INSERT, transaction, header_page);
 		auto &leaf_node = leaf_page.AsMut<BtreeLeafPage>();
+		LOG_TRACE("Leaf node size: %d and max size %d", static_cast<int>(leaf_node.GetSize()),
+		          static_cast<int>(leaf_node.GetMaxSize()));
 
 		auto size = leaf_node.GetSize();
 		leaf_node.Insert(key, value, comparator_);
@@ -114,6 +120,7 @@ protected:
 
 		const auto &header_node = header_page.As<BtreeHeaderPage>();
 		auto root_page_id = header_node.GetRootPageId();
+		LOG_TRACE("Search from root page id: %d", root_page_id);
 		assert(root_page_id > 0);
 		auto *page = &bpm_->FetchPage({table_meta_->table_oid_, root_page_id});
 		const auto *btree_node = &page->As<BtreePage>();
@@ -189,39 +196,23 @@ protected:
 	}
 
 private:
-	// bool IsEmpty() {
-	// 	auto header_page_id = PageId {table_meta_->table_oid_, index_meta_->header_page_id_};
-	// 	ASSERT(header_page_id.page_number_ != INVALID_PAGE_ID, "header page id is invalid");
-	// 	auto &header_page = bpm_->FetchPageRead(header_page_id).As<BtreeHeaderPage>();
-	// 	return header_page.GetRootPageId() == INVALID_PAGE_ID;
-	// }
-
 	// pass in the header page to satisfy the assumption that we have the write lock to the header page
 	void CreateNewRoot(const IndexKeyType &key, const IndexValueType &value, BtreeHeaderPage &header_page) {
 		auto root_page_id = PageId {table_meta_->table_oid_};
-		auto &leaf_page = bpm_->NewPageGuarded(*table_meta_, root_page_id).UpgradeWrite().AsMut<BtreeLeafPage>();
+		auto &leaf_page = bpm_->NewPageGuarded(*index_meta_, root_page_id).UpgradeWrite().AsMut<BtreeLeafPage>();
 		leaf_page.Init();
-
-		ASSERT(root_page_id.page_number_ != INVALID_PAGE_ID, "create root page failed");
-
-		UpdateRootPageId(root_page_id, header_page); // update the root page id in the header page
-
+		assert(root_page_id.page_number_ > 0);
+		LOG_TRACE("Root page id set to: %d", root_page_id.page_number_);
+		header_page.SetRootPageId(root_page_id.page_number_);
+		// UpdateRootPageId(root_page_id, header_page); // update the root page id in the header page
 		leaf_page.Insert(key, value, comparator_);
 	}
 
 	// pass in the header page to satisfy the assumption that we have the write lock to the header page
-	void UpdateRootPageId(const PageId &root_page_id, BtreeHeaderPage &header_page) {
-		assert(index_meta_->header_page_id_ >= 0);
-		auto header_page_id = PageId {table_meta_->table_oid_, index_meta_->header_page_id_};
-		// auto &header_page = bpm_->FetchPageWrite(header_page_id).AsMut<BtreeHeaderPage>();
-		header_page.SetRootPageId(root_page_id.page_number_);
-	}
-
-	// page_id_t GetRootPageId() {
+	// void UpdateRootPageId(const PageId &root_page_id, BtreeHeaderPage &header_page) {
 	// 	assert(index_meta_->header_page_id_ >= 0);
 	// 	auto header_page_id = PageId {table_meta_->table_oid_, index_meta_->header_page_id_};
-	// 	auto &header_page = bpm_->FetchPageRead(header_page_id).As<BtreeHeaderPage>();
-	// 	return header_page.GetRootPageId();
+	// 	header_page.SetRootPageId(root_page_id.page_number_);
 	// }
 
 	std::shared_ptr<BufferPoolManager> bpm_;

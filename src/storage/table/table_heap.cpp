@@ -2,6 +2,7 @@
 #include "storage/table/table_heap.hpp"
 
 #include "buffer/buffer_pool_manager.hpp"
+#include "common/logger.hpp"
 #include "common/macros.hpp"
 #include "common/page_id.hpp"
 #include "storage/page/table_page.hpp"
@@ -16,7 +17,7 @@ using std::shared_ptr;
 TableHeap::TableHeap(shared_ptr<BufferPoolManager> bpm, std::shared_ptr<TableMeta> table_meta)
     : bpm_(bpm), table_meta_(std::move(table_meta)) {
 	assert(table_meta_ != nullptr);
-	if (table_meta_->GetLastTablePageId() == INVALID_PAGE_ID) {
+	if (table_meta_->GetLastTableHeapDataPageId() == INVALID_PAGE_ID) {
 		// page_id_t new_page_id;
 		PageId new_page_id {table_meta_->table_oid_};
 		auto guard = bpm->NewPageGuarded(*table_meta_, new_page_id);
@@ -29,13 +30,12 @@ TableHeap::TableHeap(shared_ptr<BufferPoolManager> bpm, std::shared_ptr<TableMet
 		// table_meta_->SetFirstTablePageId(new_page_id.page_number_);
 		// table_meta_->SetLastTablePageId(new_page_id.page_number_);
 	}
-	ASSERT(table_meta_->GetLastTablePageId() != INVALID_PAGE_ID && table_meta_->GetLastTablePageId() >= 0,
-	       "table heap last page is invalid");
+	assert(table_meta_->GetLastTableHeapDataPageId() >= 0);
 };
 
 std::optional<RID> TableHeap::InsertTuple(const TupleMeta &meta, const Tuple &tuple) {
 	std::unique_lock<std::mutex> guard(latch_);
-	PageId new_page_id {table_meta_->table_oid_, table_meta_->GetLastTablePageId()};
+	PageId new_page_id {table_meta_->table_oid_, table_meta_->GetLastTableHeapDataPageId()};
 	auto page_guard = bpm_->FetchPageWrite(new_page_id);
 	while (true) {
 		auto &page = page_guard.AsMut<TablePage>();
@@ -60,9 +60,10 @@ std::optional<RID> TableHeap::InsertTuple(const TupleMeta &meta, const Tuple &tu
 		auto next_page_guard = npg.UpgradeWrite();
 		page_guard = std::move(next_page_guard);
 	}
-	auto last_page_id = table_meta_->GetLastTablePageId();
+	auto last_page_id = table_meta_->GetLastTableHeapDataPageId();
 
 	auto &page = page_guard.AsMut<TablePage>();
+	LOG_TRACE("Inserting tuple at page_id %d", last_page_id);
 	auto slot_id = *page.InsertTuple(meta, tuple);
 	guard.unlock();
 	page_guard.Drop();
@@ -99,7 +100,7 @@ TupleMeta TableHeap::GetTupleMeta(RID rid) {
 TableIterator TableHeap::MakeIterator() {
 	std::unique_lock<std::mutex> guard(latch_);
 	auto table_oid = table_meta_->table_oid_;
-	auto last_page_id = table_meta_->GetLastTablePageId();
+	auto last_page_id = table_meta_->GetLastTableHeapDataPageId();
 	guard.unlock();
 
 	auto page_guard = bpm_->FetchPageRead({table_oid, last_page_id});

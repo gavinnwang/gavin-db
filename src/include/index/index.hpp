@@ -1,18 +1,18 @@
 #pragma once
 
-#include "buffer/buffer_pool_manager.hpp"
 #include "catalog/column.hpp"
-#include "catalog/schema.hpp"
 #include "common/logger.hpp"
 #include "common/macros.hpp"
 #include "common/rid.hpp"
 #include "common/typedef.hpp"
 #include "common/value.hpp"
-#include "storage/page/btree_page.hpp"
 #include "storage/serializer/serializer.hpp"
+#include "storage/table/table_meta.hpp"
 #include "storage/table/tuple.hpp"
 
-#include <unordered_set>
+#include <iomanip>
+#include <sstream>
+
 namespace db {
 enum class IndexConstraintType : uint8_t {
 	NONE = 0,    // no constraint
@@ -21,12 +21,13 @@ enum class IndexConstraintType : uint8_t {
 	FOREIGN = 3  // built to enforce a FOREIGN KEY constraint
 };
 
-struct IndexMeta {
+struct IndexMeta : public PageAllocator {
 public:
 	explicit IndexMeta() = default;
-	IndexMeta(std::string name, table_oid_t table_id, Column key_col, IndexConstraintType index_constraint_type)
+	IndexMeta(std::string name, table_oid_t table_id, const std::shared_ptr<TableMeta> &table_meta, Column key_col,
+	          IndexConstraintType index_constraint_type)
 	    : name_(std::move(name)), table_id_(table_id), key_col_(std::move(key_col)),
-	      index_constraint_type_(index_constraint_type) {
+	      index_constraint_type_(index_constraint_type), table_meta_(table_meta) {
 	}
 
 	std::string name_;
@@ -35,6 +36,13 @@ public:
 	// column_t key_col_id_;
 	IndexConstraintType index_constraint_type_;
 	page_id_t header_page_id_ {INVALID_PAGE_ID};
+	const std::shared_ptr<TableMeta> table_meta_;
+
+	PageId AllocatePage() {
+		auto new_page = table_meta_->IncrementTableDataPageId();
+		LOG_TRACE("Allocated new page for index: %d", new_page);
+		return {table_meta_->table_oid_, new_page};
+	}
 
 	void Serialize(Serializer &serializer) const {
 		serializer.WriteProperty(100, "index_name", name_);
@@ -58,17 +66,36 @@ public:
 };
 
 using Comparator = std::function<int(const IndexKeyType &, const IndexKeyType &)>;
+
+static std::string IndexKeyTypeToString(const IndexKeyType &key) {
+	std::ostringstream oss;
+	oss << "IndexKeyType contents: [";
+	for (size_t i = 0; i < key.size(); ++i) {
+		if (i != 0) {
+			oss << ", ";
+		}
+		// If data_t is not char, you might want to print in hexadecimal or as integer
+		if constexpr (std::is_same_v<data_t, char>) {
+			oss << key[i];
+		} else {
+			oss << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(key[i]);
+		}
+	}
+	oss << "]";
+	return oss.str();
+}
 class Index {
 
 public:
 	Index() = delete;
 	DISALLOW_COPY(Index);
 	Index(std::shared_ptr<IndexMeta> index_meta, std::shared_ptr<TableMeta> table_meta)
-	    : index_meta_(index_meta), table_meta_(table_meta) {
+	    : index_meta_(index_meta), table_meta_(table_meta), comparator_(GetComparator(index_meta->key_col_.GetType())) {
 	}
 
 	bool InsertRecord(const Tuple &tuple, const RID rid) {
 		auto key = ConvertTupleToKey(tuple);
+		LOG_TRACE("Inserting key: %s", IndexKeyTypeToString(key).c_str());
 		return InternalInsertRecord(std::move(key), rid);
 	}
 	bool DeleteRecord(const Tuple &tuple) {
@@ -78,10 +105,13 @@ public:
 
 	bool ScanKey(const Tuple &tuple, std::vector<RID> &rids) {
 		auto key = ConvertTupleToKey(tuple);
+		LOG_TRACE("Scanning key: %s", IndexKeyTypeToString(key).c_str());
 		return InternalScanKey(std::move(key), rids);
 	}
 
 	virtual ~Index() = default;
+
+	// debug
 
 protected:
 	virtual bool InternalInsertRecord(const IndexKeyType key, const RID rid) = 0;
@@ -110,6 +140,8 @@ private:
 
 	template <typename T>
 	static int Compare(const IndexKeyType &a, const IndexKeyType &b) {
+		LOG_TRACE("Comparing %s and %s", IndexKeyTypeToString(a).c_str(), IndexKeyTypeToString(b).c_str());
+
 		T lhs = *reinterpret_cast<const T *>(a.data());
 		T rhs = *reinterpret_cast<const T *>(b.data());
 		return (lhs < rhs) ? -1 : (lhs > rhs) ? 1 : 0;
