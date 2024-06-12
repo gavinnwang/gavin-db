@@ -51,7 +51,8 @@ public:
 
 		auto key_idx = FindKeyIndex(key, comparator);
 
-		if (comparator(node_array_[key_idx].first, key) == 0) {
+		// if size is 0 then no way already exist
+		if (GetSize() && comparator(node_array_[key_idx].first, key) == 0) {
 			LOG_TRACE("Key %s already exists, updating value to %s", IndexKeyTypeToString(key).c_str(),
 			          value.ToString().c_str());
 			// todo(gavinnwang): update the value of the key?
@@ -76,10 +77,19 @@ public:
 		return std::distance(node_array_, target_idx);
 	}
 	std::optional<IndexValueType> Lookup(const IndexKeyType &key, const Comparator &comparator) const {
+
 		idx_t target_index = FindKeyIndex(key, comparator);
-		if (target_index < GetSize() && node_array_[target_index].first == key) {
+
+		auto leaf_key = node_array_[target_index].first;
+		LOG_TRACE("comparing to leaf key %s at index %d", IndexKeyTypeToString(leaf_key).c_str(),
+		          static_cast<int>(target_index));
+
+		if (target_index < GetSize() && leaf_key == key) {
+			LOG_TRACE("Key %s index is %d", IndexKeyTypeToString(key).c_str(), static_cast<int>(target_index));
 			return node_array_[target_index].second;
 		}
+		LOG_TRACE("Key with looked up index %d not found", static_cast<int>(target_index));
+
 		return std::nullopt;
 	}
 	void MoveHalfTo(BtreeLeafPage &recipient) {

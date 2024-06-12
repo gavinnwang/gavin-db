@@ -65,6 +65,9 @@ protected:
 		Transaction transaction {};
 
 		auto &leaf_raw_page = SearchLeafPage(key, Operation::SEARCH, transaction, header_raw_page);
+
+		LOG_TRACE("Traversed to leaf page found with page id: %d", leaf_raw_page.GetPageId().page_number_);
+
 		const auto &leaf_page = leaf_raw_page.As<BtreeLeafPage>();
 
 		auto value = leaf_page.Lookup(key, comparator_);
@@ -89,7 +92,6 @@ protected:
 		header_raw_page.WLatch();
 		Transaction transaction {};
 		LOG_TRACE("Adding header page id %d into page set (header)", header_raw_page.GetPageId().page_number_);
-		LOG_TRACE("page address: %p", &header_raw_page);
 		transaction.AddIntoPageSet(header_raw_page);
 
 		auto &header_page = header_raw_page.AsMut<BtreeHeaderPage>();
@@ -188,6 +190,7 @@ protected:
 			return;
 		}
 		// parent don't have space now have to split the parent internal node
+		assert(false);
 
 		// currently the internal page size == internal max size which means that we have to allocate a new buffer space
 		// inorder to prevent overflowing the current page
@@ -257,7 +260,6 @@ protected:
 				child_page->WLatch();
 				// add parent to page set
 				LOG_TRACE("Adding page id %d into page set", page->GetPageId().page_number_);
-				LOG_TRACE("page address: %p", page);
 				transaction.AddIntoPageSet(*page);
 				// if child node is safe to latch, release parent latches
 				LOG_TRACE("Check if child node %d is safe to latch", child_page->GetPageId().page_number_);
@@ -302,7 +304,6 @@ protected:
 			auto page = transaction.GetPageSet()->front();
 			LOG_TRACE("Releasing page %d for table %d", page.get().GetPageId().page_number_,
 			          page.get().GetPageId().table_id_);
-			LOG_TRACE("page address: %p", &page);
 			transaction.GetPageSet()->pop_front();
 			page.get().WUnlatch();
 			// dirty bit is false because we grab latch on child and

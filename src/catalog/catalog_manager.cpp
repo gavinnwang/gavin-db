@@ -18,7 +18,6 @@ std::optional<table_oid_t> CatalogManager::CreateTable(const std::string &table_
 	CreateFileIfNotExists(FilePathManager::GetInstance().GetTableMetaPath(table_name));
 	CreateFileIfNotExists(FilePathManager::GetInstance().GetTableDataPath(table_name));
 	PersistToDisk();
-
 	// create table data and meta files
 	return table_oid;
 }
