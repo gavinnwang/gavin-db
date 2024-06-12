@@ -41,7 +41,6 @@ public:
 
 	PageId AllocatePage() {
 		auto new_page = table_meta_->IncrementTableDataPageId();
-		LOG_TRACE("Allocated new page for index: %d", new_page);
 		return {table_meta_->table_oid_, new_page};
 	}
 
@@ -142,7 +141,7 @@ private:
 
 	template <typename T>
 	static int Compare(const IndexKeyType &a, const IndexKeyType &b) {
-		LOG_TRACE("Comparing %s and %s", IndexKeyTypeToString(a).c_str(), IndexKeyTypeToString(b).c_str());
+		// LOG_TRACE("Comparing %s and %s", IndexKeyTypeToString(a).c_str(), IndexKeyTypeToString(b).c_str());
 
 		T lhs = *reinterpret_cast<const T *>(a.data());
 		T rhs = *reinterpret_cast<const T *>(b.data());
@@ -150,6 +149,8 @@ private:
 	}
 	template <>
 	int Compare<std::string>(const IndexKeyType &a, const IndexKeyType &b) {
+		(void)a;
+		(void)b;
 		throw NotImplementedException("varchar key? hmmm...");
 		// return std::lexicographical_compare(a.begin(), a.end(), b.begin(), b.end());
 	}

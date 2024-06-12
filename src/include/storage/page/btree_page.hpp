@@ -31,11 +31,18 @@ public:
 		max_size_ = max_size;
 	}
 	idx_t GetMinSize() const {
-		return max_size_ / 2 - 1;
+		if (IsLeafPage()) {
+			return max_size_ / 2;
+		}
+		return (max_size_ + 1) / 2;
 	}
 
 	void SetPageType(IndexPageType page_type) {
 		page_type_ = page_type;
+	}
+
+	[[nodiscard]] IndexPageType GetPageType() const {
+		return page_type_;
 	}
 
 	bool IsLeafPage() const {
@@ -57,11 +64,23 @@ public:
 		parent_page_id_ = parent_page_id;
 	}
 
+	void SetPageId(page_id_t page_id) {
+		page_id_ = page_id;
+	}
+
+	page_id_t GetPageId() const {
+		return page_id_;
+	}
+
 private:
 	IndexPageType page_type_;
 	page_id_t parent_page_id_ {INVALID_PAGE_ID};
+	page_id_t page_id_;
 	idx_t size_ {0};
 	idx_t max_size_;
 };
+
+static constexpr int BTREE_PAGE_HEADER_SIZE = 32;
+static_assert(sizeof(BtreePage) == BTREE_PAGE_HEADER_SIZE);
 
 } // namespace db

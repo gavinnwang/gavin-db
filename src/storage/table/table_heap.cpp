@@ -63,7 +63,6 @@ std::optional<RID> TableHeap::InsertTuple(const TupleMeta &meta, const Tuple &tu
 	auto last_page_id = table_meta_->GetLastTableHeapDataPageId();
 
 	auto &page = page_guard.AsMut<TablePage>();
-	LOG_TRACE("Inserting tuple at page_id %d", last_page_id);
 	auto slot_id = *page.InsertTuple(meta, tuple);
 	guard.unlock();
 	page_guard.Drop();

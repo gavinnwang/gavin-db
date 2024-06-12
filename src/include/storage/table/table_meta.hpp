@@ -63,7 +63,6 @@ struct TableMeta : public PageAllocator {
 	PageId AllocatePage() final {
 		assert(table_oid_ != INVALID_TABLE_OID);
 		last_table_heap_data_page_id_ = IncrementTableDataPageId();
-		LOG_TRACE("Allocated page for heap: %d", last_table_heap_data_page_id_);
 		return {table_oid_, last_table_data_page_id_};
 	}
 
