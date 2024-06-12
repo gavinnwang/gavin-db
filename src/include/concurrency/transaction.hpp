@@ -1,5 +1,6 @@
 #pragma once
 
+#include "common/logger.hpp"
 #include "storage/page/page.hpp"
 
 #include <deque>
@@ -21,6 +22,7 @@ public:
 		return page_set_;
 	}
 	void AddIntoPageSet(std::reference_wrapper<Page> page) {
+    LOG_TRACE("Adding page %d into page set", page.get().GetPageId().page_number_);
 		page_set_->push_back(page);
 	}
 

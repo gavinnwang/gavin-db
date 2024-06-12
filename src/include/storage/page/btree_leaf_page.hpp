@@ -3,18 +3,18 @@
 #include "common/exception.hpp"
 #include "common/logger.hpp"
 #include "common/typedef.hpp"
-#include "index/btree_index.hpp"
 #include "index/index.hpp"
 #include "storage/page/btree_page.hpp"
 
 #include <algorithm>
 #include <optional>
 namespace db {
+static constexpr int LEAF_PAGE_HEADER_SIZE = 40;
+
+static constexpr int LEAF_MAX_NODE_SIZE =
+    (PAGE_SIZE - LEAF_PAGE_HEADER_SIZE) / (sizeof(IndexKeyType) + sizeof(IndexValueType));
 class BtreeLeafPage : public BtreePage {
 	using LeafNode = std::pair<IndexKeyType, IndexValueType>;
-	static constexpr int LEAF_PAGE_HEADER_SIZE = 16;
-	static constexpr int MAX_NODE_SIZE =
-	    (PAGE_SIZE - LEAF_PAGE_HEADER_SIZE) / (sizeof(IndexKeyType) + sizeof(IndexValueType));
 
 public:
 	// delete all 5
@@ -25,12 +25,14 @@ public:
 	BtreeLeafPage &operator=(BtreeLeafPage &&other) = delete;
 	~BtreeLeafPage() = delete;
 
-	void Init(idx_t max_size = MAX_NODE_SIZE) {
-		SetSize(0);
-		SetMaxSize(max_size);
-		LOG_TRACE("Setting size to 0 and max size to %d", static_cast<int>(max_size));
-		SetNextPageId(INVALID_PAGE_ID);
+	void Init(page_id_t page_id, page_id_t parent_id) {
 		SetPageType(IndexPageType::LEAF_PAGE);
+		SetSize(0);
+		SetPageId(page_id);
+		SetParentPageId(parent_id);
+		SetNextPageId(INVALID_PAGE_ID);
+		SetMaxSize(LEAF_MAX_NODE_SIZE);
+		LOG_TRACE("Setting size to 0 and max size to %d", static_cast<int>(GetMaxSize()));
 	}
 
 	page_id_t GetNextPageId() const {
@@ -46,7 +48,7 @@ public:
 		if (GetSize() == GetMaxSize()) {
 			throw RuntimeException("Leaf node is full, shouldve split bruh");
 		}
-		assert(key[0]);
+
 		auto key_idx = FindKeyIndex(key, comparator);
 
 		if (comparator(node_array_[key_idx].first, key) == 0) {
@@ -80,9 +82,21 @@ public:
 		}
 		return std::nullopt;
 	}
+	void MoveHalfTo(BtreeLeafPage &recipient) {
+		idx_t start_split_indx = GetMinSize();
+		SetSize(start_split_indx);
+		recipient.CopyNFrom(node_array_ + start_split_indx, GetMaxSize() - start_split_indx);
+	}
+	void CopyNFrom(LeafNode *items, idx_t size) {
+		std::copy(items, items + size, node_array_ + GetSize());
+		IncreaseSize(size);
+	}
 
 private:
 	page_id_t next_page_id_ {INVALID_PAGE_ID};
 	LeafNode node_array_[0];
 };
+
+static_assert(sizeof(BtreeLeafPage) == LEAF_PAGE_HEADER_SIZE);
+
 } // namespace db

@@ -21,7 +21,7 @@ public:
 		std::filesystem::path catalog_path = FilePathManager::GetInstance().GetSystemCatalogPath();
 		CreateFileIfNotExists(catalog_path);
 		if (GetFileSize(catalog_path) > 0) {
-			LOG_TRACE("Catalog file exists!! loading from disk");
+			LOG_TRACE("Catalog file exists! Loading from disk");
 			auto catalog_fs = FileStream(catalog_path);
 			BinaryDeserializer deserializer(catalog_fs);
 			Deserialize(deserializer);
