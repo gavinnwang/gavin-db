@@ -24,7 +24,7 @@ TEST(StorageTest, TablePersistTest) {
 	auto schema = Schema({c1, c2});
 	auto table_name = "usr";
 
-	cm->TryCreateTable(table_name, schema);
+	cm->CreateTable(table_name, schema);
 	auto table_meta = cm->GetTable(table_name);
 	auto table_heap = std::make_unique<TableHeap>(bpm, table_meta);
 
