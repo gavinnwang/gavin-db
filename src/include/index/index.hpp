@@ -1,6 +1,7 @@
 #pragma once
 
 #include "catalog/column.hpp"
+#include "common/exception.hpp"
 #include "common/logger.hpp"
 #include "common/macros.hpp"
 #include "common/rid.hpp"
@@ -89,24 +90,25 @@ class Index {
 public:
 	Index() = delete;
 	DISALLOW_COPY(Index);
-	Index(std::shared_ptr<IndexMeta> index_meta, std::shared_ptr<TableMeta> table_meta)
-	    : index_meta_(index_meta), table_meta_(table_meta), comparator_(GetComparator(index_meta->key_col_.GetType())) {
+	Index(const std::shared_ptr<IndexMeta> &index_meta, std::shared_ptr<TableMeta> table_meta)
+	    : index_meta_(index_meta), table_meta_(std::move(table_meta)),
+	      comparator_(GetComparator(index_meta->key_col_.GetType())) {
 	}
 
 	bool InsertRecord(const Tuple &tuple, const RID rid) {
 		auto key = ConvertTupleToKey(tuple);
 		LOG_TRACE("Inserting key: %s", IndexKeyTypeToString(key).c_str());
-		return InternalInsertRecord(std::move(key), rid);
+		return InternalInsertRecord(key, rid);
 	}
 	bool DeleteRecord(const Tuple &tuple) {
 		auto key = ConvertTupleToKey(tuple);
-		return InternalDeleteRecord(std::move(key));
+		return InternalDeleteRecord(key);
 	}
 
 	bool ScanKey(const Tuple &tuple, std::vector<RID> &rids) {
 		auto key = ConvertTupleToKey(tuple);
 		LOG_TRACE("Scanning key: %s", IndexKeyTypeToString(key).c_str());
-		return InternalScanKey(std::move(key), rids);
+		return InternalScanKey(key, rids);
 	}
 
 	virtual ~Index() = default;
@@ -114,9 +116,9 @@ public:
 	// debug
 
 protected:
-	virtual bool InternalInsertRecord(const IndexKeyType key, const RID rid) = 0;
-	virtual bool InternalDeleteRecord(const IndexKeyType key) = 0;
-	virtual bool InternalScanKey(const IndexKeyType key, std::vector<RID> &rids) = 0;
+	virtual bool InternalInsertRecord(IndexKeyType key, RID rid) = 0;
+	virtual bool InternalDeleteRecord(IndexKeyType key) = 0;
+	virtual bool InternalScanKey(IndexKeyType key, std::vector<RID> &rids) = 0;
 	std::shared_ptr<IndexMeta> index_meta_;
 	std::shared_ptr<TableMeta> table_meta_;
 	// comparator used to determine the order of keys
@@ -148,10 +150,11 @@ private:
 	}
 	template <>
 	int Compare<std::string>(const IndexKeyType &a, const IndexKeyType &b) {
-		return std::lexicographical_compare(a.begin(), a.end(), b.begin(), b.end());
+		throw NotImplementedException("varchar key? hmmm...");
+		// return std::lexicographical_compare(a.begin(), a.end(), b.begin(), b.end());
 	}
 
-	const IndexKeyType ConvertTupleToKey(const Tuple &tuple) {
+	IndexKeyType ConvertTupleToKey(const Tuple &tuple) {
 		auto value = tuple.GetValue(index_meta_->key_col_);
 		LOG_TRACE("converted to key: %s", value.ToString().c_str());
 		return value.ConvertToIndexKeyType();

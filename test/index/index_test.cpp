@@ -16,7 +16,7 @@ TEST(IndexTest, IndexTest) {
 	auto c1 = db::Column("user_id", db::TypeId::INTEGER);
 	auto c2 = db::Column("user_name", db::TypeId::VARCHAR, 256);
 	auto schema = db::Schema({c1, c2});
-	auto table_name = "user";
+	const auto *table_name = "user";
 
 	cm->CreateTable(table_name, schema);
 	auto table_meta = cm->GetTable(table_name);
