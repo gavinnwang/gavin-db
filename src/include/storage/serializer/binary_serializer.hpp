@@ -8,7 +8,7 @@ class BinarySerializer : public Serializer {
 
 public:
 	explicit BinarySerializer(WriteStream &stream, bool serialize_default_values_p = false) : stream_(stream) {
-		serialize_default_values = serialize_default_values_p;
+		serialize_default_values_ = serialize_default_values_p;
 	}
 
 private:

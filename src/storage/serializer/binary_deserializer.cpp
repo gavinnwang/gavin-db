@@ -37,7 +37,7 @@ void BinaryDeserializer::OnOptionalPropertyEnd(bool present) {
 }
 
 void BinaryDeserializer::OnObjectBegin() {
-	nesting_level++;
+	nesting_level_++;
 }
 
 void BinaryDeserializer::OnObjectEnd() {
@@ -46,7 +46,7 @@ void BinaryDeserializer::OnObjectEnd() {
 		throw SerializationException("Failed to deserialize: expected end of object, but found field id: " +
 		                             std::to_string(next_field));
 	}
-	nesting_level--;
+	nesting_level_--;
 }
 
 idx_t BinaryDeserializer::OnListBegin() {

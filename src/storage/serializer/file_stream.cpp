@@ -10,46 +10,46 @@
 namespace db {
 
 FileStream::FileStream(const std::filesystem::path &file_path, std::ios::openmode mode)
-    : file_path(file_path), owns_file(true) {
-	file.open(file_path, mode);
-	if (!file.is_open()) {
+    : file_path_(file_path), owns_file_(true) {
+	file_.open(file_path, mode);
+	if (!file_.is_open()) {
 		throw Exception("Failed to open file: " + file_path.string());
 	}
-	file.clear(); // Clear any error state
-	file.seekg(0, std::ios::beg);
-	file.seekp(0, std::ios::beg);
+	file_.clear(); // Clear any error state
+	file_.seekg(0, std::ios::beg);
+	file_.seekp(0, std::ios::beg);
 }
 
-FileStream::FileStream(std::fstream &&file) : file(std::move(file)), owns_file(false) {
-	if (!this->file.is_open()) {
+FileStream::FileStream(std::fstream &&file) : file_(std::move(file)), owns_file_(false) {
+	if (!this->file_.is_open()) {
 		throw Exception("Provided fstream is not open");
 	}
 }
 
 FileStream::~FileStream() {
-	if (owns_file && file.is_open()) {
-		file.close();
+	if (owns_file_ && file_.is_open()) {
+		file_.close();
 	}
 }
 
 void FileStream::WriteData(const_data_ptr_t buffer, idx_t write_size) {
-	if (!file.write(const_char_ptr_cast(buffer), write_size)) {
+	if (!file_.write(const_char_ptr_cast(buffer), write_size)) {
 		throw Exception("Failed to write data to file");
 	}
-	file.flush();
+	file_.flush();
 }
 
 void FileStream::ReadData(data_ptr_t buffer, idx_t read_size) {
-	if (!file.read(reinterpret_cast<char *>(buffer), read_size)) {
+	if (!file_.read(reinterpret_cast<char *>(buffer), read_size)) {
 		std::ostringstream error_msg;
 		error_msg << "Failed to read data from file. ";
 
 		// Check the stream state and append relevant messages
-		if (file.eof()) {
+		if (file_.eof()) {
 			error_msg << "Reason: End of file reached.";
-		} else if (file.fail()) {
+		} else if (file_.fail()) {
 			error_msg << "Reason: Logical error on i/o operation.";
-		} else if (file.bad()) {
+		} else if (file_.bad()) {
 			error_msg << "Reason: Read/writing error on i/o operation.";
 		} else {
 			error_msg << "Reason: Unknown error.";
@@ -60,22 +60,22 @@ void FileStream::ReadData(data_ptr_t buffer, idx_t read_size) {
 }
 
 void FileStream::Rewind() {
-	file.clear(); // Clear any errors
-	file.seekg(0, std::ios::beg);
-	file.seekp(0, std::ios::beg);
-	assert(file.tellg() == 0);
+	file_.clear(); // Clear any errors
+	file_.seekg(0, std::ios::beg);
+	file_.seekp(0, std::ios::beg);
+	assert(file_.tellg() == 0);
 }
 
 void FileStream::Release() {
-	owns_file = false;
+	owns_file_ = false;
 }
 
 idx_t FileStream::GetPosition() {
-	return static_cast<idx_t>(file.tellg());
+	return static_cast<idx_t>(file_.tellg());
 }
 
 std::string FileStream::GetFilePath() const {
-	return file_path;
+	return file_path_;
 }
 
 } // namespace db
