@@ -22,27 +22,19 @@ enum class IndexConstraintType : uint8_t {
 	FOREIGN = 3  // built to enforce a FOREIGN KEY constraint
 };
 
-struct IndexMeta : public PageAllocator {
+struct IndexMeta {
 public:
-	explicit IndexMeta() = default;
-	IndexMeta(std::string name, table_oid_t table_id, const std::shared_ptr<TableMeta> &table_meta, Column key_col,
-	          IndexConstraintType index_constraint_type)
+	IndexMeta() = default;
+	IndexMeta(std::string name, table_oid_t table_id, Column key_col, IndexConstraintType index_constraint_type)
 	    : name_(std::move(name)), table_id_(table_id), key_col_(std::move(key_col)),
-	      index_constraint_type_(index_constraint_type), table_meta_(table_meta) {
+	      index_constraint_type_(index_constraint_type) {
 	}
 
 	std::string name_;
 	table_oid_t table_id_;
 	Column key_col_;
-	// column_t key_col_id_;
 	IndexConstraintType index_constraint_type_;
 	page_id_t header_page_id_ {INVALID_PAGE_ID};
-	const std::shared_ptr<TableMeta> table_meta_;
-
-	PageId AllocatePage() {
-		auto new_page = table_meta_->IncrementTableDataPageId();
-		return {table_meta_->table_oid_, new_page};
-	}
 
 	void Serialize(Serializer &serializer) const {
 		serializer.WriteProperty(100, "index_name", name_);
@@ -95,7 +87,7 @@ static std::string IndexKeyTypeToString(const IndexKeyType &key) {
 	oss << "]";
 	return oss.str();
 }
-class Index {
+class Index : public PageAllocator {
 
 public:
 	Index() = delete;
@@ -105,6 +97,10 @@ public:
 	      comparator_(GetComparator(index_meta->key_col_.GetType())) {
 	}
 
+	PageId AllocatePage() override {
+		auto new_page = table_meta_->IncrementTableDataPageId();
+		return {table_meta_->table_oid_, new_page};
+	}
 	bool InsertRecord(const Tuple &tuple, const RID rid) {
 		auto key = ConvertTupleToKey(tuple);
 		LOG_TRACE("Inserting key: %s", IndexKeyTypeToString(key).c_str());
@@ -121,7 +117,7 @@ public:
 		return InternalScanKey(key, rids);
 	}
 
-	virtual ~Index() = default;
+	~Index() override = default;
 
 	// debug
 

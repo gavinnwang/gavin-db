@@ -85,8 +85,8 @@ TEST(IndexTest, IndexManyInsertionsTest) {
 	cm->CreateTable(table_name, schema);
 	auto table_meta = cm->GetTable(table_name);
 
-	auto index_meta = std::make_shared<IndexMeta>("user_id_index", table_meta->table_oid_, table_meta,
-	                                              schema.GetColumn(0), IndexConstraintType::PRIMARY);
+	auto index_meta = std::make_shared<IndexMeta>("user_id_index", table_meta->table_oid_, schema.GetColumn(0),
+	                                              IndexConstraintType::PRIMARY);
 
 	auto btree_index = std::make_unique<BTreeIndex>(index_meta, table_meta, bpm);
 

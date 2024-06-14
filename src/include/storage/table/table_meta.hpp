@@ -12,7 +12,7 @@
 
 namespace db {
 
-struct TableMeta : public PageAllocator {
+struct TableMeta {
 	explicit TableMeta() = default;
 
 	TableMeta(Schema schema, std::string name, table_oid_t table_oid)
@@ -61,13 +61,6 @@ struct TableMeta : public PageAllocator {
 			return last_table_data_page_id_ = START_PAGE_ID;
 		}
 		return ++last_table_data_page_id_;
-	}
-
-	// allocate page for table heap
-	PageId AllocatePage() final {
-		assert(table_oid_ != INVALID_TABLE_OID);
-		last_table_heap_data_page_id_ = IncrementTableDataPageId();
-		return {table_oid_, last_table_data_page_id_};
 	}
 
 	void IncreaseTupleCount() {

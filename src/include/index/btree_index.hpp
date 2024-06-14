@@ -35,9 +35,9 @@ class BTreeIndex : public Index {
 	enum class Operation { SEARCH, INSERT, DELETE };
 
 public:
-	BTreeIndex(std::shared_ptr<IndexMeta> index_meta, std::shared_ptr<TableMeta> table_meta,
+	BTreeIndex(const std::shared_ptr<IndexMeta> &index_meta, std::shared_ptr<TableMeta> table_meta,
 	           const std::shared_ptr<BufferPoolManager> &bpm)
-	    : Index(std::move(index_meta), std::move(table_meta)), bpm_(bpm) {
+	    : Index(index_meta, std::move(table_meta)), bpm_(bpm) {
 
 		LOG_TRACE("BTreeIndex constructor called");
 
@@ -45,7 +45,7 @@ public:
 			LOG_TRACE("header page id is invalid, creating new header page");
 			// Initialize the header page
 			auto new_header_page_id = PageId {table_meta_->table_oid_};
-			auto header_pg = bpm_->NewPageGuarded(*index_meta_, new_header_page_id).UpgradeWrite();
+			auto header_pg = bpm_->NewPageGuarded(*this, new_header_page_id).UpgradeWrite();
 			auto &header_page = header_pg.AsMut<BtreeHeaderPage>();
 			assert(new_header_page_id.page_number_ >= INVALID_PAGE_ID);
 			header_page.SetRootPageId(INVALID_PAGE_ID);
@@ -164,7 +164,7 @@ protected:
 			LOG_TRACE("Split node is root, create new root");
 			auto new_page_id = PageId {table_meta_->table_oid_};
 			auto &new_internal_node =
-			    bpm_->NewPageGuarded(*index_meta_, new_page_id).UpgradeWrite().AsMut<BtreeInternalPage>();
+			    bpm_->NewPageGuarded(*this, new_page_id).UpgradeWrite().AsMut<BtreeInternalPage>();
 			LOG_TRACE("Split node is root, create new root with page id %d", new_page_id.page_number_);
 			new_internal_node.Init(new_page_id.page_number_, INVALID_PAGE_ID);
 			new_internal_node.PopulateNewRoot(original_node.GetPageId(), key, sibling_new_node.GetPageId());
@@ -236,7 +236,7 @@ protected:
 	template <IsBtreeNode N>
 	N &Split(N &node) {
 		auto new_page_id = PageId {table_meta_->table_oid_};
-		auto &new_page = bpm_->NewPage(*index_meta_, new_page_id);
+		auto &new_page = bpm_->NewPage(*this, new_page_id);
 		assert(new_page_id.page_number_ > 0);
 
 		N &new_node = new_page.AsMut<N>();
@@ -385,7 +385,7 @@ private:
 	// pass in the header page to satisfy the assumption that we have the write lock to the header page
 	void CreateNewRoot(const IndexKeyType &key, const IndexValueType &value, BtreeHeaderPage &header_page) {
 		auto root_page_id = PageId {table_meta_->table_oid_};
-		auto &leaf_page = bpm_->NewPageGuarded(*index_meta_, root_page_id).UpgradeWrite().AsMut<BtreeLeafPage>();
+		auto &leaf_page = bpm_->NewPageGuarded(*this, root_page_id).UpgradeWrite().AsMut<BtreeLeafPage>();
 		leaf_page.Init(root_page_id.page_number_, INVALID_PAGE_ID);
 		assert(root_page_id.page_number_ > 0);
 		LOG_TRACE("Root page id set to: %d", root_page_id.page_number_);
