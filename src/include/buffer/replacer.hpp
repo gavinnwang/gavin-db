@@ -11,5 +11,6 @@ public:
 	virtual auto Evict(frame_id_t &frame_id) -> bool = 0;
 	virtual void Pin(frame_id_t frame_id) = 0;
 	virtual void Unpin(frame_id_t frame_id) = 0;
+	virtual void Print() = 0;
 };
 } // namespace db

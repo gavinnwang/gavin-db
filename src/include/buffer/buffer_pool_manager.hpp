@@ -31,6 +31,18 @@ public:
 
 private:
 	bool AllocateFrame(frame_id_t &frame_id);
+	void PrintPages() {
+		for (const auto &page : pages_) {
+			std::cout << "PageId: " << page.page_id_.page_number_ << " PinCount: " << page.pin_count_
+			          << " Dirty: " << page.is_dirty_ << std::endl;
+		}
+	}
+	void PrintFreeList() {
+		for (const auto &frame_id : free_list_) {
+			std::cout << frame_id << " ";
+		}
+		std::cout << std::endl;
+	}
 
 	const frame_id_t pool_size_;
 

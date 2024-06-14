@@ -26,6 +26,9 @@ bool BufferPoolManager::AllocateFrame(frame_id_t &frame_id) {
 	if (free_list_.empty()) {
 		// gotta evict a random frame because
 		if (!replacer_->Evict(frame_id)) {
+			PrintPages();
+			replacer_->Print();
+			PrintFreeList();
 			return false;
 		}
 		if (pages_[frame_id].is_dirty_) {
@@ -107,6 +110,8 @@ Page &BufferPoolManager::FetchPage(PageId page_id) {
 bool BufferPoolManager::UnpinPage(PageId page_id, bool is_dirty) {
 	std::lock_guard<std::mutex> lock(latch_);
 	if (page_table_.find(page_id) == page_table_.end()) {
+		LOG_ERROR("Page %s not found in page table", page_id.ToString().c_str());
+		assert(false);
 		return false;
 	}
 	frame_id_t frame_id = page_table_[page_id];
@@ -118,6 +123,7 @@ bool BufferPoolManager::UnpinPage(PageId page_id, bool is_dirty) {
 		return false;
 	}
 	page.pin_count_--;
+	assert(page.pin_count_ >= 0);
 	if (page.pin_count_ == 0) {
 		replacer_->Unpin(frame_id);
 	}

@@ -21,6 +21,10 @@ struct PageId {
 	bool operator==(const PageId &other) const {
 		return table_id_ == other.table_id_ && page_number_ == other.page_number_;
 	}
+
+	std::string ToString() const {
+		return "PageId[" + std::to_string(table_id_) + ", " + std::to_string(page_number_) + "]";
+	}
 };
 
 struct PageId_Hash {

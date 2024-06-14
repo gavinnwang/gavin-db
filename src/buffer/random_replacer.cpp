@@ -3,10 +3,12 @@ namespace db {
 RandomBogoReplacer::RandomBogoReplacer() {
 }
 auto RandomBogoReplacer::Evict(frame_id_t &frame_id) -> bool {
-	for (const auto &iter: frame_store_) {
+	for (auto &iter : frame_store_) {
 		if (iter.second) {
 			frame_id = iter.first;
-			frame_store_.erase(iter.first);
+			// frame_store_.erase(iter.first);
+			// change to not evitctable
+			iter.second = false;
 			return true;
 		}
 	}
