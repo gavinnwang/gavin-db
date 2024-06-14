@@ -16,11 +16,11 @@ public:
 		root_page_id_ = root_page_id;
 	}
 
-	page_id_t GetRootPageId() const {
+	[[nodiscard]] page_id_t GetRootPageId() const {
 		return root_page_id_;
 	}
 
-	bool TreeIsEmpty() const {
+	[[nodiscard]] bool TreeIsEmpty() const {
 		return root_page_id_ == INVALID_PAGE_ID;
 	}
 

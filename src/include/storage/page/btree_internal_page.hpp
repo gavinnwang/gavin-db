@@ -35,21 +35,21 @@ public:
 		LOG_TRACE("Setting internal page size to 0 and max size to %d", static_cast<int>(INTERNAL_MAX_NODE_SIZE));
 	}
 
-	IndexKeyType KeyAt(int index) const {
+	IndexKeyType KeyAt(idx_t index) const {
 		return node_array_[index].first;
 	}
 
-	void SetKeyAt(int index, const IndexKeyType &key) {
+	void SetKeyAt(idx_t index, const IndexKeyType &key) {
 		node_array_[index].first = key;
 	}
 
-	idx_t ValueIndex(const InternalValueType &value) const {
-		auto it = std::find_if(node_array_, node_array_ + GetSize(),
-		                       [&value](const auto &pair) { return pair.second == value; });
+	[[nodiscard]] idx_t ValueIndex(const InternalValueType &value) const {
+		const auto *it = std::find_if(node_array_, node_array_ + GetSize(),
+		                              [&value](const auto &pair) { return pair.second == value; });
 		return std::distance(node_array_, it);
 	}
 
-	InternalValueType ValueAt(int index) const {
+	[[nodiscard]] InternalValueType ValueAt(idx_t index) const {
 		return node_array_[index].second;
 	}
 
@@ -57,7 +57,7 @@ public:
 		node_array_[index].second = value;
 	}
 
-	InternalValueType Lookup(const IndexKeyType &key, const Comparator &comparator) const {
+	[[nodiscard]] InternalValueType Lookup(const IndexKeyType &key, const Comparator &comparator) const {
 
 		LOG_TRACE("Internal page id %d with size %d, parent id %d, max size %d content %s",
 		          static_cast<int>(GetPageId()), static_cast<int>(GetSize()), static_cast<int>(GetParentPageId()),
@@ -65,7 +65,7 @@ public:
 		LOG_TRACE("Lookup key %s and page is %s", IndexKeyTypeToString(key).c_str(), ToString().c_str());
 		// ignore the first key
 		// lwoer bound returns first it where comp(*it, key) is false
-		auto target =
+		const auto *target =
 		    std::lower_bound(node_array_ + 1, node_array_ + GetSize(), key,
 		                     [&comparator](const auto &pair, auto key) { return comparator(pair.first, key) < 0; });
 		// if target is last then lookup key is larger than all keys
@@ -73,11 +73,11 @@ public:
 			return ValueAt(GetSize() - 1);
 			// if target is the same as the search key go to that value due our internal
 			// node convention
-		} else if (comparator(key, target->first) == 0) {
-			return target->second;
-		} else {
-			return std::prev(target)->second;
 		}
+		if (comparator(key, target->first) == 0) {
+			return target->second;
+		}
+		return std::prev(target)->second;
 	}
 
 	void PopulateNewRoot(const InternalValueType &old_value, const IndexKeyType &new_key,
@@ -90,7 +90,7 @@ public:
 		LOG_TRACE("Page: %s", ToString().c_str());
 	}
 
-	std::string ToString() const {
+	[[nodiscard]] std::string ToString() const {
 		std::string result = "(";
 		bool first = true;
 		for (idx_t i = 0; i < GetSize(); i++) {

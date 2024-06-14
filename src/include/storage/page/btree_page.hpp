@@ -16,17 +16,17 @@ public:
 	BtreePage &operator=(BtreePage &&other) = delete;
 	~BtreePage() = delete;
 
-	idx_t GetSize() const {
+	[[nodiscard]] idx_t GetSize() const {
 		return size_;
 	}
-	void SetSize(int size) {
+	void SetSize(idx_t size) {
 		size_ = size;
 	}
-	void IncreaseSize(int amount) {
+	void IncreaseSize(idx_t amount) {
 		size_ += amount;
 	}
 
-	idx_t GetMaxSize() const {
+	[[nodiscard]] idx_t GetMaxSize() const {
 		assert(max_size_ > 0);
 		return max_size_;
 	}
@@ -34,7 +34,7 @@ public:
 		assert(max_size > 0);
 		max_size_ = max_size;
 	}
-	idx_t GetMinSize() const {
+	[[nodiscard]] idx_t GetMinSize() const {
 		if (IsLeafPage()) {
 			return max_size_ / 2;
 		}
@@ -49,18 +49,18 @@ public:
 		return page_type_;
 	}
 
-	bool IsLeafPage() const {
+	[[nodiscard]] bool IsLeafPage() const {
 		return page_type_ == IndexPageType::LEAF_PAGE;
 	}
 
-	bool IsInternalPage() const {
+	[[nodiscard]] bool IsInternalPage() const {
 		return page_type_ == IndexPageType::INTERNAL_PAGE;
 	}
-	bool IsRootPage() const {
+	[[nodiscard]] bool IsRootPage() const {
 		return parent_page_id_ == INVALID_PAGE_ID;
 	}
 
-	page_id_t GetParentPageId() const {
+	[[nodiscard]] page_id_t GetParentPageId() const {
 		return parent_page_id_;
 	}
 
@@ -72,7 +72,7 @@ public:
 		page_id_ = page_id;
 	}
 
-	page_id_t GetPageId() const {
+	[[nodiscard]] page_id_t GetPageId() const {
 		return page_id_;
 	}
 
