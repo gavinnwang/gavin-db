@@ -63,8 +63,8 @@ public:
 			// todo(gavinnwang): update the value of the key?
 			return;
 		}
-		LOG_INFO("Inserting key %s at index %d with val: %s", IndexKeyTypeToString(key).c_str(),
-		         static_cast<int>(key_idx), value.ToString().c_str());
+		LOG_TRACE("Inserting key %s at index %d with val: %s", IndexKeyTypeToString(key).c_str(),
+		          static_cast<int>(key_idx), value.ToString().c_str());
 
 		if (key_idx == GetSize()) {
 			*(node_array_ + key_idx) = {key, value};

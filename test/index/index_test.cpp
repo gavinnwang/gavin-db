@@ -72,7 +72,7 @@ namespace db {
 // }
 
 TEST(IndexTest, IndexManyInsertionsTest) {
-	const size_t buffer_pool_size = 20;
+	const size_t buffer_pool_size = 13;
 	auto cm = std::make_shared<db::CatalogManager>();
 	auto dm = std::make_shared<db::DiskManager>(cm);
 	auto bpm = std::make_shared<db::BufferPoolManager>(buffer_pool_size, dm);

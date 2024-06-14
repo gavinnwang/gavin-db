@@ -7,7 +7,6 @@
 #include "index/index.hpp"
 #include "storage/page/btree_page.hpp"
 
-#include "gtest/gtest.h"
 #include <algorithm>
 #include <array>
 
@@ -114,22 +113,8 @@ public:
 		assert(ValueIndex(old_value) < GetSize());
 		auto new_value_idx = ValueIndex(old_value) + 1;
 		std::move_backward(node_array_ + new_value_idx, node_array_ + GetSize(), node_array_ + GetSize() + 1);
-		LOG_INFO("Inserting key %s with value %d after key %s with value %d", IndexKeyTypeToString(new_key).c_str(),
-		         new_value, IndexKeyTypeToString(KeyAt(new_value_idx - 1)).c_str(), old_value);
-
-		// if (new_value_idx) {
-		// 	if (KeyAt(new_value_idx - 1) > new_key) {
-		// 		LOG_INFO("Inserting key %s after value %d", IndexKeyTypeToString(new_key).c_str(), new_value);
-		// 		LOG_ERROR("Key %s is greater than %s", IndexKeyTypeToString(KeyAt(new_value_idx - 1)).c_str(),
-		// 		          IndexKeyTypeToString(new_key).c_str());
-		// 		LOG_INFO(ToString().c_str());
-		// 		node_array_[new_value_idx].first = new_key;
-		// 		node_array_[new_value_idx].second = new_value;
-		// 		IncreaseSize(1);
-		// 		LOG_INFO(ToString().c_str());
-		// 		assert(false);
-		// 	}
-		// }
+		// LOG_TRACE("Inserting key %s with value %d after key %s with value %d", IndexKeyTypeToString(new_key).c_str(),
+		//          new_value, IndexKeyTypeToString(KeyAt(new_value_idx - 1)).c_str(), old_value);
 		node_array_[new_value_idx].first = new_key;
 		node_array_[new_value_idx].second = new_value;
 		IncreaseSize(1);
