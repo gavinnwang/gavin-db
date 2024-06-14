@@ -35,6 +35,9 @@ bool BufferPoolManager::AllocateFrame(frame_id_t &frame_id) {
 			auto &evict_page = pages_[frame_id];
 			disk_manager_->WritePage(evict_page.GetPageId(), evict_page.GetData());
 		}
+		assert(pages_[frame_id].pin_count_ == 0);
+		assert(pages_[frame_id].page_id_.page_number_ != 0);
+		pages_[frame_id].ResetMemory();
 		return true;
 	}
 	frame_id = free_list_.front();
@@ -108,6 +111,10 @@ Page &BufferPoolManager::FetchPage(PageId page_id) {
 }
 
 bool BufferPoolManager::UnpinPage(PageId page_id, bool is_dirty) {
+	assert(page_id.page_number_ != INVALID_PAGE_ID);
+	if (page_id.page_number_ == 0 && is_dirty) {
+		LOG_TRACE("Unpinning page %s", page_id.ToString().c_str());
+	}
 	std::lock_guard<std::mutex> lock(latch_);
 	if (page_table_.find(page_id) == page_table_.end()) {
 		LOG_ERROR("Page %s not found in page table", page_id.ToString().c_str());

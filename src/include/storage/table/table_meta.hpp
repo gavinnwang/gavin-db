@@ -56,6 +56,10 @@ struct TableMeta : public PageAllocator {
 	// effectively bump the end of the table data file
 	page_id_t IncrementTableDataPageId() {
 		assert(table_oid_ != INVALID_TABLE_OID);
+		if (last_table_data_page_id_ == INVALID_PAGE_ID) {
+			// start from 0
+			return last_table_data_page_id_ = START_PAGE_ID;
+		}
 		return ++last_table_data_page_id_;
 	}
 
@@ -73,12 +77,13 @@ struct TableMeta : public PageAllocator {
 	Schema schema_;
 	std::string name_;
 	table_oid_t table_oid_ {INVALID_TABLE_OID};
+
+	static constexpr page_id_t START_PAGE_ID = 0;
 	// the last page id of the table data file
 	// effectively the end of the linked list
-	// thus invariant: last_table_data_page_id_ <= last_table_heap_data_page_id_ && last_index_data_page_id_ <=
+	// thus invariant: last_table_data_page_id_ >= last_table_heap_data_page_id_ && last_index_data_page_id_ <=
 	// last_index_heap_data_page_id_
-	// set to -1 because it will be 0 after ++
-	page_id_t last_table_data_page_id_ {-1};
+	page_id_t last_table_data_page_id_ {INVALID_PAGE_ID};
 	// the last page id of the table heap file
 	// effectively the end of the table heap
 	page_id_t last_table_heap_data_page_id_ {INVALID_PAGE_ID};

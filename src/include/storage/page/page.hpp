@@ -55,7 +55,6 @@ public:
 
 private:
 	void ResetMemory() {
-		// data_.resize(PAGE_SIZE);
 		std::memset(data_.data(), 0, PAGE_SIZE);
 	}
 	PageId page_id_;
