@@ -29,25 +29,22 @@ public:
 		ASSERT(length_ > 0, "Invalid column length");
 	}
 
-	[[nodiscard]] auto GetName() const -> std::string {
+	[[nodiscard]] std::string GetName() const {
 		return column_name_;
 	}
-	[[nodiscard]] auto GetStorageSize() const -> uint32_t {
+	[[nodiscard]] uint32_t GetStorageSize() const {
 		return length_;
 	}
-	[[nodiscard]] auto GetOffset() const -> uint32_t {
+	[[nodiscard]] uint32_t GetOffset() const {
 		return column_offset_;
 	}
-	[[nodiscard]] auto GetType() const -> TypeId {
+	[[nodiscard]] TypeId GetType() const {
 		return column_type_;
 	}
-	[[nodiscard]] auto IsInlined() const -> bool {
+	[[nodiscard]] bool IsInlined() const {
 		return column_type_ != TypeId::VARCHAR;
 	}
-	[[nodiscard]] auto ToString(bool simplified = true) const -> std::string;
-	// void SerializeTo(char *storage) const;
-	// void DeserializeFrom(const char *storage);
-	// auto GetSerializationSize() const -> uint32_t;
+	[[nodiscard]] std::string ToString(bool simplified = true) const;
 
 	void Serialize(Serializer &serializer) const {
 		serializer.WriteProperty(100, "column_name", column_name_);

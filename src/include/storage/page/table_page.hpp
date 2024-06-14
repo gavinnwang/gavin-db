@@ -20,11 +20,11 @@ public:
 	void SetNextPageId(page_id_t next_page_id) {
 		next_page_id_ = next_page_id;
 	}
-	auto GetNextTupleOffset(const Tuple &tuple) const -> std::optional<uint16_t>;
-	auto InsertTuple(const TupleMeta &meta, const Tuple &tuple) -> std::optional<uint16_t>;
-	void UpdateTupleMeta(const TupleMeta &meta, const RID &rid);
+	[[nodiscard]] std::optional<uint16_t> GetNextTupleOffset(const Tuple &tuple) const;
+	[[nodiscard]] std::optional<uint16_t> InsertTuple(const TupleMeta &meta, const Tuple &tuple);
 	[[nodiscard]] auto GetTupleMeta(const RID &rid) const -> TupleMeta;
 	[[nodiscard]] auto GetTuple(const RID &rid) const -> std::optional<std::pair<TupleMeta, Tuple>>;
+	void UpdateTupleMeta(const TupleMeta &meta, const RID &rid);
 	void UpdateTupleInPlaceUnsafe(const TupleMeta &meta, const Tuple &tuple, RID rid);
 
 private:

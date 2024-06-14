@@ -18,10 +18,10 @@ class TableIterator {
 	friend class Cursor;
 
 public:
-	DISALLOW_COPY(TableIterator);
+	DISALLOW_COPY_AND_MOVE(TableIterator);
 
 	TableIterator(TableHeap *table_heap, RID rid, RID stop_at_rid);
-	TableIterator(TableIterator &&) = default;
+	// TableIterator(TableIterator &&) = default;
 
 	~TableIterator() = default;
 
