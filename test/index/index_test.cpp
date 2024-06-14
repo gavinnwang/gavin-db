@@ -72,7 +72,7 @@ namespace db {
 // }
 
 TEST(IndexTest, IndexManyInsertionsTest) {
-	const size_t buffer_pool_size = 30;
+	const size_t buffer_pool_size = 20;
 	auto cm = std::make_shared<db::CatalogManager>();
 	auto dm = std::make_shared<db::DiskManager>(cm);
 	auto bpm = std::make_shared<db::BufferPoolManager>(buffer_pool_size, dm);
@@ -109,10 +109,10 @@ TEST(IndexTest, IndexManyInsertionsTest) {
 	std::vector<std::string> ans;
 	std::vector<Tuple> tuples;
 
-	constexpr int n = 5000;
+	constexpr int n = 15000;
 	for (int i = 0; i < n; ++i) {
 		int32_t int_val = i;
-		std::string str_val = GenerateRandomString(10, 64);
+		std::string str_val = GenerateRandomString(1, 50);
 
 		auto v1 = Value(db::TypeId::INTEGER, int_val);
 		auto v2 = Value(db::TypeId::VARCHAR, str_val);
@@ -143,13 +143,6 @@ TEST(IndexTest, IndexManyInsertionsTest) {
 			auto rid = scan_ans[0];
 			LOG_DEBUG("rid %d %d", rid.GetPageId().page_number_, rid.GetSlotNum());
 			assert(rids[i] == rid);
-			// auto ret = table_heap->GetTuple(rid);
-			// if (ret.has_value()) {
-			// 	auto [meta, tuple] = *ret;
-			// 	auto str = tuple.ToString(schema);
-			// 	LOG_DEBUG("tuple %s", str.c_str());
-			// 	ASSERT_EQ(str, ans[i]);
-			// }
 		}
 	}
 }

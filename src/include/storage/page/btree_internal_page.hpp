@@ -7,16 +7,17 @@
 #include "index/index.hpp"
 #include "storage/page/btree_page.hpp"
 
+#include "gtest/gtest.h"
 #include <algorithm>
 #include <array>
 
 namespace db {
 static constexpr int INTERNAL_PAGE_HEADER_SIZE = 32;
-static constexpr int INTERNAL_MAX_NODE_SIZE =
-    (PAGE_SIZE - INTERNAL_PAGE_HEADER_SIZE) / (sizeof(IndexKeyType) + sizeof(InternalValueType));
-class BtreeInternalPage : public BtreePage {
+using InternalNode = std::pair<IndexKeyType, InternalValueType>;
+// static constexpr int INTERNAL_MAX_NODE_SIZE = 10;
+static constexpr int INTERNAL_MAX_NODE_SIZE = (PAGE_SIZE - INTERNAL_PAGE_HEADER_SIZE) / sizeof(InternalNode);
 
-	using InternalNode = std::pair<IndexKeyType, InternalValueType>;
+class BtreeInternalPage : public BtreePage {
 
 public:
 	BtreeInternalPage() = delete;
@@ -58,6 +59,11 @@ public:
 	}
 
 	InternalValueType Lookup(const IndexKeyType &key, const Comparator &comparator) const {
+
+		LOG_TRACE("Internal page id %d with size %d, parent id %d, max size %d content %s",
+		          static_cast<int>(GetPageId()), static_cast<int>(GetSize()), static_cast<int>(GetParentPageId()),
+		          static_cast<int>(GetMaxSize()), ToString().c_str());
+		LOG_TRACE("Lookup key %s and page is %s", IndexKeyTypeToString(key).c_str(), ToString().c_str());
 		// ignore the first key
 		// lwoer bound returns first it where comp(*it, key) is false
 		auto target =
@@ -77,10 +83,12 @@ public:
 
 	void PopulateNewRoot(const InternalValueType &old_value, const IndexKeyType &new_key,
 	                     const InternalValueType &new_value) {
+		LOG_TRACE("Populating new root with key %s and value %d", IndexKeyTypeToString(new_key).c_str(), new_value);
 		SetValueAt(0, old_value);
 		SetKeyAt(1, new_key);
 		SetValueAt(1, new_value);
 		SetSize(2);
+		LOG_TRACE("Page: %s", ToString().c_str());
 	}
 
 	std::string ToString() const {
@@ -91,8 +99,7 @@ public:
 				result += ", ";
 			}
 			first = false;
-			result += std::to_string(KeyAt(i).data()[0]);
-
+			result += IndexKeyTypeToString(KeyAt(i));
 			result += ":";
 			result += std::to_string(ValueAt(i));
 		}
@@ -102,11 +109,27 @@ public:
 
 	idx_t InsertNodeAfter(const InternalValueType &old_value, const IndexKeyType &new_key,
 	                      const InternalValueType &new_value) {
-		LOG_TRACE("Inserting key %s after value %d", IndexKeyTypeToString(new_key).c_str(), new_value);
 
+		// assert old value is in the node
+		assert(ValueIndex(old_value) < GetSize());
 		auto new_value_idx = ValueIndex(old_value) + 1;
 		std::move_backward(node_array_ + new_value_idx, node_array_ + GetSize(), node_array_ + GetSize() + 1);
+		LOG_INFO("Inserting key %s with value %d after key %s with value %d", IndexKeyTypeToString(new_key).c_str(),
+		         new_value, IndexKeyTypeToString(KeyAt(new_value_idx - 1)).c_str(), old_value);
 
+		// if (new_value_idx) {
+		// 	if (KeyAt(new_value_idx - 1) > new_key) {
+		// 		LOG_INFO("Inserting key %s after value %d", IndexKeyTypeToString(new_key).c_str(), new_value);
+		// 		LOG_ERROR("Key %s is greater than %s", IndexKeyTypeToString(KeyAt(new_value_idx - 1)).c_str(),
+		// 		          IndexKeyTypeToString(new_key).c_str());
+		// 		LOG_INFO(ToString().c_str());
+		// 		node_array_[new_value_idx].first = new_key;
+		// 		node_array_[new_value_idx].second = new_value;
+		// 		IncreaseSize(1);
+		// 		LOG_INFO(ToString().c_str());
+		// 		assert(false);
+		// 	}
+		// }
 		node_array_[new_value_idx].first = new_key;
 		node_array_[new_value_idx].second = new_value;
 		IncreaseSize(1);
@@ -129,9 +152,11 @@ public:
 		// because the recipient got the child originally referred by the owner the recipient have to be set the parent
 		// of those child leaf nodes
 		for (idx_t i = 0; i < size; i++) {
-			auto &node_wpg = bpm->FetchPageWrite({table_oid, ValueAt(i + GetSize())}).AsMut<BtreePage>();
-			node_wpg.SetParentPageId(GetParentPageId());
+			auto &node_wpg = bpm->FetchPageBasic({table_oid, ValueAt(i + GetSize())}).AsMut<BtreePage>();
+			node_wpg.SetParentPageId(GetPageId());
 		}
+
+		IncreaseSize(size);
 	}
 
 private:

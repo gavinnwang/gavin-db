@@ -79,7 +79,7 @@ static int32_t ConvertArrayToInt32(const IndexKeyType &arr) {
 
 static std::string IndexKeyTypeToString(const IndexKeyType &key) {
 	std::ostringstream oss;
-	oss << "IndexKeyType contents: [";
+	oss << "Key[";
 	oss << ConvertArrayToInt32(key);
 	// for (size_t i = 0; i < key.size(); ++i) {
 	// 	if (i != 0) {

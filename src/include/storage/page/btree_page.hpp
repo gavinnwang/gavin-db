@@ -1,6 +1,8 @@
 #pragma once
 
 #include "common/typedef.hpp"
+
+#include <cassert>
 namespace db {
 
 enum class IndexPageType { INVALID_INDEX_PAGE = 0, LEAF_PAGE, INTERNAL_PAGE };
@@ -25,9 +27,11 @@ public:
 	}
 
 	idx_t GetMaxSize() const {
+		assert(max_size_ > 0);
 		return max_size_;
 	}
 	void SetMaxSize(int max_size) {
+		assert(max_size > 0);
 		max_size_ = max_size;
 	}
 	idx_t GetMinSize() const {

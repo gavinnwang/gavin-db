@@ -55,12 +55,14 @@ public:
 
 private:
 	void ResetMemory() {
+		// data_.resize(PAGE_SIZE);
 		std::memset(data_.data(), 0, PAGE_SIZE);
 	}
 	PageId page_id_;
 	bool is_dirty_ = false;
 	uint16_t pin_count_ = 0;
 	ReaderWriterLatch rwlatch_;
+	// std::vector<char> data_;
 	std::array<char, PAGE_SIZE> data_ {};
 };
 } // namespace db

@@ -3,24 +3,16 @@
 #include <array>
 #include <cstdio>
 #include <ctime>
-#include <string>
 #include <sstream>
+#include <string>
 
 namespace db {
 
 // Log levels
-enum class LogLevel {
-	LOG_LEVEL_OFF = 1000,
-	LOG_LEVEL_ERROR = 500,
-	LOG_LEVEL_WARN = 400,
-	LOG_LEVEL_INFO = 300,
-	LOG_LEVEL_DEBUG = 200,
-	LOG_LEVEL_TRACE = 100,
-	LOG_LEVEL_ALL = 0
-};
+enum class LogLevel { OFF = 1000, ERROR = 500, WARN = 400, INFO = 300, DEBUG = 200, TRACE = 100, ALL = 0 };
 
 // Define the current log level
-constexpr LogLevel CURRENT_LOG_LEVEL = LogLevel::LOG_LEVEL_ALL;
+constexpr LogLevel CURRENT_LOG_LEVEL = LogLevel::TRACE;
 
 // Utility to extract the file name
 using cstr = const char *const;
@@ -70,12 +62,11 @@ void log_if_enabled(const char *file, int line, const char *func, const char *me
 	}
 }
 
-#define LOG_ERROR(...) log_if_enabled<LogLevel::LOG_LEVEL_ERROR>(__SHORT_FILE__, __LINE__, __FUNCTION__, __VA_ARGS__)
-#define LOG_WARN(...)  log_if_enabled<LogLevel::LOG_LEVEL_WARN>(__SHORT_FILE__, __LINE__, __FUNCTION__, __VA_ARGS__)
-#define LOG_INFO(...)  log_if_enabled<LogLevel::LOG_LEVEL_INFO>(__SHORT_FILE__, __LINE__, __FUNCTION__, __VA_ARGS__)
-#define LOG_DEBUG(...) log_if_enabled<LogLevel::LOG_LEVEL_DEBUG>(__SHORT_FILE__, __LINE__, __FUNCTION__, __VA_ARGS__)
-#define LOG_TRACE(...) log_if_enabled<LogLevel::LOG_LEVEL_TRACE>(__SHORT_FILE__, __LINE__, __FUNCTION__, __VA_ARGS__)
-
+#define LOG_ERROR(...) log_if_enabled<LogLevel::ERROR>(__SHORT_FILE__, __LINE__, __FUNCTION__, __VA_ARGS__)
+#define LOG_WARN(...)  log_if_enabled<LogLevel::WARN>(__SHORT_FILE__, __LINE__, __FUNCTION__, __VA_ARGS__)
+#define LOG_INFO(...)  log_if_enabled<LogLevel::INFO>(__SHORT_FILE__, __LINE__, __FUNCTION__, __VA_ARGS__)
+#define LOG_DEBUG(...) log_if_enabled<LogLevel::DEBUG>(__SHORT_FILE__, __LINE__, __FUNCTION__, __VA_ARGS__)
+#define LOG_TRACE(...) log_if_enabled<LogLevel::TRACE>(__SHORT_FILE__, __LINE__, __FUNCTION__, __VA_ARGS__)
 
 constexpr int HEADER_LENGTH = 40;
 inline std::string FormatLogHeader(const char *file, int line, const char *func) {
@@ -101,19 +92,19 @@ inline void OutputLogHeader(const char *file, int line, const char *func, LogLev
 	strftime(time_str, 32, LOG_LOG_TIME_FORMAT, curTime);
 	const char *type;
 	switch (level) {
-	case LogLevel::LOG_LEVEL_ERROR:
+	case LogLevel::ERROR:
 		type = "ERROR";
 		break;
-	case LogLevel::LOG_LEVEL_WARN:
+	case LogLevel::WARN:
 		type = "WARN ";
 		break;
-	case LogLevel::LOG_LEVEL_INFO:
+	case LogLevel::INFO:
 		type = "INFO ";
 		break;
-	case LogLevel::LOG_LEVEL_DEBUG:
+	case LogLevel::DEBUG:
 		type = "DEBUG";
 		break;
-	case LogLevel::LOG_LEVEL_TRACE:
+	case LogLevel::TRACE:
 		type = "TRACE";
 		break;
 	default:

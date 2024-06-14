@@ -70,6 +70,9 @@ protected:
 
 		const auto &leaf_page = leaf_raw_page.As<BtreeLeafPage>();
 
+		// remove later
+		LOG_TRACE("leaf: %s", leaf_page.ToString().c_str());
+
 		auto value = leaf_page.Lookup(key, comparator_);
 
 		leaf_raw_page.RUnlatch();
@@ -108,6 +111,12 @@ protected:
 
 	bool InsertIntoLeaf(const IndexKeyType &key, const IndexValueType &value, Transaction &transaction,
 	                    Page &header_page) {
+		if (IndexKeyTypeToString(key) == "Key[407]") {
+			LOG_INFO("HI");
+			// auto *page = &bpm_->FetchPage({table_meta_->table_oid_, 19});
+			// const auto *btree_node = &page->As<BtreePage>();
+			// LOG_DEBUG("size before search", btree_node->GetSize());
+		}
 		auto &leaf_page = SearchLeafPage(key, Operation::INSERT, transaction, header_page);
 		auto &leaf_node = leaf_page.AsMut<BtreeLeafPage>();
 		LOG_TRACE("Leaf node size: %d and max size %d", static_cast<int>(leaf_node.GetSize()),
@@ -119,8 +128,8 @@ protected:
 
 		// need to split and push to parent
 		if (new_size >= leaf_node.GetMaxSize()) {
-			LOG_TRACE("Need to split leaf and push to parent as size %d >= max size %d", static_cast<int>(new_size),
-			          static_cast<int>(leaf_node.GetMaxSize()));
+			LOG_INFO("Need to split leaf and push to parent as size %d >= max size %d", static_cast<int>(new_size),
+			         static_cast<int>(leaf_node.GetMaxSize()));
 
 			// split insert success
 			auto &sibling_leaf_node = Split(leaf_node);
@@ -128,8 +137,8 @@ protected:
 			leaf_node.SetNextPageId(sibling_leaf_node.GetPageId());
 
 			const auto &risen_key = sibling_leaf_node.KeyAt(0);
-			LOG_TRACE("Insert leaf node %d into internal parent %d with risen key %s", leaf_node.GetPageId(),
-			          leaf_node.GetParentPageId(), IndexKeyTypeToString(risen_key).c_str());
+			LOG_INFO("Insert leaf node %d into internal parent %d with risen key %s", leaf_node.GetPageId(),
+			         leaf_node.GetParentPageId(), IndexKeyTypeToString(risen_key).c_str());
 			InsertIntoParent(leaf_node, sibling_leaf_node, risen_key, transaction, header_page);
 
 			leaf_page.WUnlatch();
@@ -138,11 +147,13 @@ protected:
 
 			return true;
 		}
+		LOG_INFO("Don't need to split becase leaf size is %d and max size is %d", static_cast<int>(new_size),
+		         static_cast<int>(leaf_node.GetMaxSize()));
 
 		// don't need to split, release parent write latches one more time and do other clean up
 		ReleaseParentWriteLatches(transaction);
 		leaf_page.WUnlatch();
-		bpm_->UnpinPage(leaf_page.GetPageId(), false);
+		bpm_->UnpinPage(leaf_page.GetPageId(), true);
 
 		return new_size != size;
 	}
@@ -151,21 +162,28 @@ protected:
 		return true;
 	}
 
-	void InsertIntoParent(BtreePage &original_node, BtreePage &leaf_sibling_new_node, IndexKeyType key,
+	void InsertIntoParent(BtreePage &original_node, BtreePage &sibling_new_node, IndexKeyType key,
 	                      Transaction &transaction, Page &header_page) {
+		LOG_TRACE("Nodes %d and %d want to insert into their parent with key %s", original_node.GetPageId(),
+		          sibling_new_node.GetPageId(), IndexKeyTypeToString(key).c_str());
 		if (original_node.IsRootPage()) {
+			LOG_TRACE("Split node is root, create new root");
 			auto new_page_id = PageId {table_meta_->table_oid_};
 			auto &new_internal_node =
 			    bpm_->NewPageGuarded(*index_meta_, new_page_id).UpgradeWrite().AsMut<BtreeInternalPage>();
 			LOG_TRACE("Split node is root, create new root with page id %d", new_page_id.page_number_);
 			new_internal_node.Init(new_page_id.page_number_, INVALID_PAGE_ID);
-			new_internal_node.PopulateNewRoot(original_node.GetPageId(), key, leaf_sibling_new_node.GetPageId());
+			new_internal_node.PopulateNewRoot(original_node.GetPageId(), key, sibling_new_node.GetPageId());
 
 			LOG_TRACE("Setting parent page id of original node %d and new sibling node %d to new root %d",
-			          original_node.GetPageId(), leaf_sibling_new_node.GetPageId(), new_page_id.page_number_);
+			          original_node.GetPageId(), sibling_new_node.GetPageId(), new_page_id.page_number_);
+
+			if (!original_node.IsLeafPage()) {
+				LOG_TRACE("ONLY THIS");
+			}
 
 			original_node.SetParentPageId(new_page_id.page_number_);
-			leaf_sibling_new_node.SetParentPageId(new_page_id.page_number_);
+			sibling_new_node.SetParentPageId(new_page_id.page_number_);
 
 			auto &header_node = header_page.AsMut<BtreeHeaderPage>();
 			header_node.SetRootPageId(new_page_id.page_number_);
@@ -177,6 +195,7 @@ protected:
 		LOG_TRACE("Split node is not root, insert key into internal parent with page id %d", parent_page_id);
 
 		auto &parent_page = bpm_->FetchPage({table_meta_->table_oid_, parent_page_id});
+		LOG_INFO("Fetching parent page %d", parent_page_id);
 		auto &parent_internal_node = parent_page.AsMut<BtreeInternalPage>();
 
 		// parent has space
@@ -185,22 +204,48 @@ protected:
 			          static_cast<int>(parent_internal_node.GetSize()),
 			          static_cast<int>(parent_internal_node.GetMaxSize()));
 
-			// parent_internal_node.InsertNodeAfter(original_node.GetPageId(), key, leaf_sibling_new_node.GetPageId());
+			parent_internal_node.InsertNodeAfter(original_node.GetPageId(), key, sibling_new_node.GetPageId());
+
 			ReleaseParentWriteLatches(transaction);
+			bpm_->UnpinPage(parent_page.GetPageId(), true);
 			return;
 		}
 		// parent don't have space now have to split the parent internal node
-		assert(false);
-
 		// currently the internal page size == internal max size which means that we have to allocate a new buffer space
 		// inorder to prevent overflowing the current page
+		// assert(false);
+		LOG_INFO("Internal parent %d is full, spliting parent", parent_page_id);
+		LOG_INFO("OMG");
+		auto buffer = std::vector<data_t>(INTERNAL_PAGE_HEADER_SIZE +
+		                                  sizeof(InternalNode) * (parent_internal_node.GetSize() + 1));
+
+		std::memcpy(buffer.data(), parent_page.GetData(),
+		            INTERNAL_PAGE_HEADER_SIZE + sizeof(InternalNode) * (parent_internal_node.GetSize()));
+		auto &copy_parent_node = reinterpret_cast<BtreeInternalPage &>(*buffer.data());
+		copy_parent_node.InsertNodeAfter(original_node.GetPageId(), key, sibling_new_node.GetPageId());
+
+		auto &parent_new_sibling_node = Split(copy_parent_node);
+		LOG_TRACE("new sibling %s", parent_new_sibling_node.ToString().c_str());
+		IndexKeyType new_key = parent_new_sibling_node.KeyAt(0);
+		LOG_TRACE("new key %s", IndexKeyTypeToString(new_key).c_str());
+		// by copying this (which include the header data), the size of the parent_internal_node will be updated
+		std::memcpy(parent_page.GetData(), buffer.data(),
+		            INTERNAL_PAGE_HEADER_SIZE + sizeof(InternalNode) * copy_parent_node.GetMinSize());
+		// parent_internal_node.SetSize(copy_parent_node.GetMinSize());
+
+		LOG_TRACE("new parent %s", parent_internal_node.ToString().c_str());
+		LOG_TRACE("new sibling %s", parent_new_sibling_node.ToString().c_str());
+		InsertIntoParent(parent_internal_node, parent_new_sibling_node, new_key, transaction, header_page);
+		bpm_->UnpinPage(parent_page.GetPageId(), true);
+		bpm_->UnpinPage({table_meta_->table_oid_, parent_new_sibling_node.GetPageId()}, true);
 	}
 
 	template <IsBtreeNode N>
 	N &Split(N &node) {
 		auto new_page_id = PageId {table_meta_->table_oid_};
-		auto new_page = bpm_->NewPageGuarded(*index_meta_, new_page_id).UpgradeWrite();
+		auto &new_page = bpm_->NewPage(*index_meta_, new_page_id);
 		assert(new_page_id.page_number_ > 0);
+
 		N &new_node = new_page.AsMut<N>();
 
 		LOG_TRACE("Spliting a node with type %s", node.IsLeafPage() ? "Leaf" : "Internal");
@@ -210,8 +255,10 @@ protected:
 		new_node.Init(new_page_id.page_number_, node.GetParentPageId());
 
 		if constexpr (IsLeafPage<N>::value) {
+			LOG_INFO("Splitting leaf node %d", node.GetPageId());
 			node.MoveHalfTo(new_node);
 		} else if constexpr (IsInternalPage<N>::value) {
+			// not prepared for spliting internal node yet
 			node.MoveHalfTo(new_node, bpm_, table_meta_->table_oid_);
 		} else {
 			UNREACHABLE("Invalid node type");
@@ -225,7 +272,6 @@ protected:
 
 		const auto &header_node = header_page.As<BtreeHeaderPage>();
 		auto root_page_id = header_node.GetRootPageId();
-		LOG_TRACE("Search from root page id: %d", root_page_id);
 		assert(root_page_id > 0);
 		auto *page = &bpm_->FetchPage({table_meta_->table_oid_, root_page_id});
 		const auto *btree_node = &page->As<BtreePage>();
@@ -240,8 +286,19 @@ protected:
 			page->WLatch();
 		}
 
+		LOG_TRACE("Search from root page id: %d", root_page_id);
+
+		bool has_parent = false;
 		while (!btree_node->IsLeafPage()) {
 			const auto &internal_page = page->As<BtreeInternalPage>();
+			has_parent = true;
+
+			LOG_TRACE("Internal page id %d with size %d, parent id %d, max size %d content %s",
+			          internal_page.GetPageId(),
+
+			          static_cast<int>(internal_page.GetSize()), static_cast<int>(internal_page.GetParentPageId()),
+			          static_cast<int>(internal_page.GetMaxSize()), internal_page.ToString().c_str());
+
 			auto child_page_id = internal_page.Lookup(key, comparator_);
 			assert(child_page_id > 0);
 			LOG_TRACE("Search go to child: %d", child_page_id);
@@ -259,21 +316,29 @@ protected:
 			} else {
 				child_page->WLatch();
 				// add parent to page set
-				LOG_TRACE("Adding page id %d into page set", page->GetPageId().page_number_);
+				// LOG_TRACE("Adding page id %d into page set", page->GetPageId().page_number_);
 				transaction.AddIntoPageSet(*page);
 				// if child node is safe to latch, release parent latches
-				LOG_TRACE("Check if child node %d is safe to latch", child_page->GetPageId().page_number_);
+				// LOG_TRACE("Check if child node %d is safe to latch", child_page->GetPageId().page_number_);
 				if (IsSafeNode(*child_btree_node, operation)) {
-					LOG_TRACE("Child node %d is safe", child_page->GetPageId().page_number_);
+					// LOG_TRACE("Child node %d is safe", child_page->GetPageId().page_number_);
 					ReleaseParentWriteLatches(transaction);
 				} else {
-					LOG_TRACE("Child node %d is not safe", child_page->GetPageId().page_number_);
+					// LOG_TRACE("Child node %d is not safe", child_page->GetPageId().page_number_);
 				}
 			}
 
 			page = child_page;
 			btree_node = child_btree_node;
 		}
+
+		auto &leaf_node = (*page).AsMut<BtreeLeafPage>();
+		if (has_parent) {
+			assert(leaf_node.GetParentPageId() > 0);
+		}
+		LOG_TRACE("Leaf page id %d, size %d, parent id %d, max size %d content %s", leaf_node.GetPageId(),
+		          static_cast<int>(leaf_node.GetSize()), static_cast<int>(leaf_node.GetParentPageId()),
+		          static_cast<int>(leaf_node.GetMaxSize()), leaf_node.ToString().c_str());
 
 		return *page;
 	}
@@ -308,8 +373,13 @@ protected:
 			page.get().WUnlatch();
 			// dirty bit is false because we grab latch on child and
 			// parent is unmodified and safe to release for this operation
-			bpm_->UnpinPage(page.get().GetPageId(), false);
+			LOG_INFO("Unpinning page %d", page.get().GetPageId().page_number_);
+			// todo
+			bpm_->UnpinPage(page.get().GetPageId(), true);
 		}
+	}
+
+	void PrintTree() {
 	}
 
 private:
