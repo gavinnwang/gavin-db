@@ -57,6 +57,7 @@ public:
 	}
 };
 
+// return 0 if a == b, 1 if a > b, -1 if a < b
 using Comparator = std::function<int(const IndexKeyType &, const IndexKeyType &)>;
 
 static int32_t ConvertArrayToInt32(const IndexKeyType &arr) {

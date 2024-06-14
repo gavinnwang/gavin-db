@@ -46,18 +46,12 @@ set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 
 # Core
+# Bad practice but convinient
 file(GLOB_RECURSE SOURCE_FILES "${PROJECT_SOURCE_DIR}/src/*/*.cpp")
-
 add_library(gavindb ${SOURCE_FILES})
 
-# # Shell
-# add_executable(gavindb_shell src/shell.cpp)
-# target_link_libraries(gavindb_shell gavindb)
-
 # Include
-set(SRC_INCLUDE_DIR ${PROJECT_SOURCE_DIR}/src/include)
-include_directories(${SRC_INCLUDE_DIR})
-
+target_include_directories(gavindb PRIVATE ${PROJECT_SOURCE_DIR}/src/include)
 
 include(FetchContent)
 FetchContent_Declare(
@@ -65,11 +59,19 @@ FetchContent_Declare(
   GIT_REPOSITORY https://github.com/google/googletest.git
   GIT_TAG v1.14.0
 )
-FetchContent_MakeAvailable(googletest)
-
-include_directories(
-  ${googletest_SOURCE_DIR}/googletest/include
-  ${googletest_SOURCE_DIR}/googlemock/include
+FetchContent_Declare(
+  fmt
+  GIT_REPOSITORY https://github.com/fmtlib/fmt.git
+  GIT_TAG 10.2.1
 )
+FetchContent_MakeAvailable(googletest)
+FetchContent_MakeAvailable(fmt)
+
+target_link_libraries(gavindb PRIVATE fmt::fmt)
+target_link_libraries(gavindb PRIVATE gtest gtest_main)
 
 add_subdirectory(test)
+
+# # Shell
+# add_executable(gavindb_shell src/shell.cpp)
+# target_link_libraries(gavindb_shell gavindb)
