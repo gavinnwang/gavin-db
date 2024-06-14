@@ -7,13 +7,13 @@ namespace db {
 class BinarySerializer : public Serializer {
 
 public:
-	explicit BinarySerializer(WriteStream &stream, bool serialize_default_values_p = false) : stream(stream) {
+	explicit BinarySerializer(WriteStream &stream, bool serialize_default_values_p = false) : stream_(stream) {
 		serialize_default_values = serialize_default_values_p;
 	}
 
 private:
 	void WriteData(const_data_ptr_t buffer, idx_t write_size) {
-		stream.WriteData(buffer, write_size);
+		stream_.WriteData(buffer, write_size);
 	}
 
 	void WriteData(const char *ptr, idx_t write_size) {
@@ -87,7 +87,6 @@ protected:
 	void WriteDataPtr(const_data_ptr_t ptr, idx_t count) final;
 
 private:
-	// vector<DebugState> debug_stack;
-	WriteStream &stream;
+	WriteStream &stream_;
 };
 } // namespace db

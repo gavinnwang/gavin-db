@@ -12,9 +12,9 @@
 namespace db {
 class FileStream : public WriteStream, public ReadStream {
 private:
-	std::fstream file;
-	std::string file_path;
-	bool owns_file;
+	std::fstream file_;
+	std::string file_path_;
+	bool owns_file_;
 
 public:
 	// Create a new FileStream with the specified file path. The stream will own the file and handle its closing.
@@ -49,14 +49,14 @@ public:
 
 	// Debugging function to print the file content in hexadecimal format.
 	void Print() {
-		std::streampos current_pos = file.tellg();
+		std::streampos current_pos = file_.tellg();
 
 		// Move to the beginning of the file
-		file.seekg(0, std::ios::beg);
+		file_.seekg(0, std::ios::beg);
 
 		// Read up to the current position into a buffer
 		std::vector<char> buffer(current_pos);
-		file.read(buffer.data(), current_pos);
+		file_.read(buffer.data(), current_pos);
 
 		// Print each byte in hexadecimal format
 		for (const auto &byte : buffer) {
@@ -65,7 +65,7 @@ public:
 		printf("\n");
 
 		// Restore the file position
-		file.seekg(current_pos);
+		file_.seekg(current_pos);
 	}
 };
 } // namespace db

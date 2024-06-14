@@ -7,10 +7,10 @@
 namespace db {
 class MemoryStream : public WriteStream, public ReadStream {
 private:
-	idx_t position;
-	idx_t capacity;
-	bool owns_data;
-	data_ptr_t data;
+	idx_t position_;
+	idx_t capacity_;
+	bool owns_data_;
+	data_ptr_t data_;
 
 public:
 	// Create a new owning MemoryStream with an internal  backing buffer with the specified capacity. The stream will
@@ -50,8 +50,8 @@ public:
 	idx_t GetCapacity() const;
 
 	void Print() {
-		for (idx_t i = 0; i < position; i++) {
-			printf("%02x ", data[i]);
+		for (idx_t i = 0; i < position_; i++) {
+			printf("%02x ", data_[i]);
 		}
 		printf("\n");
 	}

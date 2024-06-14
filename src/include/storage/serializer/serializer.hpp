@@ -18,7 +18,7 @@ class Value;
 class Serializer {
 protected:
 	// bool serialize_enum_as_string = false;
-	bool serialize_default_values = false;
+	bool serialize_default_values_ = false;
 
 public:
 	// Serialize a value
@@ -32,7 +32,7 @@ public:
 	template <class T>
 	void WritePropertyWithDefault(const field_id_t field_id, const char *tag, const T &value, const T &&default_value) {
 		// If current value is default, don't write it
-		if (!serialize_default_values && (value == default_value)) {
+		if (!serialize_default_values_ && (value == default_value)) {
 			OnOptionalPropertyBegin(field_id, tag, false);
 			OnOptionalPropertyEnd(false);
 			return;
@@ -58,9 +58,7 @@ public:
 
 protected:
 	template <typename T>
-	void WriteValue(const T value)
-	    requires std::is_enum_v<T>
-	{
+	void WriteValue(const T value) requires std::is_enum_v<T> {
 		WriteValue(static_cast<typename std::underlying_type<T>::type>(value));
 	}
 	// Unique Pointer Ref
@@ -136,9 +134,7 @@ protected:
 
 	// class or struct implementing `Serialize(Serializer& Serializer)`;
 	template <typename T>
-	void WriteValue(const T &value)
-	    requires HasSerialize<T>
-	{
+	void WriteValue(const T &value) requires HasSerialize<T> {
 		OnObjectBegin();
 		value.Serialize(*this);
 		OnObjectEnd();

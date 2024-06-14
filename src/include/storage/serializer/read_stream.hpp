@@ -23,8 +23,7 @@ public:
 	// 	return value;
 	// }
 
-	virtual ~ReadStream() {
-	}
+	virtual ~ReadStream() = default;
 };
 
 } // namespace db

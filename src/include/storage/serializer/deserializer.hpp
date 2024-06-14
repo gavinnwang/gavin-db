@@ -8,8 +8,7 @@ namespace db {
 class Deserializer {
 
 public:
-	virtual ~Deserializer() {
-	}
+	virtual ~Deserializer() = default;
 	// Read into an existing value
 	template <typename T>
 	inline void ReadProperty(const field_id_t field_id, const char *tag, T &ret) {
@@ -62,9 +61,7 @@ public:
 private:
 	// Deserialize anything implementing a Deserialize method
 	template <typename T>
-	inline T Read()
-	    requires HasDeserialize<T>
-	{
+	inline T Read() requires HasDeserialize<T> {
 		OnObjectBegin();
 		auto val = T::Deserialize(*this);
 		OnObjectEnd();
@@ -73,8 +70,7 @@ private:
 
 	// Deserialize unique_ptr if the element type has a Deserialize method
 	template <typename T>
-	    requires IsUniquePtr<T> && HasDeserialize<typename T::element_type>
-	T Read() {
+	requires IsUniquePtr<T> && HasDeserialize<typename T::element_type> T Read() {
 		using ELEMENT_TYPE = typename T::element_type;
 		std::unique_ptr<ELEMENT_TYPE> ptr = nullptr;
 		auto is_present = OnNullableBegin();
@@ -89,8 +85,7 @@ private:
 
 	// Deserialize a unique_ptr if the element type does not have a Deserialize method
 	template <typename T>
-	    requires IsUniquePtr<T> && (!HasDeserialize<typename T::element_type>)
-	T Read() {
+	requires IsUniquePtr<T> &&(!HasDeserialize<typename T::element_type>)T Read() {
 		using ELEMENT_TYPE = typename T::element_type;
 		std::unique_ptr<ELEMENT_TYPE> ptr = nullptr;
 		auto is_present = OnNullableBegin();
@@ -105,8 +100,7 @@ private:
 
 	// Deserialize shared_ptr
 	template <typename T>
-	    requires IsSharedPtr<T> && HasDeserialize<typename T::element_type>
-	T Read() {
+	requires IsSharedPtr<T> && HasDeserialize<typename T::element_type> T Read() {
 		using ELEMENT_TYPE = typename T::element_type;
 		std::shared_ptr<ELEMENT_TYPE> ptr = nullptr;
 		auto is_present = OnNullableBegin();
@@ -120,9 +114,7 @@ private:
 	}
 
 	template <typename T>
-	inline T Read()
-	    requires IsVector<T>
-	{
+	inline T Read() requires IsVector<T> {
 		using ELEMENT_TYPE = typename T::value_type;
 		T vec;
 		auto size = OnListBegin();
@@ -134,9 +126,7 @@ private:
 	}
 
 	template <typename T>
-	inline T Read()
-	    requires IsMap<T>
-	{
+	inline T Read() requires IsMap<T> {
 		using KEY_TYPE = typename T::key_type;
 		using VALUE_TYPE = typename T::mapped_type;
 		T map;
@@ -172,108 +162,80 @@ private:
 	// }
 
 	template <typename T>
-	inline T Read()
-	    requires std::is_same_v<T, bool>
-	{
+	inline T Read() requires std::is_same_v<T, bool> {
 		return ReadBool();
 	}
 
 	template <typename T>
-	inline T Read()
-	    requires std::is_same_v<T, char>
-	{
+	inline T Read() requires std::is_same_v<T, char> {
 		return ReadChar();
 	}
 
 	template <typename T>
-	inline T Read()
-	    requires std::is_same_v<T, int8_t>
-	{
+	inline T Read() requires std::is_same_v<T, int8_t> {
 		return ReadSignedInt8();
 	}
 
 	template <typename T>
-	inline T Read()
-	    requires std::is_same_v<T, uint8_t>
-	{
+	inline T Read() requires std::is_same_v<T, uint8_t> {
 		return ReadUnsignedInt8();
 	}
 
 	template <typename T>
-	inline T Read()
-	    requires std::is_same_v<T, int16_t>
-	{
+	inline T Read() requires std::is_same_v<T, int16_t> {
 		return ReadSignedInt16();
 	}
 
 	template <typename T>
-	inline T Read()
-	    requires std::is_same_v<T, uint16_t>
-	{
+	inline T Read() requires std::is_same_v<T, uint16_t> {
 		return ReadUnsignedInt16();
 	}
 
 	template <typename T>
-	inline T Read()
-	    requires std::is_same_v<T, int32_t>
-	{
+	inline T Read() requires std::is_same_v<T, int32_t> {
 		return ReadSignedInt32();
 	}
 
 	template <typename T>
-	inline T Read()
-	    requires std::is_same_v<T, uint32_t>
-	{
+	inline T Read() requires std::is_same_v<T, uint32_t> {
 		return ReadUnsignedInt32();
 	}
 
 	template <typename T>
-	inline T Read()
-	    requires std::is_same_v<T, int64_t>
-	{
+	inline T Read() requires std::is_same_v<T, int64_t> {
 		return ReadSignedInt64();
 	}
 
 	template <typename T>
-	inline T Read()
-	    requires std::is_same_v<T, uint64_t>
-	{
+	inline T Read() requires std::is_same_v<T, uint64_t> {
 		return ReadUnsignedInt64();
 	}
 
 	template <typename T>
-	inline T Read()
-	    requires std::is_same_v<T, float>
-	{
+	inline T Read() requires std::is_same_v<T, float> {
 		return ReadFloat();
 	}
 
 	template <typename T>
-	inline T Read()
-	    requires std::is_same_v<T, double>
-	{
+	inline T Read() requires std::is_same_v<T, double> {
 		return ReadDouble();
 	}
 
 	template <typename T>
-	inline T Read()
-	    requires std::is_same_v<T, std::string>
-	{
+	inline T Read() requires std::is_same_v<T, std::string> {
 		return ReadString();
 	}
 
 	template <typename T>
-	inline T Read()
-	    requires std::is_enum_v<T>
-	{
+	inline T Read() requires std::is_enum_v<T> {
 		return static_cast<T>(Read<typename std::underlying_type<T>::type>());
 	}
 
 protected:
 	// Hooks for subclasses to override to implement custom behavior
-	virtual void OnPropertyBegin(const field_id_t field_id, const char *tag) = 0;
+	virtual void OnPropertyBegin(field_id_t field_id, const char *tag) = 0;
 	virtual void OnPropertyEnd() = 0;
-	virtual bool OnOptionalPropertyBegin(const field_id_t field_id, const char *tag) = 0;
+	virtual bool OnOptionalPropertyBegin(field_id_t field_id, const char *tag) = 0;
 	virtual void OnOptionalPropertyEnd(bool present) = 0;
 
 	virtual void OnObjectBegin() = 0;

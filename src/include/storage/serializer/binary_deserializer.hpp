@@ -9,14 +9,14 @@ namespace db {
 class BinaryDeserializer : public Deserializer {
 
 private:
-	ReadStream &stream;
-	idx_t nesting_level = 0;
+	ReadStream &stream_;
+	idx_t nesting_level_ = 0;
 
-	bool has_buffered_field = false;
-	field_id_t buffered_field = 0;
+	bool has_buffered_field_ = false;
+	field_id_t buffered_field_ = 0;
 
 public:
-	explicit BinaryDeserializer(ReadStream &stream) : stream(stream) {
+	explicit BinaryDeserializer(ReadStream &stream) : stream_(stream) {
 	}
 
 	template <class T>
@@ -24,7 +24,7 @@ public:
 		OnObjectBegin();
 		auto result = T::Deserialize(*this);
 		OnObjectEnd();
-		assert(nesting_level == 0); // make sure we are at the root level
+		assert(nesting_level_ == 0); // make sure we are at the root level
 		return result;
 	}
 
@@ -33,7 +33,7 @@ public:
 		OnObjectBegin();
 		auto result = T::Deserialize(*this);
 		OnObjectEnd();
-		assert(nesting_level == 0); // make sure we are at the root level
+		assert(nesting_level_ == 0); // make sure we are at the root level
 		return result;
 	}
 
@@ -50,34 +50,34 @@ public:
 	}
 
 	ReadStream &GetStream() {
-		return stream;
+		return stream_;
 	}
 
 private:
 	field_id_t PeekField() {
-		if (!has_buffered_field) {
-			buffered_field = ReadPrimitive<field_id_t>();
-			has_buffered_field = true;
+		if (!has_buffered_field_) {
+			buffered_field_ = ReadPrimitive<field_id_t>();
+			has_buffered_field_ = true;
 		}
-		return buffered_field;
+		return buffered_field_;
 	}
 	void ConsumeField() {
-		if (!has_buffered_field) {
-			buffered_field = ReadPrimitive<field_id_t>();
+		if (!has_buffered_field_) {
+			buffered_field_ = ReadPrimitive<field_id_t>();
 		} else {
-			has_buffered_field = false;
+			has_buffered_field_ = false;
 		}
 	}
 	field_id_t NextField() {
-		if (has_buffered_field) {
-			has_buffered_field = false;
-			return buffered_field;
+		if (has_buffered_field_) {
+			has_buffered_field_ = false;
+			return buffered_field_;
 		}
 		return ReadPrimitive<field_id_t>();
 	}
 
 	void ReadData(data_ptr_t buffer, idx_t read_size) {
-		stream.ReadData(buffer, read_size);
+		stream_.ReadData(buffer, read_size);
 	}
 
 	template <class T>
