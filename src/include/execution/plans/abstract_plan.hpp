@@ -40,9 +40,10 @@ public:
 	}
 	virtual ~AbstractPlanNode() = default;
 
-	const Schema &GetSchema() const {
+	const Schema &OutputSchema() const {
 		return *output_schema_;
 	}
+
 	const std::vector<AbstractPlanNodeRef> &GetChildren() const {
 		return children_;
 	}

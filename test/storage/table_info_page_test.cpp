@@ -16,7 +16,7 @@ TEST(StorageTest, SimpleTableMetaPageTest) {
 	auto c1 = db::Column("user_id", db::TypeId::INTEGER);
 	auto c2 = db::Column("user_name", db::TypeId::VARCHAR, 256);
 	auto schema = db::Schema({c1, c2});
-	const auto *table_name = "usr";
+	const auto *table_name = "user";
 	cm->CreateTable(table_name, schema);
 }
 
@@ -29,7 +29,7 @@ TEST(StorageTest, DuplicateTableNameTest) {
 	auto c1 = db::Column("user_id", db::TypeId::INTEGER);
 	auto c2 = db::Column("user_name", db::TypeId::VARCHAR, 256);
 	auto schema = db::Schema({c1, c2});
-	const auto *table_name = "usr";
+	const auto *table_name = "user";
 	cm->CreateTable(table_name, schema);
-	EXPECT_THROW(cm->CreateTable(table_name, schema), std::runtime_error);
+	EXPECT_TRUE(!cm->CreateTable(table_name, schema).has_value());
 }

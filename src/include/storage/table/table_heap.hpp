@@ -14,13 +14,13 @@ class TableHeap : public PageAllocator {
 public:
 	DISALLOW_COPY_AND_MOVE(TableHeap);
 	explicit TableHeap(const std::shared_ptr<BufferPoolManager> &bpm, const std::shared_ptr<TableMeta> &table_meta);
-	std::optional<RID> InsertTuple(const TupleMeta &meta, const Tuple &tuple);
+	[[nodiscard]] std::optional<RID> InsertTuple(const TupleMeta &meta, const Tuple &tuple);
 	void UpdateTupleMeta(const TupleMeta &meta, RID rid);
-	std::optional<std::pair<TupleMeta, Tuple>> GetTuple(RID rid);
-	TupleMeta GetTupleMeta(RID rid);
+	[[nodiscard]] std::optional<std::pair<TupleMeta, Tuple>> GetTuple(RID rid);
+	[[nodiscard]] TupleMeta GetTupleMeta(RID rid);
 	[[nodiscard]] page_id_t GetFirstPageId() const;
-	TableIterator MakeIterator();
-	PageId AllocatePage() final {
+	[[nodiscard]] TableIterator MakeIterator();
+	[[nodiscard]] PageId AllocatePage() final {
 		assert(table_meta_->table_oid_ != INVALID_TABLE_OID);
 		table_meta_->last_table_heap_data_page_id_ = table_meta_->IncrementTableDataPageId();
 		return {table_meta_->table_oid_, table_meta_->last_table_data_page_id_};

@@ -1,14 +1,16 @@
 #pragma once
 
-#include "buffer/buffer_pool_manager.hpp"
+#include "execution/plans/abstract_plan.hpp"
 namespace db {
 
 class ExecutionEngine {
 public:
+	ExecutionEngine(AbstractPlanNodeRef plan) : plan_(std::move(plan)) {
+	}
 	DISALLOW_COPY_AND_MOVE(ExecutionEngine);
 
 private:
-	const std::shared_ptr<BufferPoolManager> &buffer_pool_manager_;
+	AbstractPlanNodeRef plan_;
 };
 
 } // namespace db

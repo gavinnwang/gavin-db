@@ -5,7 +5,7 @@
 #include <cassert>
 namespace db {
 
-enum class IndexPageType { INVALID_INDEX_PAGE = 0, LEAF_PAGE, INTERNAL_PAGE };
+enum class IndexPageType { INVALID_INDEX_PAGE = 0, HEADER_PAGE, LEAF_PAGE, INTERNAL_PAGE };
 
 class BtreePage {
 public:

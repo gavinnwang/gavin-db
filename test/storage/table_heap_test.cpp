@@ -21,7 +21,7 @@ TEST(StorageTest, TableHeapSimpleTest) {
 	auto c1 = Column("user_id", db::TypeId::INTEGER);
 	auto c2 = Column("user_name", db::TypeId::VARCHAR, 256);
 	auto schema = Schema({c1, c2});
-	auto table_name = "usr";
+	auto table_name = "user";
 
 	cm->CreateTable(table_name, schema);
 	auto table_meta = cm->GetTable(table_name);
@@ -64,7 +64,7 @@ TEST(StorageTest, TableHeapManyInsertionTest) {
 	auto c1 = Column("user_id", db::TypeId::INTEGER);
 	auto c2 = Column("user_name", db::TypeId::VARCHAR, 256);
 	auto schema = Schema({c1, c2});
-	auto table_name = "usr";
+	auto table_name = "user";
 
 	cm->CreateTable(table_name, schema);
 	auto table_meta = cm->GetTable(table_name);

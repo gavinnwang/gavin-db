@@ -47,6 +47,7 @@ public:
 			auto new_header_page_id = PageId {table_meta_->table_oid_};
 			auto header_pg = bpm_->NewPageGuarded(*this, new_header_page_id).UpgradeWrite();
 			auto &header_page = header_pg.AsMut<BtreeHeaderPage>();
+			header_page.Init();
 			assert(new_header_page_id.page_number_ >= INVALID_PAGE_ID);
 			header_page.SetRootPageId(INVALID_PAGE_ID);
 			index_meta_->header_page_id_ = new_header_page_id.page_number_;
@@ -356,6 +357,7 @@ protected:
 
 	void ReleaseHeaderPageAndMarkDirty(Transaction &transaction) {
 		auto page = transaction.GetPageSet()->front();
+		assert(page.get().AsMut<BtreePage>().GetPageType() == IndexPageType::HEADER_PAGE);
 		transaction.GetPageSet()->pop_front();
 		page.get().WUnlatch();
 		bpm_->UnpinPage(page.get().GetPageId(), true);

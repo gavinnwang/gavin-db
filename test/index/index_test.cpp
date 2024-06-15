@@ -142,7 +142,7 @@ TEST(IndexTest, IndexManyInsertionsTest) {
 			ASSERT_EQ(scan_ans.size(), 1);
 			auto rid = scan_ans[0];
 			LOG_DEBUG("rid %d %d", rid.GetPageId().page_number_, rid.GetSlotNum());
-			assert(rids[i] == rid);
+			ASSERT_EQ(rids[i], rid);
 		}
 	}
 }
