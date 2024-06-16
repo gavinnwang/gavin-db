@@ -153,7 +153,24 @@ protected:
 		return new_size != size;
 	}
 	bool InternalDeleteRecord(const IndexKeyType key) override {
-		(void)key;
+		auto &header_raw_page = bpm_->FetchPage({table_meta_->table_oid_, index_meta_->header_page_id_});
+		header_raw_page.WLatch();
+		Transaction transaction {};
+		LOG_TRACE("Adding header page id %d into page set (header)", header_raw_page.GetPageId().page_number_);
+		transaction.AddIntoPageSet(header_raw_page);
+
+		auto &header_page = header_raw_page.AsMut<BtreeHeaderPage>();
+
+		if (header_page.TreeIsEmpty()) {
+			ReleaseParentWriteLatches(transaction);
+			return false;
+		}
+
+		auto &leaf_page = SearchLeafPage(key, Operation::DELETE, transaction, header_raw_page);
+		auto &leaf_node = leaf_page.AsMut<BtreeLeafPage>();
+
+		(void)leaf_node;
+
 		return true;
 	}
 

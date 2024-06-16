@@ -121,6 +121,11 @@ public:
 		}
 	}
 
+	template <typename T>
+	[[nodiscard]] T GetAs() const {
+		return std::get<T>(value_);
+	}
+
 private:
 	[[nodiscard]] uint32_t GetVarlenStorageSize() const {
 		if (type_id_ != TypeId::VARCHAR) {

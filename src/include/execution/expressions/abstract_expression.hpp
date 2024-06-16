@@ -1,6 +1,7 @@
 #pragma once
 
 #include "common/type.hpp"
+#include "common/typedef.hpp"
 
 #include <memory>
 #include <vector>
@@ -17,7 +18,7 @@ public:
 
 	virtual ~AbstractExpression() = default;
 
-	const AbstractExpressionRef &GetChildAt(uint32_t child_idx) const {
+	const AbstractExpressionRef &GetChildAt(idx_t child_idx) const {
 		return children_.at(child_idx);
 	}
 
@@ -29,7 +30,7 @@ public:
 		return ret_type_;
 	}
 
-	virtual auto ToString() const -> std::string {
+	virtual std::string ToString() const {
 		return "<unknown>";
 	}
 
