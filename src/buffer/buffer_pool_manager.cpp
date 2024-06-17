@@ -31,12 +31,12 @@ bool BufferPoolManager::AllocateFrame(frame_id_t &frame_id) {
 			PrintFreeList();
 			return false;
 		}
+		assert(pages_[frame_id].pin_count_ == 0);
+		assert(pages_[frame_id].page_id_.page_number_ >= 0);
 		if (pages_[frame_id].is_dirty_) {
 			auto &evict_page = pages_[frame_id];
 			disk_manager_->WritePage(evict_page.GetPageId(), evict_page.GetData());
 		}
-		assert(pages_[frame_id].pin_count_ == 0);
-		assert(pages_[frame_id].page_id_.page_number_ != 0);
 		pages_[frame_id].ResetMemory();
 		return true;
 	}

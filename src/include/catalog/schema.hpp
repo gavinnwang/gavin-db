@@ -10,7 +10,7 @@
 namespace db {
 
 class Schema;
-using SchemaRef = std::shared_ptr<const Schema>;
+using SchemaRef = std::unique_ptr<const Schema>;
 
 class Schema {
 public:

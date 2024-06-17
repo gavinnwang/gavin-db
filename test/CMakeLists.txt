@@ -13,6 +13,6 @@ foreach(test_source ${GAVIN_DB_TEST_SOURCES})
           ${PROJECT_SOURCE_DIR}/src/include
           ${TEST_INCLUDE_DIR}
   )
-  target_link_libraries(${test_name} gavindb GTest::gtest_main)
+  target_link_libraries(${test_name} PRIVATE gavindb GTest::gtest_main fmt::fmt)
   gtest_discover_tests(${test_name})
 endforeach ()

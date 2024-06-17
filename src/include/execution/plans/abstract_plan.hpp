@@ -2,7 +2,6 @@
 
 #include "catalog/schema.hpp"
 
-#include <algorithm>
 #include <memory>
 #include <utility>
 namespace db {
@@ -30,13 +29,30 @@ enum class PlanType {
 };
 
 class AbstractPlanNode;
-using AbstractPlanNodeRef = std::shared_ptr<const AbstractPlanNode>;
+using AbstractPlanNodeRef = std::unique_ptr<const AbstractPlanNode>;
 
 class AbstractPlanNode {
+private:
+	template <typename T, typename... Args>
+	std::vector<T> BuildVectorFromMoveOnlyObjects(Args &&...args) {
+		std::vector<T> container;
+		container.reserve(sizeof...(Args));
+		(container.emplace_back(std::forward<Args>(args)), ...);
+		return container;
+	}
 
 public:
+	explicit AbstractPlanNode(SchemaRef output_schema) : output_schema_(std::move(output_schema)) {
+	}
+
 	AbstractPlanNode(SchemaRef output_schema, std::vector<AbstractPlanNodeRef> children)
 	    : output_schema_(std::move(output_schema)), children_(std::move(children)) {
+	}
+
+	template <typename... Args>
+	AbstractPlanNode(SchemaRef output_schema, Args &&...args)
+	    : output_schema_(std::move(output_schema)),
+	      children_(BuildVectorFromMoveOnlyObjects<AbstractPlanNodeRef>(std::forward<Args>(args)...)) {
 	}
 	virtual ~AbstractPlanNode() = default;
 
@@ -47,7 +63,7 @@ public:
 	const std::vector<AbstractPlanNodeRef> &GetChildren() const {
 		return children_;
 	}
-	const AbstractPlanNodeRef GetChildAt(idx_t child_idx) const {
+	const AbstractPlanNodeRef &GetChildAt(idx_t child_idx) const {
 		return children_.at(child_idx);
 	}
 	virtual PlanType GetType() const = 0;

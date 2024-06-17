@@ -62,8 +62,7 @@ FetchContent_Declare(
 FetchContent_MakeAvailable(googletest)
 FetchContent_MakeAvailable(fmt)
 
-target_link_libraries(gavindb PRIVATE fmt::fmt)
-target_link_libraries(gavindb PRIVATE gtest gtest_main)
+target_link_libraries(gavindb PRIVATE gtest gtest_main fmt::fmt)
 
 add_subdirectory(test)
 

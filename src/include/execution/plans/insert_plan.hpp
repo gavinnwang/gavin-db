@@ -9,7 +9,7 @@ namespace db {
 class InsertPlanNode : public AbstractPlanNode {
 public:
 	InsertPlanNode(SchemaRef output, AbstractPlanNodeRef child, table_oid_t table_oid)
-	    : AbstractPlanNode(std::move(output), {std::move(child)}), table_oid_(table_oid) {
+	    : AbstractPlanNode(std::move(output), std::move(child)), table_oid_(table_oid) {
 	}
 	PlanType GetType() const override {
 		return PlanType::Insert;
@@ -17,7 +17,7 @@ public:
 	table_oid_t GetTableOid() const {
 		return table_oid_;
 	}
-	AbstractPlanNodeRef GetChildPlan() const {
+	const AbstractPlanNodeRef &GetChildPlan() const {
 		assert(GetChildren().size() == 1);
 		return GetChildAt(0);
 	}

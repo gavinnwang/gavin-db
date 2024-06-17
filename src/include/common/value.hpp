@@ -1,5 +1,6 @@
 #pragma once
 
+#include "common/arithmetic_type.hpp"
 #include "common/config.hpp"
 #include "common/exception.hpp"
 #include "common/logger.hpp"
@@ -10,6 +11,7 @@
 
 #include <cstdint>
 #include <cstring>
+#include <utility>
 #include <variant>
 
 namespace db {
@@ -49,6 +51,10 @@ public:
 		return Type::TypeSize(type_id_, GetVarlenStorageSize());
 	}
 
+	[[nodiscard]] inline TypeId GetTypeId() const {
+		return type_id_;
+	}
+
 	[[nodiscard]] inline bool IsNull() const {
 		return is_null_;
 	}
@@ -59,7 +65,7 @@ public:
 	void Serialize(Serializer &serializer) const;
 	static Value Deserialize(Deserializer &deserializer);
 
-	static Value DeserializeFromWithTypeInfo(const_data_ptr_t storage) {
+	[[nodiscard]] static Value DeserializeFromWithTypeInfo(const_data_ptr_t storage) {
 		auto type_id = *reinterpret_cast<const TypeId *>(storage);
 		return DeserializeFrom(storage + sizeof(TypeId), type_id);
 	}
@@ -69,7 +75,7 @@ public:
 		SerializeTo(storage + sizeof(TypeId));
 	}
 
-	static auto DeserializeFrom(const_data_ptr_t storage, const TypeId type_id) -> Value {
+	[[nodiscard]] static Value DeserializeFrom(const_data_ptr_t storage, const TypeId type_id) {
 		switch (type_id) {
 		case TypeId::BOOLEAN: {
 			int8_t val = *reinterpret_cast<const int8_t *>(storage);
@@ -124,6 +130,45 @@ public:
 	template <typename T>
 	[[nodiscard]] T GetAs() const {
 		return std::get<T>(value_);
+	}
+
+#define HANDLE_ARITHMETIC_CASE(type, cpp_type, op)                                                                     \
+	case TypeId::type:                                                                                                 \
+		value_ = std::get<cpp_type>(value_) op other.GetAs<cpp_type>();                                                \
+		return
+
+#define HANDLE_UNREACHABLE_CASE(type)                                                                                  \
+	case TypeId::type:                                                                                                 \
+		UNREACHABLE(#type " arithmetic not supported");
+
+	void ComputeArithmetic(const Value &other, ArithmeticType expression_type) {
+		switch (expression_type) {
+		case ArithmeticType::Plus:
+			switch (type_id_) {
+				HANDLE_UNREACHABLE_CASE(BOOLEAN);
+				HANDLE_ARITHMETIC_CASE(INTEGER, int32_t, +);
+				HANDLE_ARITHMETIC_CASE(TIMESTAMP, uint64_t, +);
+				HANDLE_UNREACHABLE_CASE(VARCHAR);
+				HANDLE_UNREACHABLE_CASE(INVALID);
+			}
+		case ArithmeticType::Minus:
+			switch (type_id_) {
+				HANDLE_UNREACHABLE_CASE(BOOLEAN);
+				HANDLE_ARITHMETIC_CASE(INTEGER, int32_t, -);
+				HANDLE_ARITHMETIC_CASE(TIMESTAMP, uint64_t, -);
+				HANDLE_UNREACHABLE_CASE(VARCHAR);
+				HANDLE_UNREACHABLE_CASE(INVALID);
+			}
+		case ArithmeticType::Multiply:
+			switch (type_id_) {
+				HANDLE_UNREACHABLE_CASE(BOOLEAN);
+				HANDLE_ARITHMETIC_CASE(INTEGER, int32_t, *);
+				HANDLE_UNREACHABLE_CASE(TIMESTAMP);
+				HANDLE_UNREACHABLE_CASE(VARCHAR);
+				HANDLE_UNREACHABLE_CASE(INVALID);
+			}
+		}
+		std::unreachable();
 	}
 
 private:

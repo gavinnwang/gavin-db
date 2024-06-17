@@ -28,7 +28,7 @@ class Tuple {
 
 public:
 	// Default constructor (to create a dummy tuple)
-	Tuple() = default;
+	explicit Tuple() = default;
 
 	// construct a tuple using input values
 	Tuple(std::vector<Value> values, const Schema &schema);
