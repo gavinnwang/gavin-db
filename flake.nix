@@ -26,14 +26,5 @@
           ];
         };
       };
-
-      devShell = pkgs.mkShell {
-        buildInputs = with pkgs; [
-          clang
-          cmake
-          fmt
-          gtest
-        ];
-      };
     });
 }
