@@ -48,19 +48,22 @@ add_library(gavindb ${SOURCE_FILES})
 # Include
 target_include_directories(gavindb PRIVATE ${PROJECT_SOURCE_DIR}/src/include)
 
-include(FetchContent)
-FetchContent_Declare(
-  googletest
-  GIT_REPOSITORY https://github.com/google/googletest.git
-  GIT_TAG v1.14.0
-)
-FetchContent_Declare(
-  fmt
-  GIT_REPOSITORY https://github.com/fmtlib/fmt.git
-  GIT_TAG 10.2.1
-)
-FetchContent_MakeAvailable(googletest)
-FetchContent_MakeAvailable(fmt)
+# include(FetchContent)
+# FetchContent_Declare(
+#   googletest
+#   GIT_REPOSITORY https://github.com/google/googletest.git
+#   GIT_TAG v1.14.0
+# )
+# FetchContent_Declare(
+#   fmt
+#   GIT_REPOSITORY https://github.com/fmtlib/fmt.git
+#   GIT_TAG 10.2.1
+# )
+# FetchContent_MakeAvailable(googletest)
+# FetchContent_MakeAvailable(fmt)
+
+find_package(GTest REQUIRED)
+find_package(fmt REQUIRED)
 
 target_link_libraries(gavindb PRIVATE gtest gtest_main fmt::fmt)
 
