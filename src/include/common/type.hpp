@@ -9,7 +9,20 @@ enum class TypeId : uint8_t { INVALID = 0, BOOLEAN, INTEGER, TIMESTAMP, VARCHAR 
 
 class Type {
 public:
-	static auto TypeSize(TypeId type_id, uint32_t length = 0) -> uint32_t {
+	static bool IsFixedSize(TypeId type_id) {
+		switch (type_id) {
+		case TypeId::BOOLEAN:
+		case TypeId::INTEGER:
+		case TypeId::TIMESTAMP:
+			return true;
+		case TypeId::VARCHAR:
+			return false;
+		default: {
+			UNREACHABLE("Cannot get size of invalid type");
+		}
+		}
+	}
+	static uint32_t TypeSize(TypeId type_id, uint32_t length = 0) {
 		switch (type_id) {
 		case TypeId::BOOLEAN:
 			return 1;
@@ -24,7 +37,8 @@ public:
 		}
 		}
 	}
-	static auto TypeIdToString(TypeId type_id) -> std::string {
+
+	static std::string TypeIdToString(TypeId type_id) {
 		switch (type_id) {
 		case TypeId::BOOLEAN:
 			return "BOOLEAN";

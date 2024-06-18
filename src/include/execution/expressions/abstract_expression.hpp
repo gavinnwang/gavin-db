@@ -50,11 +50,12 @@ public:
 	TypeId GetReturnType() const {
 		return ret_type_;
 	}
-	virtual Value Evaluate(const Tuple &tuple, const Schema &schema) const = 0;
 
-	virtual std::string ToString() const {
-		return "<unknown>";
-	}
+	virtual Value Evaluate(const Tuple &tuple, const Schema &schema) const = 0;
+	virtual Value EvaluateJoin(const Tuple &left_tuple, const Schema &left_schema, const Tuple &right_tuple,
+	                           const Schema &right_schema) const = 0;
+
+	virtual std::string ToString() const = 0;
 
 protected:
 	std::vector<AbstractExpressionRef> children_;
@@ -62,6 +63,7 @@ protected:
 private:
 	// return type of the expression
 	TypeId ret_type_;
+	// uint32_t variable_return_size_;
 };
 
 } // namespace db

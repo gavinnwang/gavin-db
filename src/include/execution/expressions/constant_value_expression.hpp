@@ -13,6 +13,12 @@ public:
 		return val_;
 	}
 
+	Value EvaluateJoin([[maybe_unused]] const Tuple &left_tuple, [[maybe_unused]] const Schema &left_schema,
+	                   [[maybe_unused]] const Tuple &right_tuple,
+	                   [[maybe_unused]] const Schema &right_schema) const override {
+		return val_;
+	}
+
 	std::string ToString() const override {
 		return val_.ToString();
 	}

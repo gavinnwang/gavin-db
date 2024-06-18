@@ -22,6 +22,12 @@ public:
 		Value rhs = GetChildAt(1)->Evaluate(tuple, schema);
 		return PerformComputation(std::move(lhs), std::move(rhs));
 	}
+	Value EvaluateJoin(const Tuple &left_tuple, const Schema &left_schema, const Tuple &right_tuple,
+	                   const Schema &right_schema) const override {
+		Value lhs = GetChildAt(0)->EvaluateJoin(left_tuple, left_schema, right_tuple, right_schema);
+		Value rhs = GetChildAt(1)->EvaluateJoin(left_tuple, left_schema, right_tuple, right_schema);
+		return PerformComputation(std::move(lhs), std::move(rhs));
+	}
 
 	std::string ToString() const override {
 		return fmt::format("{} {} {}", GetChildAt(0)->ToString(), ArithmeticTypeHelper::ToString(compute_type_),

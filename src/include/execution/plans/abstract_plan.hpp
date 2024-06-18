@@ -45,9 +45,9 @@ public:
 	explicit AbstractPlanNode(SchemaRef output_schema) : output_schema_(std::move(output_schema)) {
 	}
 
-	AbstractPlanNode(SchemaRef output_schema, std::vector<AbstractPlanNodeRef> children)
-	    : output_schema_(std::move(output_schema)), children_(std::move(children)) {
-	}
+	// AbstractPlanNode(SchemaRef output_schema, std::vector<AbstractPlanNodeRef> children)
+	//     : output_schema_(std::move(output_schema)), children_(std::move(children)) {
+	// }
 
 	template <typename... Args>
 	AbstractPlanNode(SchemaRef output_schema, Args &&...args)
