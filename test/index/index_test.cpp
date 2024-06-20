@@ -1,7 +1,7 @@
 
 
 #include "common/test_utils.hpp"
-#include "index/btree_index.hpp"
+#include "index/bplus_tree_index.hpp"
 #include "storage/table/table_heap.hpp"
 
 #include "gtest/gtest.h"
