@@ -6,8 +6,6 @@
 #include <functional>
 namespace db {
 
-// enum class PageType : uint8_t { INVALID_PAGE = 0, DATA_PAGE = 1, HASH_INDEX_PAGE = 2, BTREE_INDEX_PAGE = 3 };
-
 struct PageId {
 	page_id_t page_number_;
 	table_oid_t table_id_;

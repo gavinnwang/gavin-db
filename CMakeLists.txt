@@ -62,8 +62,8 @@ FetchContent_Declare(
 FetchContent_MakeAvailable(googletest)
 FetchContent_MakeAvailable(fmt)
 
-find_package(GTest REQUIRED)
-find_package(fmt REQUIRED)
+# find_package(googletest REQUIRED)
+# find_package(fmt REQUIRED)
 
 target_link_libraries(gavindb PRIVATE gtest gtest_main fmt::fmt)
 
