@@ -22,11 +22,16 @@ public:
 		Value rhs = GetChildAt(1)->Evaluate(tuple, schema);
 		return PerformComputation(std::move(lhs), std::move(rhs));
 	}
+
 	Value EvaluateJoin(const Tuple &left_tuple, const Schema &left_schema, const Tuple &right_tuple,
 	                   const Schema &right_schema) const override {
 		Value lhs = GetChildAt(0)->EvaluateJoin(left_tuple, left_schema, right_tuple, right_schema);
 		Value rhs = GetChildAt(1)->EvaluateJoin(left_tuple, left_schema, right_tuple, right_schema);
 		return PerformComputation(std::move(lhs), std::move(rhs));
+	}
+
+	Value GetConstValue() const override {
+		UNREACHABLE("Arithmetic Expression cannot return a constant value");
 	}
 
 	std::string ToString() const override {

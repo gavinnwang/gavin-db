@@ -52,6 +52,9 @@ public:
 	}
 
 	virtual Value Evaluate(const Tuple &tuple, const Schema &schema) const = 0;
+
+	virtual Value GetConstValue() const = 0;
+
 	virtual Value EvaluateJoin(const Tuple &left_tuple, const Schema &left_schema, const Tuple &right_tuple,
 	                           const Schema &right_schema) const = 0;
 

@@ -74,17 +74,6 @@ static std::string IndexKeyTypeToString(const IndexKeyType &key) {
 	std::ostringstream oss;
 	oss << "Key[";
 	oss << ConvertArrayToInt32(key);
-	// for (size_t i = 0; i < key.size(); ++i) {
-	// 	if (i != 0) {
-	// 		oss << ", ";
-	// 	}
-	// 	// If data_t is not char, you might want to print in hexadecimal or as integer
-	// 	if constexpr (std::is_same_v<data_t, char>) {
-	// 		oss << key[i];
-	// 	} else {
-	// 		oss << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(key[i]);
-	// 	}
-	// }
 	oss << "]";
 	return oss.str();
 }

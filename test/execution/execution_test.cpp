@@ -3,6 +3,7 @@
 #include "execution/expressions/constant_value_expression.hpp"
 
 #include "gtest/gtest.h"
+#include <memory>
 namespace db {
 TEST(ExecutionTest, ArithmeticExpressionTest) {
 	AbstractExpressionRef lhs =
@@ -26,5 +27,8 @@ TEST(ExecutionTest, ArithmeticExpressionTest) {
 	auto res1 = ae1->Evaluate(Tuple {}, Schema {});
 
 	ASSERT_EQ(res1.ToString(), "69");
+}
+
+TEST(ExecutionTest, ConstantValueExpressionTest) {
 }
 } // namespace db

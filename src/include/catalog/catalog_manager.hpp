@@ -3,6 +3,7 @@
 #include "catalog/schema.hpp"
 #include "common/fs_utils.hpp"
 #include "common/typedef.hpp"
+#include "index/index.hpp"
 #include "storage/disk_manager.hpp"
 #include "storage/file_path_manager.hpp"
 #include "storage/serializer/binary_deserializer.hpp"
@@ -89,6 +90,7 @@ private:
 		}
 	};
 	std::unordered_map<table_oid_t, std::shared_ptr<TableMeta>> tables_;
+	std::unordered_map<table_oid_t, std::map<std::string, std::shared_ptr<IndexMeta>>> indexes_;
 	std::unordered_map<std::string, table_oid_t> table_names_;
 };
 } // namespace db

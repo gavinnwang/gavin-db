@@ -58,7 +58,9 @@ public:
 
 protected:
 	template <typename T>
-	void WriteValue(const T value) requires std::is_enum_v<T> {
+	void WriteValue(const T value)
+	    requires std::is_enum_v<T>
+	{
 		WriteValue(static_cast<typename std::underlying_type<T>::type>(value));
 	}
 	// Unique Pointer Ref
@@ -134,7 +136,9 @@ protected:
 
 	// class or struct implementing `Serialize(Serializer& Serializer)`;
 	template <typename T>
-	void WriteValue(const T &value) requires HasSerialize<T> {
+	void WriteValue(const T &value)
+	    requires HasSerialize<T>
+	{
 		OnObjectBegin();
 		value.Serialize(*this);
 		OnObjectEnd();

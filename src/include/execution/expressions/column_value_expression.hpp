@@ -15,6 +15,11 @@ public:
 	Value Evaluate(const Tuple &tuple, const Schema &schema) const override {
 		return tuple.GetValue(schema, col_idx_);
 	}
+
+	Value GetConstValue() const override {
+		UNREACHABLE("Column Value Expression cannot return a constant value");
+	}
+
 	Value EvaluateJoin(const Tuple &left_tuple, const Schema &left_schema, const Tuple &right_tuple,
 	                   const Schema &right_schema) const override {
 		return tuple_pos_ == TUPLE_POSITION::LEFT ? left_tuple.GetValue(left_schema, col_idx_)

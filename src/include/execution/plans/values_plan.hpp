@@ -18,6 +18,11 @@ public:
 		assert(GetChildren().size() == 1);
 		return GetChildAt(0);
 	}
+
+	auto GetValues() const -> const std::vector<std::vector<AbstractExpressionRef>> & {
+		return values_;
+	}
+
 	std::string ToString() const override {
 		return fmt::format("Values {{ }}");
 	}

@@ -1,6 +1,7 @@
 #pragma once
 
 #include "execution/expressions/abstract_expression.hpp"
+#include "storage/table/tuple.hpp"
 
 #include <string>
 namespace db {
@@ -10,6 +11,10 @@ public:
 	}
 
 	Value Evaluate([[maybe_unused]] const Tuple &tuple, [[maybe_unused]] const Schema &schema) const override {
+		return val_;
+	}
+
+	Value GetConstValue() const override {
 		return val_;
 	}
 
