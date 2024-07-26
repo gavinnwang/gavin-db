@@ -1,12 +1,48 @@
 #include "execution/executors/insert_executor.hpp"
+
+#include "storage/table/table_heap.hpp"
+
 namespace db {
 
-InsertExecutor::InsertExecutor(const InsertPlanNode &plan, std::unique_ptr<AbstractExecutor> &&child_executor)
-    : child_executor_(std::move(child_executor)), plan_(plan) {
-}
-bool Next(Tuple &tuple, RID &rid) {
-	(void)tuple;
-	(void)rid;
+bool InsertExecutor::Next(Tuple &tuple, RID &rid) {
+	if (executed_) {
+		return false;
+	}
+
+	idx_t changed_row_count = 0;
+	Tuple t;
+	RID r;
+
+	const auto &table_meta = exec_ctx_->GetCatalog()->GetTable(plan_->GetTableOid());
+	const auto &bpm = exec_ctx_->GetBufferPoolManager();
+	auto table_heap = std::make_unique<TableHeap>(bpm, table_meta);
+
+	while (child_executor_->Next(t, r)) {
+		TupleMeta meta = TupleMeta();
+		meta.is_deleted_ = false;
+
+		auto return_rid = table_heap->InsertTuple(meta, t);
+
+		if (return_rid.has_value()) {
+			rid = *return_rid;
+			// TODO: insert to index
+
+			// for (auto index : index_info_) {
+			// 	auto key = t.KeyFromTuple(table_info_->schema_, index->key_schema_, index->index_->GetKeyAttrs());
+			// 	auto rid_val = return_rid.value();
+			// 	index->index_->InsertEntry(key, rid_val, exec_ctx_->GetTransaction());
+			// }
+			changed_row_count++;
+		} else {
+			throw std::runtime_error("Failed to insert tuple");
+			return false;
+		}
+	}
+
+	std::vector<Value> values = {Value(TypeId::INTEGER, changed_row_count)};
+	tuple = Tuple(values, plan_->OutputSchema());
+
+	executed_ = true;
 	return true;
 }
 

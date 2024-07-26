@@ -32,7 +32,14 @@ public:
 
 	std::optional<table_oid_t> CreateTable(const std::string &table_name, const Schema &schema);
 
-	std::shared_ptr<TableMeta> GetTable(const std::string &table_name) const {
+	const std::shared_ptr<TableMeta> &GetTable(const table_oid_t table_oid) const {
+		if (tables_.find(table_oid) == tables_.end()) {
+			throw Exception("Table not found when getting table info");
+		}
+		return tables_.at(table_oid);
+	};
+
+	const std::shared_ptr<TableMeta> &GetTable(const std::string &table_name) const {
 		if (table_names_.find(table_name) == table_names_.end()) {
 			throw Exception("Table not found when getting table info");
 		}

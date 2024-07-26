@@ -2,7 +2,7 @@
 #include "execution/executors/value_executor.hpp"
 namespace db {
 
-auto ValuesExecutor::Next(Tuple &tuple, RID &rid) -> bool {
+auto ValuesExecutor::Next(Tuple &tuple, [[maybe_unused]] RID &rid) -> bool {
 	if (cursor_ >= plan_->GetValues().size()) {
 		return false;
 	}

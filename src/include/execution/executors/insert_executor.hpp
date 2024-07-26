@@ -22,6 +22,6 @@ public:
 private:
 	std::unique_ptr<AbstractExecutor> child_executor_;
 	const std::unique_ptr<InsertPlanNode> plan_;
-	bool executed = false;
+	bool executed_ = false;
 };
 } // namespace db
