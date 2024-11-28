@@ -2,6 +2,7 @@
 
 #include "common/macros.hpp"
 #include "common/type.hpp"
+#include "fmt/format.h"
 #include "storage/serializer/deserializer.hpp"
 #include "storage/serializer/serializer.hpp"
 
@@ -72,3 +73,20 @@ private:
 	uint32_t column_offset_ = 0;
 };
 } // namespace db
+
+template <typename T>
+struct fmt::formatter<T, std::enable_if_t<std::is_base_of<db::Column, T>::value, char>> : fmt::formatter<std::string> {
+	template <typename FormatCtx>
+	auto format(const db::Column &x, FormatCtx &ctx) const {
+		return fmt::formatter<std::string>::format(x.ToString(), ctx);
+	}
+};
+
+template <typename T>
+struct fmt::formatter<std::unique_ptr<T>, std::enable_if_t<std::is_base_of<db::Column, T>::value, char>>
+    : fmt::formatter<std::string> {
+	template <typename FormatCtx>
+	auto format(const std::unique_ptr<db::Column> &x, FormatCtx &ctx) const {
+		return fmt::formatter<std::string>::format(x->ToString(), ctx);
+	}
+};
