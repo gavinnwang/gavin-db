@@ -1,6 +1,8 @@
 #pragma once
 
+#include "common/exception.hpp"
 #include "common/macros.hpp"
+#include "sql/ColumnType.h"
 
 #include <cstdint>
 #include <string>
@@ -51,6 +53,32 @@ public:
 		default: {
 			UNREACHABLE("Unkown type");
 		}
+		}
+	}
+
+	static TypeId HsqlColumnTypeToTypeId(hsql::ColumnType col_type) {
+		switch (col_type.data_type) {
+		case hsql::DataType::BOOLEAN:
+			return TypeId::BOOLEAN;
+		case hsql::DataType::INT:
+			return TypeId::INTEGER;
+		case hsql::DataType::TIME:
+			return TypeId::TIMESTAMP;
+		case hsql::DataType::VARCHAR:
+			return TypeId::VARCHAR;
+		case hsql::DataType::UNKNOWN:
+		case hsql::DataType::BIGINT:
+		case hsql::DataType::CHAR:
+		case hsql::DataType::DATE:
+		case hsql::DataType::DATETIME:
+		case hsql::DataType::DECIMAL:
+		case hsql::DataType::DOUBLE:
+		case hsql::DataType::FLOAT:
+		case hsql::DataType::LONG:
+		case hsql::DataType::REAL:
+		case hsql::DataType::SMALLINT:
+		case hsql::DataType::TEXT:
+			throw NotImplementedException("Type is not implemented");
 		}
 	}
 };
