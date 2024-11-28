@@ -4,7 +4,7 @@
 #include "gtest/gtest.h"
 namespace db {
 TEST(QueryTest, SimpleQueryTest) {
-	std::string query = "select * from car;";
+	std::string query = "SELECT * FROM Customers WHERE CustomerID > 80;";
 	hsql::SQLParserResult result;
 	hsql::SQLParser::parse(query, &result);
 
@@ -14,6 +14,7 @@ TEST(QueryTest, SimpleQueryTest) {
 		if (statement->isType(hsql::kStmtSelect)) {
 			const auto *select = static_cast<const hsql::SelectStatement *>(statement);
 			std::cout << select->fromTable->getName() << std::endl;
+			std::cout << select->whereClause << std::endl;
 		}
 	}
 }

@@ -45,8 +45,6 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 file(GLOB_RECURSE SOURCE_FILES "${PROJECT_SOURCE_DIR}/src/*/*.cpp")
 add_library(gavindb ${SOURCE_FILES})
 
-# Include
-target_include_directories(gavindb PRIVATE ${PROJECT_SOURCE_DIR}/src/include)
 
 include(FetchContent)
 FetchContent_Declare(
@@ -103,5 +101,10 @@ add_custom_command(
 
 target_link_libraries(gavindb PRIVATE fmt::fmt "${SQL_PARSER_LIBRARY_DIR}/libsqlparser.so")
 
+# Include
+target_include_directories(gavindb PRIVATE 
+${PROJECT_SOURCE_DIR}/src/include
+${SQL_PARSER_LIBRARY_DIR}/src
+)
 
 add_subdirectory(test)

@@ -24,7 +24,8 @@ bool InsertExecutor::Next(Tuple &tuple, RID &rid) {
 		auto return_rid = table_heap->InsertTuple(meta, t);
 
 		if (return_rid.has_value()) {
-			rid = *return_rid;
+			rid = return_rid.value();
+			changed_row_count++;
 			// TODO: insert to index
 
 			// for (auto index : index_info_) {
@@ -32,7 +33,6 @@ bool InsertExecutor::Next(Tuple &tuple, RID &rid) {
 			// 	auto rid_val = return_rid.value();
 			// 	index->index_->InsertEntry(key, rid_val, exec_ctx_->GetTransaction());
 			// }
-			changed_row_count++;
 		} else {
 			throw std::runtime_error("Failed to insert tuple");
 			return false;
