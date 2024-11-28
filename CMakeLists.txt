@@ -62,13 +62,35 @@ FetchContent_Declare(
 FetchContent_MakeAvailable(googletest)
 FetchContent_MakeAvailable(fmt)
 
-# find_package(googletest REQUIRED)
-# find_package(fmt REQUIRED)
 
-target_link_libraries(gavindb PRIVATE gtest gtest_main fmt::fmt)
+include(ExternalProject)
+ExternalProject_Add(sql_parser
+    GIT_REPOSITORY git@github.com:hyrise/sql-parser.git
+    GIT_TAG master
+    PREFIX ${CMAKE_BINARY_DIR}/external/sql-parser
+    BUILD_IN_SOURCE 1
+    CONFIGURE_COMMAND ""
+    BUILD_COMMAND "make"
+    INSTALL_COMMAND ""
+)
+
+ExternalProject_Get_Property(sql_parser BINARY_DIR)
+set(SQL_PARSER_LIBRARY_DIR "${BINARY_DIR}")
+message(STATUS "Sql_parser location: ${SQL_PARSER_LIBRARY_DIR}/libsqlparser.so")
+
+add_custom_command(
+    TARGET sql_parser POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E echo "Checking for libsqlparser.so in ${BINARY_DIR}"
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different
+            "${BINARY_DIR}/libsqlparser.so"
+            "${CMAKE_BINARY_DIR}/test/"
+    COMMENT "Copying libsqlparser.so to the test directory if it exists"
+    VERBATIM
+)
+
+add_dependencies(gavindb sql_parser)
+
+target_link_libraries(gavindb PRIVATE fmt::fmt "${SQL_PARSER_LIBRARY_DIR}/libsqlparser.so")
+
 
 add_subdirectory(test)
-
-# # Shell
-# add_executable(gavindb_shell src/shell.cpp)
-# target_link_libraries(gavindb_shell gavindb)

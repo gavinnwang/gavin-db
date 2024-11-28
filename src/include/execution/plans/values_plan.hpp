@@ -14,6 +14,7 @@ public:
 	PlanType GetType() const override {
 		return PlanType::Values;
 	}
+
 	const AbstractPlanNodeRef &GetChildPlan() const {
 		assert(GetChildren().size() == 1);
 		return GetChildAt(0);

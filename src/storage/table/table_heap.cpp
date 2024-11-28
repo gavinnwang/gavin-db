@@ -86,7 +86,6 @@ std::optional<std::pair<TupleMeta, Tuple>> TableHeap::GetTuple(RID rid) {
 };
 
 TupleMeta TableHeap::GetTupleMeta(RID rid) {
-
 	auto page_guard = bpm_->FetchPageRead(rid.GetPageId());
 	const auto &page = page_guard.As<TablePage>();
 	return page.GetTupleMeta(rid);
@@ -106,11 +105,5 @@ TableIterator TableHeap::MakeIterator() {
 	// iterate from rid 0, 0 to last_page_id and num_tuples
 	return {this, {{table_oid, 0}, 0}, {{table_oid, last_page_id}, num_tuples}};
 }
-
-// auto TableHeap::GetFirstPageId() const -> page_id_t {
-// 	auto page_guard = bpm_->FetchPageRead(table_meta_id_);
-// 	auto table_meta = page_guard.As<TableMetaPage>();
-// 	return table_meta->GetFirstTablePageId();
-// }
 
 } // namespace db
