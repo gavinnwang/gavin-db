@@ -72,6 +72,7 @@ ExternalProject_Add(sql_parser
     CONFIGURE_COMMAND ""
     BUILD_COMMAND "make"
     INSTALL_COMMAND ""
+    BUILD_BYPRODUCTS "${CMAKE_BINARY_DIR}/external/sql-parser/src/sql_parser/libsqlparser.so"
 )
 
 ExternalProject_Get_Property(sql_parser BINARY_DIR)
@@ -80,15 +81,25 @@ message(STATUS "Sql_parser location: ${SQL_PARSER_LIBRARY_DIR}/libsqlparser.so")
 
 add_custom_command(
     TARGET sql_parser POST_BUILD
-    COMMAND ${CMAKE_COMMAND} -E echo "Checking for libsqlparser.so in ${BINARY_DIR}"
     COMMAND ${CMAKE_COMMAND} -E copy_if_different
             "${BINARY_DIR}/libsqlparser.so"
             "${CMAKE_BINARY_DIR}/test/"
-    COMMENT "Copying libsqlparser.so to the test directory if it exists"
     VERBATIM
 )
-
-add_dependencies(gavindb sql_parser)
+add_custom_command(
+    TARGET sql_parser POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different
+            "${BINARY_DIR}/libsqlparser.so"
+            "${CMAKE_BINARY_DIR}/bin/"
+    VERBATIM
+)
+add_custom_command(
+    TARGET sql_parser POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different
+            "${BINARY_DIR}/libsqlparser.so"
+            "${CMAKE_BINARY_DIR}/"
+    VERBATIM
+)
 
 target_link_libraries(gavindb PRIVATE fmt::fmt "${SQL_PARSER_LIBRARY_DIR}/libsqlparser.so")
 

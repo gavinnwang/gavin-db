@@ -10,9 +10,6 @@ foreach(test_source ${GAVIN_DB_TEST_SOURCES})
   get_filename_component(test_name ${test_source} NAME_WE)
   add_executable(${test_name} ${test_source})
 
-  if(NOT EXISTS "${SQL_PARSER_LIBRARY_DIR}/src")
-      message(FATAL_ERROR "The SQL Parser include directory does not exist. Ensure the sql_parser project is built.")
-  endif()
   target_include_directories(${test_name}
       PRIVATE
       ${PROJECT_SOURCE_DIR}/src/include
@@ -20,6 +17,7 @@ foreach(test_source ${GAVIN_DB_TEST_SOURCES})
       ${SQL_PARSER_LIBRARY_DIR}/src
   )
   target_link_libraries(${test_name} PRIVATE gavindb gtest_main fmt::fmt)
+  add_dependencies(${test_name} sql_parser)
 
   gtest_discover_tests(${test_name})
 endforeach ()
