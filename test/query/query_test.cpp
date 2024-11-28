@@ -7,16 +7,14 @@ TEST(QueryTest, SimpleQueryTest) {
 	std::string query = "select * from car;";
 	hsql::SQLParserResult result;
 	hsql::SQLParser::parse(query, &result);
-	if (result.isValid()) {
-		printf("Parsed successfully!\n");
-		printf("Number of statements: %lu\n", result.size());
 
-		for (auto i = 0u; i < result.size(); ++i) {
-			// Print a statement summary.
-			hsql::printStatementInfo(result.getStatement(i));
+	if (result.isValid() && result.size() > 0) {
+		const hsql::SQLStatement *statement = result.getStatement(0);
+
+		if (statement->isType(hsql::kStmtSelect)) {
+			const auto *select = static_cast<const hsql::SelectStatement *>(statement);
+			std::cout << select->fromTable->getName() << std::endl;
 		}
-	} else {
-		printf("failed!\n");
 	}
 }
 } // namespace db
