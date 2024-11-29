@@ -13,7 +13,7 @@ class TableHeap : public PageAllocator {
 	// in memory representation of table heap
 public:
 	DISALLOW_COPY_AND_MOVE(TableHeap);
-	explicit TableHeap(const std::shared_ptr<BufferPoolManager> &bpm, const std::unique_ptr<TableMeta> &table_meta);
+	explicit TableHeap(const std::unique_ptr<BufferPoolManager> &bpm, const std::unique_ptr<TableMeta> &table_meta);
 	[[nodiscard]] std::optional<RID> InsertTuple(const TupleMeta &meta, const Tuple &tuple);
 	void UpdateTupleMeta(const TupleMeta &meta, RID rid);
 	[[nodiscard]] std::optional<std::pair<TupleMeta, Tuple>> GetTuple(RID rid);
@@ -27,7 +27,7 @@ public:
 	}
 
 private:
-	const std::shared_ptr<BufferPoolManager> &bpm_;
+	const std::unique_ptr<BufferPoolManager> &bpm_;
 	const std::unique_ptr<TableMeta> &table_meta_;
 	std::mutex latch_;
 };

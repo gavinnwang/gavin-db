@@ -14,7 +14,7 @@
 namespace db {
 using std::shared_ptr;
 
-TableHeap::TableHeap(const shared_ptr<BufferPoolManager> &bpm, const std::unique_ptr<TableMeta> &table_meta)
+TableHeap::TableHeap(const std::unique_ptr<BufferPoolManager> &bpm, const std::unique_ptr<TableMeta> &table_meta)
     : bpm_(bpm), table_meta_(table_meta) {
 	assert(table_meta_ != nullptr);
 	if (table_meta_->GetLastTableHeapDataPageId() == INVALID_PAGE_ID) {

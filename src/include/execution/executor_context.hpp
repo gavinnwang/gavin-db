@@ -8,7 +8,7 @@
 namespace db {
 class ExecutorContext {
 public:
-	ExecutorContext(std::shared_ptr<CatalogManager> &catalog, std::shared_ptr<BufferPoolManager> &bpm)
+	ExecutorContext(std::unique_ptr<CatalogManager> &catalog, std::unique_ptr<BufferPoolManager> &bpm)
 	    : catalog_ {catalog}, bpm_ {bpm} {
 	}
 
@@ -16,16 +16,16 @@ public:
 
 	DISALLOW_COPY_AND_MOVE(ExecutorContext);
 
-	auto GetCatalog() -> std::shared_ptr<CatalogManager> & {
+	std::unique_ptr<CatalogManager> &GetCatalog() {
 		return catalog_;
 	}
 
-	auto GetBufferPoolManager() -> std::shared_ptr<BufferPoolManager> & {
+	std::unique_ptr<BufferPoolManager> &GetBufferPoolManager() {
 		return bpm_;
 	}
 
 private:
-	std::shared_ptr<CatalogManager> &catalog_;
-	std::shared_ptr<BufferPoolManager> &bpm_;
+	std::unique_ptr<CatalogManager> &catalog_;
+	std::unique_ptr<BufferPoolManager> &bpm_;
 };
 } // namespace db

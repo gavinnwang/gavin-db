@@ -13,8 +13,8 @@ class CatalogManager; // forward declaration
 
 class DiskManager {
 public:
-	explicit DiskManager(std::shared_ptr<CatalogManager> catalog_manager) : cm_(catalog_manager) {
-	  }
+	explicit DiskManager(std::unique_ptr<CatalogManager> &catalog_manager) : cm_(catalog_manager) {
+	}
 	void ShutDown();
 	void WritePage(PageId page_id, const char *page_data);
 	void ReadPage(PageId page_id, char *page_data);
@@ -23,7 +23,7 @@ public:
 
 private:
 	void AddTableDataIfNotExist(table_oid_t table_id);
-  std::shared_ptr<CatalogManager> cm_;
+	std::unique_ptr<CatalogManager> &cm_;
 	std::unordered_map<table_oid_t, std::fstream> table_data_files_;
 	std::unordered_map<table_oid_t, std::fstream> table_meta_files_;
 };

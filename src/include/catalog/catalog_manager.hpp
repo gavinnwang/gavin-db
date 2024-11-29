@@ -32,21 +32,16 @@ public:
 
 	std::optional<table_oid_t> CreateTable(const std::string &table_name, const Schema &schema);
 
-	std::optional<index_oid_t>
-
-	    const std::unique_ptr<TableMeta> &GetTable(const table_oid_t table_oid) const {
-		if (tables_.find(table_oid) == tables_.end()) {
-			throw Exception("Table not found when getting table info");
-		}
-		return tables_.at(table_oid);
-	};
-
 	const std::unique_ptr<TableMeta> &GetTable(const std::string &table_name) const {
 		if (table_names_.find(table_name) == table_names_.end()) {
 			throw Exception("Table not found when getting table info");
 		}
 		return tables_.at(table_names_.at(table_name));
 	};
+
+	const std::unique_ptr<TableMeta> &GetTable(const table_oid_t table_oid) const {
+		return GetTable(GetTableName(table_oid));
+	}
 
 	std::string &GetTableName(const table_oid_t table_oid) const {
 		if (tables_.find(table_oid) == tables_.end()) {
@@ -99,7 +94,7 @@ private:
 		}
 	};
 	std::unordered_map<table_oid_t, std::unique_ptr<TableMeta>> tables_;
-	std::unordered_map<table_oid_t, std::map<std::string, std::shared_ptr<IndexMeta>>> indexes_;
+	std::unordered_map<table_oid_t, std::map<std::string, std::unique_ptr<IndexMeta>>> indexes_;
 	std::unordered_map<std::string, table_oid_t> table_names_;
 };
 } // namespace db

@@ -10,9 +10,9 @@
 TEST(StorageTest, SimpleTableMetaPageTest) {
 	db::DeletePathIfExists(db::FilePathManager::GetInstance().GetDatabaseRootPath());
 	const size_t buffer_pool_size = 10;
-	auto cm = std::make_shared<db::CatalogManager>();
+	auto cm = std::make_unique<db::CatalogManager>();
 	auto dm = std::make_shared<db::DiskManager>(cm);
-	auto bpm = std::make_shared<db::BufferPoolManager>(buffer_pool_size, std::move(dm));
+	auto bpm = std::make_unique<db::BufferPoolManager>(buffer_pool_size, std::move(dm));
 	auto c1 = db::Column("user_id", db::TypeId::INTEGER);
 	auto c2 = db::Column("user_name", db::TypeId::VARCHAR, 256);
 	auto schema = db::Schema({c1, c2});
@@ -23,9 +23,9 @@ TEST(StorageTest, SimpleTableMetaPageTest) {
 TEST(StorageTest, DuplicateTableNameTest) {
 	db::DeletePathIfExists(db::FilePathManager::GetInstance().GetDatabaseRootPath());
 	const size_t buffer_pool_size = 10;
-	auto cm = std::make_shared<db::CatalogManager>();
+	auto cm = std::make_unique<db::CatalogManager>();
 	auto dm = std::make_shared<db::DiskManager>(cm);
-	auto bpm = std::make_shared<db::BufferPoolManager>(buffer_pool_size, std::move(dm));
+	auto bpm = std::make_unique<db::BufferPoolManager>(buffer_pool_size, std::move(dm));
 	auto c1 = db::Column("user_id", db::TypeId::INTEGER);
 	auto c2 = db::Column("user_name", db::TypeId::VARCHAR, 256);
 	auto schema = db::Schema({c1, c2});

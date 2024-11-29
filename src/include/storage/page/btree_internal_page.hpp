@@ -122,7 +122,7 @@ public:
 		return GetSize();
 	}
 
-	void MoveHalfTo(BtreeInternalPage &recipient, const std::shared_ptr<BufferPoolManager> &bpm,
+	void MoveHalfTo(BtreeInternalPage &recipient, const std::unique_ptr<BufferPoolManager> &bpm,
 	                table_oid_t table_oid) {
 		idx_t start_split_indx = GetMinSize();
 		idx_t original_size = GetSize();
@@ -130,7 +130,7 @@ public:
 		recipient.CopyNFrom(node_array_ + start_split_indx, original_size - start_split_indx, bpm, table_oid);
 	}
 
-	void CopyNFrom(InternalNode *items, idx_t size, const std::shared_ptr<BufferPoolManager> &bpm,
+	void CopyNFrom(InternalNode *items, idx_t size, const std::unique_ptr<BufferPoolManager> &bpm,
 	               table_oid_t table_oid) {
 		std::copy(items, items + size, node_array_ + GetSize());
 

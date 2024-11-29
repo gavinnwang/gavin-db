@@ -36,7 +36,7 @@ class BTreeIndex : public Index {
 
 public:
 	BTreeIndex(const std::shared_ptr<IndexMeta> &index_meta, const std::unique_ptr<TableMeta> &table_meta,
-	           const std::shared_ptr<BufferPoolManager> &bpm)
+	           const std::unique_ptr<BufferPoolManager> &bpm)
 	    : Index(index_meta, table_meta), bpm_(bpm) {
 
 		LOG_TRACE("BTreeIndex constructor called");
@@ -412,6 +412,6 @@ private:
 		leaf_page.Insert(key, value, comparator_);
 	}
 
-	const std::shared_ptr<BufferPoolManager> &bpm_;
+	const std::unique_ptr<BufferPoolManager> &bpm_;
 };
 } // namespace db

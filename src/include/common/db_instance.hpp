@@ -15,8 +15,8 @@ public:
 	void HandleCreateStatement(Transaction &txn, const CreateStatement &stmt);
 
 private:
-	std::shared_ptr<BufferPoolManager> bpm_;
-	std::shared_ptr<CatalogManager> catalog_manager_;
+	std::unique_ptr<BufferPoolManager> bpm_;
+	std::unique_ptr<CatalogManager> catalog_manager_;
 	/** Lock for CatalogManager */
 	std::shared_mutex catalog_manager_lock_;
 };
