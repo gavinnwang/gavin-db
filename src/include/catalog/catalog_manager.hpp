@@ -32,14 +32,14 @@ public:
 
 	std::optional<table_oid_t> CreateTable(const std::string &table_name, const Schema &schema);
 
-	const std::shared_ptr<TableMeta> &GetTable(const table_oid_t table_oid) const {
+	const std::unique_ptr<TableMeta> &GetTable(const table_oid_t table_oid) const {
 		if (tables_.find(table_oid) == tables_.end()) {
 			throw Exception("Table not found when getting table info");
 		}
 		return tables_.at(table_oid);
 	};
 
-	const std::shared_ptr<TableMeta> &GetTable(const std::string &table_name) const {
+	const std::unique_ptr<TableMeta> &GetTable(const std::string &table_name) const {
 		if (table_names_.find(table_name) == table_names_.end()) {
 			throw Exception("Table not found when getting table info");
 		}
@@ -73,14 +73,14 @@ public:
 
 	void Serialize(Serializer &serializer) const {
 		serializer.WritePropertyWithDefault(100, "tables", tables_,
-		                                    std::unordered_map<table_oid_t, std::shared_ptr<TableMeta>>());
+		                                    std::unordered_map<table_oid_t, std::unique_ptr<TableMeta>>());
 		serializer.WritePropertyWithDefault(101, "table_names", table_names_,
 		                                    std::unordered_map<std::string, table_oid_t>());
 	}
 
 	void Deserialize(Deserializer &deserializer) {
 		deserializer.ReadPropertyWithDefault(100, "tables", tables_,
-		                                     std::unordered_map<table_oid_t, std::shared_ptr<TableMeta>>());
+		                                     std::unordered_map<table_oid_t, std::unique_ptr<TableMeta>>());
 		deserializer.ReadPropertyWithDefault(101, "table_names", table_names_,
 		                                     std::unordered_map<std::string, table_oid_t>());
 	}
@@ -96,7 +96,7 @@ private:
 			}
 		}
 	};
-	std::unordered_map<table_oid_t, std::shared_ptr<TableMeta>> tables_;
+	std::unordered_map<table_oid_t, std::unique_ptr<TableMeta>> tables_;
 	std::unordered_map<table_oid_t, std::map<std::string, std::shared_ptr<IndexMeta>>> indexes_;
 	std::unordered_map<std::string, table_oid_t> table_names_;
 };

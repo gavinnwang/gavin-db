@@ -24,7 +24,7 @@ TEST(StorageTest, TableHeapSimpleTest) {
 	auto table_name = "user";
 
 	cm->CreateTable(table_name, schema);
-	auto table_meta = cm->GetTable(table_name);
+	auto &table_meta = cm->GetTable(table_name);
 	auto table_heap = std::make_unique<TableHeap>(bpm, table_meta);
 	int32_t int_val = 2392;
 	std::string str_val = "hhihi";
@@ -67,7 +67,7 @@ TEST(StorageTest, TableHeapManyInsertionTest) {
 	auto table_name = "user";
 
 	cm->CreateTable(table_name, schema);
-	auto table_meta = cm->GetTable(table_name);
+	auto &table_meta = cm->GetTable(table_name);
 	auto table_heap = std::make_unique<TableHeap>(bpm, table_meta);
 
 	std::vector<RID> rids;

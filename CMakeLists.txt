@@ -45,7 +45,6 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 file(GLOB_RECURSE SOURCE_FILES "${PROJECT_SOURCE_DIR}/src/*/*.cpp")
 add_library(gavindb ${SOURCE_FILES})
 
-
 include(FetchContent)
 FetchContent_Declare(
   googletest
@@ -67,8 +66,8 @@ ExternalProject_Add(sql_parser
     GIT_TAG master
     PREFIX ${CMAKE_BINARY_DIR}/external/sql-parser
     BUILD_IN_SOURCE 1
-    CONFIGURE_COMMAND ""
-    BUILD_COMMAND "make"
+    CONFIGURE_COMMAND "make"
+    BUILD_COMMAND ""
     INSTALL_COMMAND ""
     BUILD_BYPRODUCTS "${CMAKE_BINARY_DIR}/external/sql-parser/src/sql_parser/libsqlparser.so"
 )
@@ -91,6 +90,7 @@ add_custom_command(
             "${CMAKE_BINARY_DIR}/bin/"
     VERBATIM
 )
+
 add_custom_command(
     TARGET sql_parser POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy_if_different
@@ -106,5 +106,7 @@ target_include_directories(gavindb PRIVATE
 ${PROJECT_SOURCE_DIR}/src/include
 ${SQL_PARSER_LIBRARY_DIR}/src
 )
+
+add_dependencies(gavindb sql_parser)
 
 add_subdirectory(test)

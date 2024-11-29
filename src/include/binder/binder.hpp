@@ -19,6 +19,6 @@ public:
 	Column BindColumnDefinition(const hsql::ColumnDefinition *col_def);
 
 private:
-	const std::shared_ptr<CatalogManager> &catalog_manager_;
+	[[maybe_unused]] const std::shared_ptr<CatalogManager> &catalog_manager_;
 };
 } // namespace db

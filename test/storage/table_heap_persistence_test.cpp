@@ -25,7 +25,7 @@ TEST(StorageTest, TablePersistTest) {
 	auto table_name = "user";
 
 	cm->CreateTable(table_name, schema);
-	auto table_meta = cm->GetTable(table_name);
+	auto &table_meta = cm->GetTable(table_name);
 	auto table_heap = std::make_unique<TableHeap>(bpm, table_meta);
 
 	std::vector<RID> rids;
@@ -53,7 +53,7 @@ TEST(StorageTest, TablePersistTest) {
 	auto dm2 = std::make_shared<DiskManager>(cm);
 	auto bpm2 = std::make_shared<BufferPoolManager>(buffer_pool_size, dm);
 
-	auto table_meta2 = cm2->GetTable(table_name);
+	auto &table_meta2 = cm2->GetTable(table_name);
 	LOG_DEBUG("table_meta2: %s", table_meta2->name_.c_str());
 
 	auto table_heap2 = std::make_unique<TableHeap>(bpm2, table_meta2);

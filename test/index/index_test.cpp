@@ -83,7 +83,7 @@ TEST(IndexTest, IndexManyInsertionsTest) {
 	const auto *table_name = "user";
 
 	cm->CreateTable(table_name, schema);
-	auto table_meta = cm->GetTable(table_name);
+	auto &table_meta = cm->GetTable(table_name);
 
 	auto index_meta = std::make_shared<IndexMeta>("user_id_index", table_meta->table_oid_, schema.GetColumn(0),
 	                                              IndexConstraintType::PRIMARY);

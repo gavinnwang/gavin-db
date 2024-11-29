@@ -82,9 +82,8 @@ class Index : public PageAllocator {
 public:
 	Index() = delete;
 	DISALLOW_COPY(Index);
-	Index(const std::shared_ptr<IndexMeta> &index_meta, std::shared_ptr<TableMeta> table_meta)
-	    : index_meta_(index_meta), table_meta_(std::move(table_meta)),
-	      comparator_(GetComparator(index_meta->key_col_.GetType())) {
+	Index(const std::shared_ptr<IndexMeta> &index_meta, const std::unique_ptr<TableMeta> &table_meta)
+	    : index_meta_(index_meta), table_meta_(table_meta), comparator_(GetComparator(index_meta->key_col_.GetType())) {
 	}
 
 	PageId AllocatePage() override {
@@ -116,7 +115,7 @@ protected:
 	virtual bool InternalDeleteRecord(IndexKeyType key) = 0;
 	virtual bool InternalScanKey(IndexKeyType key, std::vector<RID> &rids) = 0;
 	std::shared_ptr<IndexMeta> index_meta_;
-	std::shared_ptr<TableMeta> table_meta_;
+	const std::unique_ptr<TableMeta> &table_meta_;
 	// comparator used to determine the order of keys
 	Comparator comparator_;
 
