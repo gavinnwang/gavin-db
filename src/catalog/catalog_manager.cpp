@@ -15,6 +15,7 @@ std::optional<table_oid_t> CatalogManager::CreateTable(const std::string &table_
 	auto table_meta = std::make_unique<TableMeta>(schema, table_name, table_oid);
 
 	tables_.insert({table_oid, std::move(table_meta)});
+	indexes_.emplace(table_oid, std::map<std::string, std::shared_ptr<IndexMeta>> {});
 
 	CreateFileIfNotExists(FilePathManager::GetInstance().GetTableMetaPath(table_name));
 	CreateFileIfNotExists(FilePathManager::GetInstance().GetTableDataPath(table_name));

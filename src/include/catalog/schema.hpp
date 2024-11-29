@@ -42,9 +42,6 @@ public:
 	[[nodiscard]] uint32_t GetTupleInlinePartStorageSize() const {
 		return tuple_inline_part_storage_size_;
 	}
-	// void SerializeTo(char *storage) const;
-	// void DeserializeFrom(const char *storage);
-	// auto GetSerializationSize() const -> uint32_t;
 
 	void Serialize(Serializer &serializer) const {
 		serializer.WriteProperty(100, "columns", columns_);
