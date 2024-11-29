@@ -1,6 +1,8 @@
 #include "binder/binder.hpp"
 
 #include "SQLParser.h"
+#include "common/exception.hpp"
+#include "sql/CreateStatement.h"
 #include "sql/SQLStatement.h"
 
 #include <memory>
@@ -21,12 +23,22 @@ std::unique_ptr<BoundStatement> Binder::Bind(const std::unique_ptr<const hsql::S
 std::unique_ptr<CreateStatement> Binder::BindCreate(const std::unique_ptr<const hsql::CreateStatement> stmt) {
 	auto table = std::string(stmt->tableName);
 	auto columns = std::vector<Column> {};
-	size_t column_count = 0;
-	std::vector<std::string> pk;
-	for (const auto col_def : *stmt->columns) {
-		auto col = BindColumnDefinition(col_def);
-		columns.emplace_back(col);
+	std::vector<std::string> primary_key;
+	if (stmt->type == hsql::CreateType::kCreateTable) {
+		for (const auto col_def : *stmt->columns) {
+			auto col = BindColumnDefinition(col_def);
+			if (col_def->column_constraints->contains(hsql::ConstraintType::PrimaryKey)) {
+				primary_key.push_back(col.GetName());
+			}
+			if (primary_key.size() > 1) {
+				throw NotImplementedException("cannot have two primary keys");
+			}
+			columns.emplace_back(col);
+		}
+	} else {
+		throw NotImplementedException("unsupported create statement");
 	}
+	return std::make_unique<CreateStatement>(std::move(table), std::move(columns), std::move(primary_key));
 }
 
 Column Binder::BindColumnDefinition(const hsql::ColumnDefinition *col_def) {
