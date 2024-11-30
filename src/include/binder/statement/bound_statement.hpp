@@ -9,7 +9,7 @@ public:
 	virtual ~BoundStatement() = default;
 
 	/** The statement type. */
-	StatementType type_;
+	const StatementType type_;
 
 public:
 	/** Render this statement as a string. */

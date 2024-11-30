@@ -6,7 +6,6 @@
 #include "catalog/schema.hpp"
 #include "common/exception.hpp"
 #include "common/macros.hpp"
-#include "parser/parser.hpp"
 #include "util/sqlhelper.h"
 
 #include <algorithm>
