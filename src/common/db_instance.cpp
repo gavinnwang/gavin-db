@@ -19,7 +19,7 @@ void DB::ExecuteQuery([[maybe_unused]] Transaction &txn, const std::string &quer
 		LOG_INFO("Query failed to parse!");
 		throw Exception(fmt::format("Query failed to parse: {}", raw_parse_result.errorMsg()));
 	}
-	const auto binder = Binder {catalog_manager_};
+	const auto binder = Binder {};
 	for (const auto &parsed_stmt : raw_parse_result.getStatements()) {
 		std::cout << parsed_stmt << std::endl;
 		hsql::printStatementInfo(parsed_stmt);
