@@ -22,12 +22,13 @@ public:
 	CatalogManager() {
 		LOG_TRACE("Initializing catalog manager...");
 		std::filesystem::path catalog_path = FilePathManager::GetInstance().GetSystemCatalogPath();
-		CreateFileIfNotExists(catalog_path);
 		if (std::filesystem::exists(catalog_path)) {
-			LOG_TRACE("Catalog file exists! Loading from disk");
+			LOG_TRACE("Catalog file exists! Loading from disk...");
 			auto catalog_fs = FileStream(catalog_path);
 			BinaryDeserializer deserializer(catalog_fs);
 			Deserialize(deserializer);
+		} else {
+			PersistToDisk();
 		}
 		EnsureTableFilesExist();
 	}

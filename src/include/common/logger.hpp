@@ -48,21 +48,6 @@ constexpr bool is_log_level_enabled(LogLevel level) {
 }
 
 template <LogLevel level, typename... Args>
-void log_if_enabled(const char *file, int line, const char *func, const char *message, Args &&...args) {
-	if constexpr (is_log_level_enabled(level)) {
-		OutputLogHeader(file, line, func, level);
-		if constexpr (!sizeof...(Args)) {
-			// If no additional arguments, just print the message
-			fprintf(LOG_OUTPUT_STREAM, "%s\n", message);
-		} else {
-			// Use a format string if there are additional arguments
-			fprintf(LOG_OUTPUT_STREAM, message, std::forward<Args>(args)...);
-			fprintf(LOG_OUTPUT_STREAM, "\n");
-		}
-		fflush(stdout);
-	}
-}
-template <LogLevel level, typename... Args>
 void log_if_enabled_fmt(const char *file, int line, const char *func, const std::string message, Args &&...args) {
 	if constexpr (is_log_level_enabled(level)) {
 		OutputLogHeader(file, line, func, level);
