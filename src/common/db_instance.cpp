@@ -6,7 +6,6 @@
 #include "catalog/schema.hpp"
 #include "common/exception.hpp"
 #include "common/macros.hpp"
-#include "util/sqlhelper.h"
 
 #include <algorithm>
 namespace db {
@@ -21,11 +20,8 @@ void DB::ExecuteQuery([[maybe_unused]] Transaction &txn, const std::string &quer
 	}
 	const auto binder = Binder {};
 	for (const auto &parsed_stmt : raw_parse_result.getStatements()) {
-		std::cout << parsed_stmt << std::endl;
-		hsql::printStatementInfo(parsed_stmt);
 		auto binded_stmt = binder.Bind(parsed_stmt);
 		switch (binded_stmt->type_) {
-		// case StatementType::INVALID_STATEMENT:
 		// case StatementType::SELECT_STATEMENT:
 		// case StatementType::INSERT_STATEMENT:
 		case StatementType::CREATE_STATEMENT: {

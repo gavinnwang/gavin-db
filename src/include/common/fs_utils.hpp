@@ -1,6 +1,7 @@
 #pragma once
 
 #include "common/exception.hpp"
+#include "common/logger.hpp"
 
 #include <filesystem>
 #include <fstream>
@@ -36,13 +37,13 @@ inline void CreateFolderIfNotExists(const std::filesystem::path &folder_path) {
 }
 inline void CreateFileIfNotExists(const std::filesystem::path &file_path) {
 	fs::path directory_path = file_path.parent_path();
-
 	if (!fs::exists(directory_path)) {
 		CreateFolderIfNotExists(directory_path);
 	}
 	if (fs::exists(file_path)) {
 		return;
 	}
+	LOG_TRACE("Creating file as it doesn't exist {}", file_path.string());
 
 	std::ofstream file(file_path);
 	if (!file.is_open()) {

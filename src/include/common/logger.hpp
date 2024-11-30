@@ -1,6 +1,7 @@
 #pragma once
 
-#include <array>
+#include "fmt/core.h"
+
 #include <cstdio>
 #include <ctime>
 #include <sstream>
@@ -61,12 +62,34 @@ void log_if_enabled(const char *file, int line, const char *func, const char *me
 		fflush(stdout);
 	}
 }
+template <LogLevel level, typename... Args>
+void log_if_enabled_fmt(const char *file, int line, const char *func, const std::string message, Args &&...args) {
+	if constexpr (is_log_level_enabled(level)) {
+		OutputLogHeader(file, line, func, level);
 
-#define LOG_ERROR(...) log_if_enabled<LogLevel::ERROR>(__SHORT_FILE__, __LINE__, __FUNCTION__, __VA_ARGS__)
-#define LOG_WARN(...)  log_if_enabled<LogLevel::WARN>(__SHORT_FILE__, __LINE__, __FUNCTION__, __VA_ARGS__)
-#define LOG_INFO(...)  log_if_enabled<LogLevel::INFO>(__SHORT_FILE__, __LINE__, __FUNCTION__, __VA_ARGS__)
-#define LOG_DEBUG(...) log_if_enabled<LogLevel::DEBUG>(__SHORT_FILE__, __LINE__, __FUNCTION__, __VA_ARGS__)
-#define LOG_TRACE(...) log_if_enabled<LogLevel::TRACE>(__SHORT_FILE__, __LINE__, __FUNCTION__, __VA_ARGS__)
+		if constexpr (!sizeof...(Args)) {
+			fmt::print(LOG_OUTPUT_STREAM, "{}\n", message);
+		} else {
+			if constexpr (std::is_same_v<std::decay_t<decltype(message)>, const char *>) {
+				// Format with fprintf for const char*
+				std::string formatted_message = fmt::format(fmt::runtime(message), std::forward<Args>(args)...);
+				fprintf(LOG_OUTPUT_STREAM, "%s\n", formatted_message.c_str());
+			} else if constexpr (std::is_same_v<std::decay_t<decltype(message)>, std::string>) {
+				// Format with fmt for std::string
+				auto formatted_message = fmt::format(fmt::runtime(message), std::forward<Args>(args)...);
+				fmt::print(LOG_OUTPUT_STREAM, "{}\n", formatted_message);
+			}
+		}
+
+		fflush(LOG_OUTPUT_STREAM); // Ensure log is flushed
+	}
+}
+
+#define LOG_ERROR(...) log_if_enabled_fmt<LogLevel::ERROR>(__SHORT_FILE__, __LINE__, __FUNCTION__, __VA_ARGS__)
+#define LOG_WARN(...)  log_if_enabled_fmt<LogLevel::WARN>(__SHORT_FILE__, __LINE__, __FUNCTION__, __VA_ARGS__)
+#define LOG_INFO(...)  log_if_enabled_fmt<LogLevel::INFO>(__SHORT_FILE__, __LINE__, __FUNCTION__, __VA_ARGS__)
+#define LOG_DEBUG(...) log_if_enabled_fmt<LogLevel::DEBUG>(__SHORT_FILE__, __LINE__, __FUNCTION__, __VA_ARGS__)
+#define LOG_TRACE(...) log_if_enabled_fmt<LogLevel::TRACE>(__SHORT_FILE__, __LINE__, __FUNCTION__, __VA_ARGS__)
 
 constexpr int HEADER_LENGTH = 40;
 inline std::string FormatLogHeader(const char *file, int line, const char *func) {

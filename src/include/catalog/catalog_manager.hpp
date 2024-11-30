@@ -20,9 +20,10 @@ namespace db {
 class CatalogManager {
 public:
 	CatalogManager() {
+		LOG_TRACE("Initializing catalog manager...");
 		std::filesystem::path catalog_path = FilePathManager::GetInstance().GetSystemCatalogPath();
 		CreateFileIfNotExists(catalog_path);
-		if (GetFileSize(catalog_path) > 0) {
+		if (std::filesystem::exists(catalog_path)) {
 			LOG_TRACE("Catalog file exists! Loading from disk");
 			auto catalog_fs = FileStream(catalog_path);
 			BinaryDeserializer deserializer(catalog_fs);
@@ -89,12 +90,13 @@ public:
 private:
 	void EnsureTableFilesExist() {
 		for (const auto &[table_name, table_oid] : table_names_) {
-			LOG_TRACE("Checking table files for table %s", table_name.c_str());
+			LOG_TRACE("Checking table files for table {}", table_name);
 			auto data_exists = std::filesystem::exists(FilePathManager::GetInstance().GetTableDataPath(table_name));
 			auto meta_exists = std::filesystem::exists(FilePathManager::GetInstance().GetTableMetaPath(table_name));
 			if (!data_exists || !meta_exists) {
 				throw Exception("Data file or meta file not found for table " + table_name);
 			}
+			LOG_TRACE("Check success: table exists");
 		}
 	};
 	std::unordered_map<table_oid_t, std::unique_ptr<TableMeta>> tables_;

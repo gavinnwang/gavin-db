@@ -31,12 +31,12 @@ std::unique_ptr<CreateStatement> Binder::BindCreate(const hsql::CreateStatement 
 				primary_key.push_back(col.GetName());
 			}
 			if (primary_key.size() > 1) {
-				throw NotImplementedException("cannot have two primary keys");
+				throw NotImplementedException("Cannot have two primary keys");
 			}
 			columns.emplace_back(col);
 		}
 	} else {
-		throw NotImplementedException("unsupported create statement");
+		throw NotImplementedException("Unsupported create statement");
 	}
 	return std::make_unique<CreateStatement>(std::move(table), std::move(columns), std::move(primary_key));
 }
@@ -44,16 +44,13 @@ std::unique_ptr<CreateStatement> Binder::BindCreate(const hsql::CreateStatement 
 Column Binder::BindColumnDefinition(const hsql::ColumnDefinition *col_def) const {
 	auto col_type = col_def->type;
 	std::string col_name = std::string(col_def->name);
-	if (col_type.data_type == hsql::DataType::VARCHAR) {
-		const auto col = Column {std::move(col_name), Type::HsqlColumnTypeToTypeId(col_type),
-		                         static_cast<uint32_t>(col_def->type.length)};
-		LOG_DEBUG("Column Def: %s", col.ToString().c_str());
-		return col;
-	} else {
-		const auto col = Column {std::move(col_name), Type::HsqlColumnTypeToTypeId(col_type)};
-		LOG_DEBUG("Column Def: %s", col.ToString().c_str());
-		return col;
-	}
+	const auto col = (col_type.data_type == hsql::DataType::VARCHAR)
+	                     ? Column {std::move(col_name), Type::HsqlColumnTypeToTypeId(col_type),
+	                               static_cast<uint32_t>(col_def->type.length)}
+	                     : Column {std::move(col_name), Type::HsqlColumnTypeToTypeId(col_type)};
+
+	LOG_TRACE("Binding Column Def: {}", col.ToString());
+	return col;
 }
 
 } // namespace db
