@@ -14,8 +14,8 @@ class Binder {
 public:
 	explicit Binder(const std::unique_ptr<CatalogManager> &CatalogManager) : catalog_manager_(CatalogManager) {
 	}
-	std::unique_ptr<BoundStatement> Bind(const std::unique_ptr<const hsql::SQLStatement> &stmt) const;
-	std::unique_ptr<CreateStatement> BindCreate(const std::unique_ptr<const hsql::CreateStatement> &stmt) const;
+	std::unique_ptr<BoundStatement> Bind(const hsql::SQLStatement *stmt) const;
+	std::unique_ptr<CreateStatement> BindCreate(const hsql::CreateStatement *stmt) const;
 	Column BindColumnDefinition(const hsql::ColumnDefinition *col_def) const;
 
 private:

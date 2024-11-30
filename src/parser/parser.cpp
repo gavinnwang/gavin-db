@@ -22,7 +22,7 @@ const std::vector<std::unique_ptr<const hsql::SQLStatement>> Parser::Parse(const
 
 	for (const auto stmt : parse_result.getStatements()) {
 		hsql::printStatementInfo(stmt);
-		result.emplace_back(stmt); // Transfer ownership
+		result.emplace_back(std::unique_ptr<const hsql::SQLStatement>(stmt));
 	}
 	return result;
 }

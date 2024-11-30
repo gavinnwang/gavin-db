@@ -12,7 +12,7 @@ namespace db {
 enum class LogLevel { OFF = 1000, ERROR = 500, WARN = 400, INFO = 300, DEBUG = 200, TRACE = 100, ALL = 0 };
 
 // Define the current log level
-constexpr LogLevel CURRENT_LOG_LEVEL = LogLevel::DEBUG;
+constexpr LogLevel CURRENT_LOG_LEVEL = LogLevel::ALL;
 
 // Utility to extract the file name
 using cstr = const char *const;

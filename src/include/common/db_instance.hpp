@@ -16,8 +16,8 @@ public:
 	    : catalog_manager_(std::make_unique<CatalogManager>()),
 	      disk_manager_(std::make_shared<DiskManager>(catalog_manager_)),
 	      bpm_(std::make_unique<BufferPoolManager>(DEFAULT_POOL_SIZE, disk_manager_)) {
-		DeletePathIfExists(db::FilePathManager::GetInstance().GetDatabaseRootPath());
-	};
+	          // DeletePathIfExists(db::FilePathManager::GetInstance().GetDatabaseRootPath());
+	      };
 	~DB() {};
 
 	void HandleCreateStatement(Transaction &txn, const std::unique_ptr<CreateStatement> &stmt);

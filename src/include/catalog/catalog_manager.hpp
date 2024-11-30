@@ -57,7 +57,7 @@ public:
 	void PersistToDisk() {
 		// persist the catalog to disk
 		std::filesystem::path catalog_path = FilePathManager::GetInstance().GetSystemCatalogPath();
-		// CreateFileIfNotExists(catalog_path)
+		CreateFileIfNotExists(catalog_path);
 		auto catalog_fs = FileStream(catalog_path);
 		BinarySerializer serializer(catalog_fs);
 		Serialize(serializer);
