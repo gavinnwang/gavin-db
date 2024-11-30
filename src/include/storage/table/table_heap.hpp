@@ -14,6 +14,7 @@ class TableHeap : public PageAllocator {
 public:
 	DISALLOW_COPY_AND_MOVE(TableHeap);
 	explicit TableHeap(const std::unique_ptr<BufferPoolManager> &bpm, const std::unique_ptr<TableMeta> &table_meta);
+	// doesn't ensure the tuple is the same schema as the table
 	[[nodiscard]] std::optional<RID> InsertTuple(const TupleMeta &meta, const Tuple &tuple);
 	void UpdateTupleMeta(const TupleMeta &meta, RID rid);
 	[[nodiscard]] std::optional<std::pair<TupleMeta, Tuple>> GetTuple(RID rid);

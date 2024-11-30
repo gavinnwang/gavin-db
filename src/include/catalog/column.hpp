@@ -36,8 +36,11 @@ public:
 	[[nodiscard]] uint32_t GetStorageSize() const {
 		return length_;
 	}
-	[[nodiscard]] uint32_t GetOffset() const {
-		return column_offset_;
+	[[nodiscard]] uint32_t GetStorageOffset() const {
+		return storage_offset_;
+	}
+	[[nodiscard]] uint32_t GetSchemaOffset() const {
+		return schema_offset_;
 	}
 	[[nodiscard]] TypeId GetType() const {
 		return column_type_;
@@ -51,14 +54,14 @@ public:
 		serializer.WriteProperty(100, "column_name", column_name_);
 		serializer.WriteProperty(101, "column_type", column_type_);
 		serializer.WriteProperty(102, "length", length_);
-		serializer.WriteProperty(103, "column_offset", column_offset_);
+		serializer.WriteProperty(103, "column_offset", storage_offset_);
 	}
 	static Column Deserialize(Deserializer &deserializer) {
 		auto result = Column();
 		deserializer.ReadProperty(100, "column_name", result.column_name_);
 		deserializer.ReadProperty(101, "column_type", result.column_type_);
 		deserializer.ReadProperty(102, "length", result.length_);
-		deserializer.ReadProperty(103, "column_offset", result.column_offset_);
+		deserializer.ReadProperty(103, "column_offset", result.storage_offset_);
 		return result;
 	}
 
@@ -69,8 +72,12 @@ private:
 	TypeId column_type_;
 	// size of col
 	uint32_t length_;
-	// offset in the tuple
-	uint32_t column_offset_ = 0;
+	// storage offset
+	uint32_t storage_offset_ = 0;
+	// schema offset
+	idx_t schema_offset_ = 0;
+	// if auto increment col
+	bool is_auto_increment_ = false;
 };
 } // namespace db
 

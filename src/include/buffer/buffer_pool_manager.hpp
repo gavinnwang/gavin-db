@@ -1,7 +1,6 @@
 #pragma once
 
 #include "buffer/replacer.hpp"
-#include "catalog/catalog_manager.hpp"
 #include "common/macros.hpp"
 #include "common/page_id.hpp"
 #include "common/typedef.hpp"

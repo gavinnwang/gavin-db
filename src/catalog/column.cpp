@@ -16,8 +16,8 @@ auto Column::ToString(bool simplified) const -> std::string {
 		return (ostream.str());
 	}
 
-	ostream << "Column[" << column_name_ << ", " << Type::TypeIdToString(column_type_) << ", " << "Offset:" << column_offset_
-	   << ", ";
+	ostream << "Column[" << column_name_ << ", " << Type::TypeIdToString(column_type_) << ", "
+	        << "Offset:" << storage_offset_ << ", ";
 	ostream << "Length:" << length_;
 	ostream << "]";
 	return (ostream.str());

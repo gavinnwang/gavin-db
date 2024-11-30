@@ -14,9 +14,13 @@ namespace db {
 
 void DiskManager::AddTableDataIfNotExist(table_oid_t table_id) {
 	if (!table_data_files_.contains(table_id)) {
-		// get table data file
-		auto table_name = cm_->GetTableName(table_id);
-		auto table_data_path = FilePathManager::GetInstance().GetTableDataPath(table_name);
+		fs::path table_data_path;
+		if (table_id == SYSTEM_CATALOG_ID) {
+			table_data_path = FilePathManager::GetInstance().GetSystemCatalogPath();
+		} else {
+			auto table_name = cm_->GetTableName(table_id);
+			table_data_path = FilePathManager::GetInstance().GetTableDataPath(table_name);
+		}
 		auto data_fs = std::fstream(table_data_path, std::ios::binary | std::ios::in | std::ios::out);
 		if (!data_fs.is_open()) {
 			data_fs.clear();

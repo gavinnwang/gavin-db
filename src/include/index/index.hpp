@@ -21,28 +21,33 @@ enum class IndexConstraintType : uint8_t {
 	PRIMARY = 2, // built to enforce a PRIMARY KEY constraint
 	FOREIGN = 3  // built to enforce a FOREIGN KEY constraint
 };
+enum class IndexType { BPlusTreeIndex, HashTableIndex };
 
 struct IndexMeta {
 public:
 	IndexMeta() = default;
-	IndexMeta(std::string name, table_oid_t table_id, Column key_col, IndexConstraintType index_constraint_type)
+	IndexMeta(std::string name, table_oid_t table_id, Column key_col, IndexConstraintType index_constraint_type,
+	          IndexType index_type)
 	    : name_(std::move(name)), table_id_(table_id), key_col_(std::move(key_col)),
-	      index_constraint_type_(index_constraint_type) {
+	      index_constraint_type_(index_constraint_type), index_type_(index_type) {
 	}
 
 	std::string name_;
 	table_oid_t table_id_;
+	index_oid_t index_id_;
 	Column key_col_;
 	IndexConstraintType index_constraint_type_;
 	page_id_t header_page_id_ {INVALID_PAGE_ID};
+	IndexType index_type_;
 
 	void Serialize(Serializer &serializer) const {
 		serializer.WriteProperty(100, "index_name", name_);
 		serializer.WriteProperty(101, "table_id", table_id_);
 		serializer.WriteProperty(102, "key_col", key_col_);
-		// serializer.WriteProperty(103, "key_col_id", key_col_id_);
+		serializer.WriteProperty(103, "index_id", index_id_);
 		serializer.WriteProperty(104, "index_constraint_type", index_constraint_type_);
 		serializer.WriteProperty(105, "header_page_id", header_page_id_);
+		serializer.WriteProperty(106, "index_type", index_type_);
 	}
 
 	[[nodiscard]] static std::unique_ptr<IndexMeta> Deserialize(Deserializer &deserializer) {
@@ -50,9 +55,10 @@ public:
 		deserializer.ReadProperty(100, "table_name", meta->name_);
 		deserializer.ReadProperty(101, "table_id", meta->table_id_);
 		deserializer.ReadProperty(102, "key_col", meta->key_col_);
-		// deserializer.ReadProperty(103, "key_col_id", meta->key_col_id_);
+		deserializer.ReadProperty(103, "index_id", meta->index_id_);
 		deserializer.ReadProperty(104, "index_constraint_type", meta->index_constraint_type_);
 		deserializer.ReadProperty(105, "header_page_id", meta->header_page_id_);
+		deserializer.ReadProperty(106, "index_type", meta->index_type_);
 		return meta;
 	}
 };
@@ -82,7 +88,7 @@ class Index : public PageAllocator {
 public:
 	Index() = delete;
 	DISALLOW_COPY(Index);
-	Index(const std::shared_ptr<IndexMeta> &index_meta, const std::unique_ptr<TableMeta> &table_meta)
+	Index(const std::unique_ptr<IndexMeta> &index_meta, const std::unique_ptr<TableMeta> &table_meta)
 	    : index_meta_(index_meta), table_meta_(table_meta), comparator_(GetComparator(index_meta->key_col_.GetType())) {
 	}
 
@@ -114,7 +120,7 @@ protected:
 	virtual bool InternalInsertRecord(IndexKeyType key, RID rid) = 0;
 	virtual bool InternalDeleteRecord(IndexKeyType key) = 0;
 	virtual bool InternalScanKey(IndexKeyType key, std::vector<RID> &rids) = 0;
-	std::shared_ptr<IndexMeta> index_meta_;
+	const std::unique_ptr<IndexMeta> &index_meta_;
 	const std::unique_ptr<TableMeta> &table_meta_;
 	// comparator used to determine the order of keys
 	Comparator comparator_;

@@ -39,12 +39,12 @@ Tuple::Tuple(std::vector<Value> values, const Schema &schema) {
 		const auto &col = schema.GetColumn(i);
 		if (!col.IsInlined()) {
 			// serialize the relative offset
-			*reinterpret_cast<uint32_t *>(data_.data() + col.GetOffset()) = offset;
+			*reinterpret_cast<uint32_t *>(data_.data() + col.GetStorageOffset()) = offset;
 			// serialize actual varchar value, in place (size | data)
 			values[i].SerializeTo(data_.data() + offset);
 			offset += values[i].GetStorageSize() + sizeof(uint32_t);
 		} else {
-			values[i].SerializeTo(data_.data() + col.GetOffset());
+			values[i].SerializeTo(data_.data() + col.GetStorageOffset());
 		}
 	}
 }
@@ -70,12 +70,12 @@ Value Tuple::GetValue(const Schema &schema, uint32_t column_idx) const {
 const_data_ptr_t Tuple::GetDataPtr(const Column &col) const {
 	bool is_inlined = col.IsInlined();
 	if (is_inlined) {
-		ASSERT(col.GetOffset() < data_.size(), "offset out of range");
-		return (data_.data() + col.GetOffset());
+		ASSERT(col.GetStorageOffset() < data_.size(), "offset out of range");
+		return (data_.data() + col.GetStorageOffset());
 	}
 
 	// read the relative offset from the tuple data.
-	int32_t offset = *reinterpret_cast<const int32_t *>(data_.data() + col.GetOffset());
+	int32_t offset = *reinterpret_cast<const int32_t *>(data_.data() + col.GetStorageOffset());
 	// return the beginning address of the real data for the VARCHAR type.
 	return (data_.data() + offset);
 }

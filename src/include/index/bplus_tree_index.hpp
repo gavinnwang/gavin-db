@@ -35,7 +35,7 @@ class BTreeIndex : public Index {
 	enum class Operation { SEARCH, INSERT, DELETE };
 
 public:
-	BTreeIndex(const std::shared_ptr<IndexMeta> &index_meta, const std::unique_ptr<TableMeta> &table_meta,
+	BTreeIndex(const std::unique_ptr<IndexMeta> &index_meta, const std::unique_ptr<TableMeta> &table_meta,
 	           const std::unique_ptr<BufferPoolManager> &bpm)
 	    : Index(index_meta, table_meta), bpm_(bpm) {
 

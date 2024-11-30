@@ -1,7 +1,9 @@
 
 
+#include "catalog/catalog_manager.hpp"
 #include "common/test_utils.hpp"
 #include "index/bplus_tree_index.hpp"
+#include "index/index.hpp"
 #include "storage/table/table_heap.hpp"
 
 #include "gtest/gtest.h"
@@ -22,8 +24,8 @@ TEST(IndexTest, IndexTest) {
 	cm->CreateTable(table_name, schema);
 	auto &table_meta = cm->GetTable(table_name);
 
-	auto index_meta = std::make_shared<IndexMeta>("user_id_index", table_meta->table_oid_, schema.GetColumn(0),
-	                                              IndexConstraintType::PRIMARY);
+	auto index_meta = std::make_unique<IndexMeta>("user_id_index", table_meta->table_oid_, schema.GetColumn(0),
+	                                              IndexConstraintType::PRIMARY, IndexType::BPlusTreeIndex);
 
 	auto btree_index = std::make_unique<BTreeIndex>(index_meta, table_meta, bpm);
 
@@ -85,8 +87,8 @@ TEST(IndexTest, IndexManyInsertionsTest) {
 	cm->CreateTable(table_name, schema);
 	auto &table_meta = cm->GetTable(table_name);
 
-	auto index_meta = std::make_shared<IndexMeta>("user_id_index", table_meta->table_oid_, schema.GetColumn(0),
-	                                              IndexConstraintType::PRIMARY);
+	auto index_meta = std::make_unique<IndexMeta>("user_id_index", table_meta->table_oid_, schema.GetColumn(0),
+	                                              IndexConstraintType::PRIMARY, IndexType::BPlusTreeIndex);
 
 	auto btree_index = std::make_unique<BTreeIndex>(index_meta, table_meta, bpm);
 

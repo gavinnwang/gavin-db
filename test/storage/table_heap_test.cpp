@@ -1,4 +1,5 @@
 #include "buffer/buffer_pool_manager.hpp"
+#include "catalog/catalog_manager.hpp"
 #include "common/fs_utils.hpp"
 #include "common/logger.hpp"
 #include "common/test_utils.hpp"

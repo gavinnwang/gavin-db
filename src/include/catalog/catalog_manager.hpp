@@ -1,5 +1,6 @@
 #pragma once
 
+#include "buffer/buffer_pool_manager.hpp"
 #include "catalog/schema.hpp"
 #include "common/fs_utils.hpp"
 #include "common/typedef.hpp"
@@ -31,6 +32,9 @@ public:
 	}
 
 	std::optional<table_oid_t> CreateTable(const std::string &table_name, const Schema &schema);
+	std::optional<index_oid_t> CreateIndex(const std::string &index_name, const std::string &table_name,
+	                                       const Column &key_col, bool is_primary_key, IndexType index_type,
+	                                       const std::unique_ptr<BufferPoolManager> &bpm);
 
 	const std::unique_ptr<TableMeta> &GetTable(const std::string &table_name) const {
 		if (table_names_.find(table_name) == table_names_.end()) {
@@ -94,7 +98,9 @@ private:
 		}
 	};
 	std::unordered_map<table_oid_t, std::unique_ptr<TableMeta>> tables_;
-	std::unordered_map<table_oid_t, std::map<std::string, std::unique_ptr<IndexMeta>>> indexes_;
+	std::unordered_map<index_oid_t, std::unique_ptr<IndexMeta>> indexes_;
+	// table name -> index name -> index id
+	std::unordered_map<std::string, std::unordered_map<std::string, index_oid_t>> index_names_;
 	std::unordered_map<std::string, table_oid_t> table_names_;
 };
 } // namespace db

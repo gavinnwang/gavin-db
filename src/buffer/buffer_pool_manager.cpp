@@ -2,6 +2,7 @@
 
 #include "buffer/random_replacer.h"
 #include "common/config.hpp"
+#include "common/logger.hpp"
 #include "common/macros.hpp"
 #include "storage/page/page_guard.hpp"
 #include "storage/page_allocator.hpp"
