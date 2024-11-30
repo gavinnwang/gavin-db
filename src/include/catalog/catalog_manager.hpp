@@ -96,7 +96,7 @@ private:
 			if (!data_exists || !meta_exists) {
 				throw Exception("Data file or meta file not found for table " + table_name);
 			}
-			LOG_TRACE("Check success: table exists");
+			LOG_TRACE("Check success: table {} exists", table_name);
 		}
 	};
 	std::unordered_map<table_oid_t, std::unique_ptr<TableMeta>> tables_;
