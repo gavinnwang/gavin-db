@@ -31,13 +31,9 @@ public:
 	BoundExpression() = default;
 	virtual ~BoundExpression() = default;
 
-	virtual auto ToString() const -> std::string {
+	virtual std::string ToString() const {
 		return "";
 	};
-
-	auto IsInvalid() const -> bool {
-		return type_ == ExpressionType::INVALID;
-	}
 
 	/** The type of this expression. */
 	ExpressionType type_ {ExpressionType::INVALID};

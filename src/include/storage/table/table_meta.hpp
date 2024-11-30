@@ -67,6 +67,12 @@ struct TableMeta {
 		tuple_count_++;
 	}
 
+	std::string ToString() const {
+		return fmt::format("TableMeta(name: {}, table_oid: {}, schema: {}, last_table_data_page_id: {}, "
+		                   "last_table_heap_data_page_id: {}, tuple_count: {})",
+		                   name_, table_oid_, schema_.ToString(), last_table_data_page_id_,
+		                   last_table_heap_data_page_id_, tuple_count_);
+	}
 	Schema schema_;
 	std::string name_;
 	table_oid_t table_oid_ {INVALID_TABLE_OID};

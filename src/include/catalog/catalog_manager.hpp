@@ -28,6 +28,7 @@ public:
 			BinaryDeserializer deserializer(catalog_fs);
 			Deserialize(deserializer);
 		} else {
+			LOG_TRACE("Catalog file not found. Creating one to disk");
 			PersistToDisk();
 		}
 		EnsureTableFilesExist();
@@ -57,6 +58,7 @@ public:
 	}
 
 	void PersistToDisk() {
+		LOG_TRACE("Persisting catalog to disk");
 		// persist the catalog to disk
 		std::filesystem::path catalog_path = FilePathManager::GetInstance().GetSystemCatalogPath();
 		CreateFileIfNotExists(catalog_path);
@@ -66,6 +68,7 @@ public:
 
 		// persist all table meta to disk
 		for (const auto &[table_oid, table_meta] : tables_) {
+			LOG_TRACE("Persisting table {}", table_meta->ToString());
 			std::filesystem::path table_meta_path = FilePathManager::GetInstance().GetTableMetaPath(table_meta->name_);
 			// CreateFileIfNotExists(table_meta_path);
 			auto table_meta_fs = FileStream(table_meta_path);
@@ -77,15 +80,40 @@ public:
 	void Serialize(Serializer &serializer) const {
 		serializer.WritePropertyWithDefault(100, "tables", tables_,
 		                                    std::unordered_map<table_oid_t, std::unique_ptr<TableMeta>>());
+
 		serializer.WritePropertyWithDefault(101, "table_names", table_names_,
 		                                    std::unordered_map<std::string, table_oid_t>());
+
+		serializer.WritePropertyWithDefault(102, "indexes", indexes_,
+		                                    std::unordered_map<index_oid_t, std::unique_ptr<IndexMeta>>());
+
+		serializer.WritePropertyWithDefault(
+		    103, "index_names", index_names_,
+		    std::unordered_map<std::string, std::unordered_map<std::string, index_oid_t>>());
+
+		serializer.WriteProperty(104, "magic_bytes", magic_bytes);
 	}
 
 	void Deserialize(Deserializer &deserializer) {
 		deserializer.ReadPropertyWithDefault(100, "tables", tables_,
 		                                     std::unordered_map<table_oid_t, std::unique_ptr<TableMeta>>());
+
 		deserializer.ReadPropertyWithDefault(101, "table_names", table_names_,
 		                                     std::unordered_map<std::string, table_oid_t>());
+
+		deserializer.ReadPropertyWithDefault(102, "indexes", indexes_,
+		                                     std::unordered_map<index_oid_t, std::unique_ptr<IndexMeta>>());
+
+		deserializer.ReadPropertyWithDefault(
+		    103, "index_names", index_names_,
+		    std::unordered_map<std::string, std::unordered_map<std::string, index_oid_t>>());
+
+		std::string deserialized_magic_bytes;
+		deserializer.ReadProperty(104, "magic_bytes", deserialized_magic_bytes);
+
+		if (deserialized_magic_bytes != magic_bytes) {
+			throw std::runtime_error("Catalog file is corrupted or incompatible.");
+		}
 	}
 
 private:
@@ -105,5 +133,7 @@ private:
 	// table name -> index name -> index id
 	std::unordered_map<std::string, std::unordered_map<std::string, index_oid_t>> index_names_;
 	std::unordered_map<std::string, table_oid_t> table_names_;
+	// magic bytes to ensure catalog manager is not corrupt
+	std::string magic_bytes {"GAVINDB_CATALOG_MANAGER"};
 };
 } // namespace db
