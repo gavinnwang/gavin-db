@@ -12,13 +12,13 @@
 namespace db {
 class Binder {
 public:
-	explicit Binder(const std::shared_ptr<CatalogManager> &CatalogManager) : catalog_manager_(CatalogManager) {
+	explicit Binder(const std::unique_ptr<CatalogManager> &CatalogManager) : catalog_manager_(CatalogManager) {
 	}
-	std::unique_ptr<BoundStatement> Bind(const std::unique_ptr<const hsql::SQLStatement> stmt);
-	std::unique_ptr<CreateStatement> BindCreate(const std::unique_ptr<const hsql::CreateStatement> stmt);
-	Column BindColumnDefinition(const hsql::ColumnDefinition *col_def);
+	std::unique_ptr<BoundStatement> Bind(const std::unique_ptr<const hsql::SQLStatement> &stmt) const;
+	std::unique_ptr<CreateStatement> BindCreate(const std::unique_ptr<const hsql::CreateStatement> &stmt) const;
+	Column BindColumnDefinition(const hsql::ColumnDefinition *col_def) const;
 
 private:
-	[[maybe_unused]] const std::shared_ptr<CatalogManager> &catalog_manager_;
+	[[maybe_unused]] const std::unique_ptr<CatalogManager> &catalog_manager_;
 };
 } // namespace db

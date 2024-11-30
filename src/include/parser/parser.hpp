@@ -9,7 +9,7 @@ public:
 	explicit Parser() {
 	}
 
-	const std::vector<std::unique_ptr<const hsql::SQLStatement>> Parse(std::string query);
+	const std::vector<std::unique_ptr<const hsql::SQLStatement>> Parse(const std::string &query) const;
 };
 
 } // namespace db

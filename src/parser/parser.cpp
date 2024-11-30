@@ -1,13 +1,15 @@
 #include "parser/parser.hpp"
 
 #include "SQLParser.h"
+#include "catalog/catalog_manager.hpp"
 #include "common/exception.hpp"
 #include "common/logger.hpp"
 #include "fmt/format.h"
+#include "util/sqlhelper.h"
 
 namespace db {
 
-const std::vector<std::unique_ptr<const hsql::SQLStatement>> Parser::Parse(std::string query) {
+const std::vector<std::unique_ptr<const hsql::SQLStatement>> Parser::Parse(const std::string &query) const {
 
 	hsql::SQLParserResult parse_result;
 	hsql::SQLParser::parse(query, &parse_result);
@@ -18,7 +20,8 @@ const std::vector<std::unique_ptr<const hsql::SQLStatement>> Parser::Parse(std::
 
 	std::vector<std::unique_ptr<const hsql::SQLStatement>> result;
 
-	for (auto stmt : parse_result.getStatements()) {
+	for (const auto stmt : parse_result.getStatements()) {
+		hsql::printStatementInfo(stmt);
 		result.emplace_back(stmt); // Transfer ownership
 	}
 	return result;

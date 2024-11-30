@@ -5,7 +5,7 @@ namespace db {
 
 class BoundStatement {
 public:
-	explicit BoundStatement(StatementType type);
+	explicit BoundStatement(StatementType type) : type_(type) {};
 	virtual ~BoundStatement() = default;
 
 	/** The statement type. */

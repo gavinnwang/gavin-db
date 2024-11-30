@@ -8,7 +8,7 @@
 #include <memory>
 
 namespace db {
-std::unique_ptr<BoundStatement> Binder::Bind(const std::unique_ptr<const hsql::SQLStatement> stmt) {
+std::unique_ptr<BoundStatement> Binder::Bind(const std::unique_ptr<const hsql::SQLStatement> &stmt) const {
 	switch (stmt->type()) {
 	case hsql::kStmtCreate: {
 		auto rawCreateStmt = static_cast<const hsql::CreateStatement *>(stmt.get());
@@ -20,7 +20,7 @@ std::unique_ptr<BoundStatement> Binder::Bind(const std::unique_ptr<const hsql::S
 	}
 }
 
-std::unique_ptr<CreateStatement> Binder::BindCreate(const std::unique_ptr<const hsql::CreateStatement> stmt) {
+std::unique_ptr<CreateStatement> Binder::BindCreate(const std::unique_ptr<const hsql::CreateStatement> &stmt) const {
 	auto table = std::string(stmt->tableName);
 	auto columns = std::vector<Column> {};
 	std::vector<std::string> primary_key;
@@ -41,7 +41,7 @@ std::unique_ptr<CreateStatement> Binder::BindCreate(const std::unique_ptr<const 
 	return std::make_unique<CreateStatement>(std::move(table), std::move(columns), std::move(primary_key));
 }
 
-Column Binder::BindColumnDefinition(const hsql::ColumnDefinition *col_def) {
+Column Binder::BindColumnDefinition(const hsql::ColumnDefinition *col_def) const {
 	auto col_type = col_def->type;
 	std::string col_name = std::string(col_def->name);
 	return Column {std::move(col_name), Type::HsqlColumnTypeToTypeId(col_type)};

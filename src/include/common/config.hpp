@@ -7,6 +7,7 @@ static constexpr int INVALID_PAGE_ID = -1; // invalid page id
 static constexpr int INVALID_TABLE_OID = -1;
 static constexpr int PAGE_SIZE = 4096; // size of a data page in byte
 const std::string DEFAULT_DB_NAME = "gavindb";
+static constexpr int DEFAULT_POOL_SIZE = 10;
 
 static constexpr int INDEX_KEY_SIZE = 8;
 
