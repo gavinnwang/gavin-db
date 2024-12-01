@@ -23,6 +23,8 @@ public:
 	std::unique_ptr<SelectStatement> BindSelect(const hsql::SelectStatement *stmt);
 	std::unique_ptr<InsertStatement> BindInsert(const hsql::InsertStatement *stmt);
 	std::unique_ptr<BoundExpressionListRef> BindValuesList(const std::vector<hsql::Expr *> &list);
+	std::vector<std::unique_ptr<BoundExpression>> BindExpressionList(const std::vector<hsql::Expr *> &list);
+	std::unique_ptr<BoundExpression> BindExpression(const hsql::Expr *expr);
 	Column BindColumnDefinition(const hsql::ColumnDefinition *col_def) const;
 	std::unique_ptr<BoundBaseTableRef> BindBaseTableRef(const std::string &table_name);
 

@@ -18,7 +18,7 @@ public:
 	explicit BoundConstant(const Value &val) : BoundExpression(ExpressionType::CONSTANT), val_(val) {
 	}
 
-	auto ToString() const -> std::string override {
+	std::string ToString() const override {
 		return val_.ToString();
 	}
 

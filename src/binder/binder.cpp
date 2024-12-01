@@ -1,5 +1,7 @@
 #include "binder/binder.hpp"
 
+#include "binder/expressions/bound_columnn_ref.hpp"
+#include "binder/expressions/bound_constant.hpp"
 #include "binder/table_ref/bound_expression_list.hpp"
 #include "binder/table_ref/bound_table_ref.hpp"
 #include "common/exception.hpp"
@@ -9,6 +11,7 @@
 #include "util/sqlhelper.h"
 
 #include <memory>
+#include <utility>
 
 namespace db {
 std::unique_ptr<BoundStatement> Binder::Bind(const hsql::SQLStatement *stmt) {
@@ -49,27 +52,8 @@ std::unique_ptr<CreateStatement> Binder::BindCreate(const hsql::CreateStatement 
 
 std::unique_ptr<SelectStatement> Binder::BindSelect(const hsql::SelectStatement *stmt) {
 	LOG_TRACE("Binding select statement");
+	ASSERT(stmt, "Select statement cannot be nullptr");
 	hsql::printSelectStatementInfo(stmt, 1);
-
-	// if (stmt->selectList->empty()) {
-	// 	return std::make_unique<BoundTableRef>(TableReferenceType::EMPTY);
-	// }
-	// // Bind VALUES clause.
-	// if (pg_stmt->valuesLists != nullptr) {
-	//   auto values_list_name = fmt::format("__values#{}", universal_id_++);
-	//   auto value_list = BindValuesList(pg_stmt->valuesLists);
-	//   value_list->identifier_ = values_list_name;
-	//   std::vector<std::unique_ptr<BoundExpression>> exprs;
-	//   size_t expr_length = value_list->values_[0].size();
-	//   for (size_t i = 0; i < expr_length; i++) {
-	//     exprs.emplace_back(std::make_unique<BoundColumnRef>(std::vector{values_list_name, fmt::format("{}", i)}));
-	//   }
-	//   return std::make_unique<SelectStatement>(
-	//       std::move(value_list), std::move(exprs), std::make_unique<BoundExpression>(),
-	//       std::vector<std::unique_ptr<BoundExpression>>{}, std::make_unique<BoundExpression>(),
-	//       std::make_unique<BoundExpression>(), std::make_unique<BoundExpression>(),
-	//       std::vector<std::unique_ptr<BoundOrderBy>>{}, std::vector<std::unique_ptr<BoundSubqueryRef>>{}, false);
-	// }
 
 	// Bind VALUES clause.
 	if (stmt->selectList != nullptr) {
@@ -77,11 +61,11 @@ std::unique_ptr<SelectStatement> Binder::BindSelect(const hsql::SelectStatement 
 		std::vector<std::unique_ptr<BoundExpression>> exprs;
 		size_t expr_length = value_list->values_[0].size();
 		for (size_t i = 0; i < expr_length; i++) {
-			// exprs.emplace_back(std::make_unique<BoundColumnRef>(std::vector {values_list_name, fmt::format("{}",
-			// i)}));
+			exprs.emplace_back(std::make_unique<BoundColumnRef>(std::vector {fmt::format("Temp Col {}", i)}));
 		}
+		return std::make_unique<SelectStatement>(std::move(value_list), std::move(exprs));
 	}
-	return nullptr;
+	throw NotImplementedException("Have not implemented select clause like this");
 }
 
 std::unique_ptr<InsertStatement> Binder::BindInsert(const hsql::InsertStatement *stmt) {
@@ -93,15 +77,71 @@ std::unique_ptr<InsertStatement> Binder::BindInsert(const hsql::InsertStatement 
 		throw Exception(fmt::format("invalid table for insert: {}", table->table_));
 	}
 
-	auto select = BindSelect(stmt->select);
-	return std::make_unique<InsertStatement>(std::move(table), std::move(select));
+	if (stmt->values) {
+		auto value_list = BindValuesList(*stmt->values);
+		LOG_TRACE("{}", value_list->ToString());
+		std::vector<std::unique_ptr<BoundExpression>> exprs;
+		size_t expr_length = value_list->values_[0].size();
+		for (size_t i = 0; i < expr_length; i++) {
+			exprs.emplace_back(std::make_unique<BoundColumnRef>(std::vector {fmt::format("Temp Col {}", i)}));
+		}
+		auto select = std::make_unique<SelectStatement>(std::move(value_list), std::move(exprs));
+		return std::make_unique<InsertStatement>(std::move(table), std::move(select));
+	}
+
+	// ASSERT(stmt->select, "select is nullptr");
+	// auto select = BindSelect(stmt->select);
+	// return std::make_unique<InsertStatement>(std::move(table), std::move(select));
+	throw NotImplementedException("Have not implemented insert clause like this");
+}
+
+std::unique_ptr<BoundExpression> Binder::BindExpression(const hsql::Expr *expr) {
+	switch (expr->type) {
+	case hsql::kExprLiteralInt: {
+		LOG_TRACE("int expr {}", expr->ival);
+		auto IntValue = Value {TypeId::INTEGER, static_cast<int32_t>(expr->ival)};
+		return std::make_unique<BoundConstant>(std::move(IntValue));
+	}
+	case hsql::kExprLiteralString: {
+		std::string string {expr->getName()};
+		LOG_TRACE("string expr {}", string);
+		auto VarcharValue = Value {TypeId::VARCHAR, std::move(string)};
+		return std::make_unique<BoundConstant>(std::move(VarcharValue));
+	}
+	case hsql::kExprLiteralFloat:
+	case hsql::kExprLiteralNull:
+	case hsql::kExprLiteralDate:
+	case hsql::kExprLiteralInterval:
+	case hsql::kExprStar:
+	case hsql::kExprParameter:
+	case hsql::kExprColumnRef:
+	case hsql::kExprFunctionRef:
+	case hsql::kExprOperator:
+	case hsql::kExprSelect:
+	case hsql::kExprHint:
+	case hsql::kExprArray:
+	case hsql::kExprArrayIndex:
+	case hsql::kExprExtract:
+	case hsql::kExprCast:
+	default:
+		throw NotImplementedException("This expr type is not supported");
+	}
+	std::unreachable();
+}
+std::vector<std::unique_ptr<BoundExpression>> Binder::BindExpressionList(const std::vector<hsql::Expr *> &list) {
+	std::vector<std::unique_ptr<BoundExpression>> expr_list;
+	expr_list.reserve(list.size());
+	for (const auto *expr : list) {
+		expr_list.emplace_back(BindExpression(expr));
+	}
+	return expr_list;
 }
 
 std::unique_ptr<BoundExpressionListRef> Binder::BindValuesList(const std::vector<hsql::Expr *> &list) {
-	for ([[maybe_unused]] const auto *expr : list) {
-		// print
-	}
-	return nullptr;
+	std::vector<std::vector<std::unique_ptr<BoundExpression>>> value_list {};
+	// Currently value list only support one value
+	value_list.emplace_back(BindExpressionList(list));
+	return std::make_unique<BoundExpressionListRef>(std::move(value_list));
 }
 
 std::unique_ptr<BoundBaseTableRef> Binder::BindBaseTableRef(const std::string &table_name) {
