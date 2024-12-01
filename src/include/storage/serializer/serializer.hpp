@@ -41,20 +41,6 @@ public:
 		WriteValue(value);
 		OnOptionalPropertyEnd(true);
 	}
-	//
-	// Specialization for Value (default Value comparison throws when comparing
-	// nulls)
-	template <>
-	void WritePropertyWithDefault<Value>(const field_id_t field_id, const char *tag, const Value &value,
-	                                     const Value &&default_value) {
-		// If current value is default, don't write it
-		// TODO
-		(void)field_id;
-		(void)tag;
-		(void)value;
-		(void)default_value;
-		throw NotImplementedException("WritePropertyWithDefault<Value> not implemented");
-	}
 
 protected:
 	template <typename T>
@@ -188,4 +174,11 @@ protected:
 	virtual void WriteValue(const char *str) = 0;
 	virtual void WriteDataPtr(const_data_ptr_t ptr, idx_t count) = 0;
 };
+
+//
+// Specialization for Value (default Value comparison throws when comparing
+// nulls)
+template <>
+void Serializer::WritePropertyWithDefault<Value>(const field_id_t field_id, const char *tag, const Value &value,
+                                                 const Value &&default_value);
 } // namespace db

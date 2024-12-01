@@ -143,6 +143,8 @@ private:
 
 	template <typename T>
 	static int Compare(const IndexKeyType &a, const IndexKeyType &b) {
+		// LOG_TRACE("Comparing %s and %s", IndexKeyTypeToString(a).c_str(), IndexKeyTypeToString(b).c_str());
+
 		T lhs = *reinterpret_cast<const T *>(a.data());
 		T rhs = *reinterpret_cast<const T *>(b.data());
 		return (lhs < rhs) ? -1 : (lhs > rhs) ? 1 : 0;
@@ -150,9 +152,16 @@ private:
 
 	IndexKeyType ConvertTupleToKey(const Tuple &tuple) {
 		auto value = tuple.GetValue(index_meta_->key_col_);
-		LOG_TRACE("converted to key: {}", value.ToString());
+		LOG_TRACE("converted to key: %s", value.ToString().c_str());
 		return value.ConvertToIndexKeyType();
 	}
 };
+template <>
+int Index::Compare<std::string>(const IndexKeyType &a, const IndexKeyType &b) {
+	(void)a;
+	(void)b;
+	throw NotImplementedException("varchar key? hmmm...");
+	// return std::lexicographical_compare(a.begin(), a.end(), b.begin(), b.end());
+}
 
 } // namespace db

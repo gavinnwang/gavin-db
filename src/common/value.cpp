@@ -5,6 +5,7 @@
 
 #include <cstdint>
 #include <cstring>
+#include <utility>
 #include <variant>
 namespace db {
 
@@ -105,8 +106,8 @@ auto Value::ToString() const -> std::string {
 	case TypeId::VARCHAR:
 		return std::get<std::string>(value_);
 	case TypeId::INVALID:
-		UNREACHABLE("Cannot convert invalid type value to string");
-		return "";
+		UNREACHABLE("Value has invalid type id");
 	}
+	std::unreachable();
 }
 } // namespace db

@@ -16,19 +16,18 @@ enum class LogLevel { OFF = 1000, ERROR = 500, WARN = 400, INFO = 300, DEBUG = 2
 constexpr LogLevel CURRENT_LOG_LEVEL = LogLevel::ALL;
 
 // Utility to extract the file name
-using cstr = const char *const;
-constexpr cstr past_last_slash(cstr str, cstr last_slash) {
-	return *str == '\0'  ? last_slash
-	       : *str == '/' ? past_last_slash(str + 1, str + 1)
-	                     : past_last_slash(str + 1, last_slash);
+constexpr std::string_view past_last_slash(std::string_view str, std::string_view last_slash) {
+	return str.empty()          ? last_slash
+	       : str.front() == '/' ? past_last_slash(str.substr(1), str.substr(1))
+	                            : past_last_slash(str.substr(1), last_slash);
 }
-constexpr cstr past_last_slash(cstr str) {
+constexpr std::string_view past_last_slash(std::string_view str) {
 	return past_last_slash(str, str);
 }
 
 #define __SHORT_FILE__                                                                                                 \
 	([] {                                                                                                              \
-		constexpr cstr sf__ {past_last_slash(__FILE__)};                                                               \
+		constexpr std::string_view sf__ {past_last_slash(__FILE__)};                                                   \
 		return sf__;                                                                                                   \
 	}())
 
@@ -41,43 +40,12 @@ constexpr cstr past_last_slash(cstr str) {
 #define __FUNCTION__ ""
 #endif
 
-void OutputLogHeader(const char *file, int line, const char *func, LogLevel level);
-
 constexpr bool is_log_level_enabled(LogLevel level) {
 	return level >= CURRENT_LOG_LEVEL;
 }
 
-template <LogLevel level, typename... Args>
-void log_if_enabled_fmt(const char *file, int line, const char *func, const std::string message, Args &&...args) {
-	if constexpr (is_log_level_enabled(level)) {
-		OutputLogHeader(file, line, func, level);
-
-		if constexpr (!sizeof...(Args)) {
-			fmt::print(LOG_OUTPUT_STREAM, "{}\n", message);
-		} else {
-			if constexpr (std::is_same_v<std::decay_t<decltype(message)>, const char *>) {
-				// Format with fprintf for const char*
-				std::string formatted_message = fmt::format(fmt::runtime(message), std::forward<Args>(args)...);
-				fprintf(LOG_OUTPUT_STREAM, "%s\n", formatted_message.c_str());
-			} else if constexpr (std::is_same_v<std::decay_t<decltype(message)>, std::string>) {
-				// Format with fmt for std::string
-				auto formatted_message = fmt::format(fmt::runtime(message), std::forward<Args>(args)...);
-				fmt::print(LOG_OUTPUT_STREAM, "{}\n", formatted_message);
-			}
-		}
-
-		fflush(LOG_OUTPUT_STREAM); // Ensure log is flushed
-	}
-}
-
-#define LOG_ERROR(...) log_if_enabled_fmt<LogLevel::ERROR>(__SHORT_FILE__, __LINE__, __FUNCTION__, __VA_ARGS__)
-#define LOG_WARN(...)  log_if_enabled_fmt<LogLevel::WARN>(__SHORT_FILE__, __LINE__, __FUNCTION__, __VA_ARGS__)
-#define LOG_INFO(...)  log_if_enabled_fmt<LogLevel::INFO>(__SHORT_FILE__, __LINE__, __FUNCTION__, __VA_ARGS__)
-#define LOG_DEBUG(...) log_if_enabled_fmt<LogLevel::DEBUG>(__SHORT_FILE__, __LINE__, __FUNCTION__, __VA_ARGS__)
-#define LOG_TRACE(...) log_if_enabled_fmt<LogLevel::TRACE>(__SHORT_FILE__, __LINE__, __FUNCTION__, __VA_ARGS__)
-
 constexpr int HEADER_LENGTH = 40;
-inline std::string FormatLogHeader(const char *file, int line, const char *func) {
+inline std::string FormatLogHeader(std::string_view file, int line, const char *func) {
 	std::ostringstream ss;
 	ss << file << ':' << line << ':' << func;
 	std::string fullStr = ss.str();
@@ -93,7 +61,7 @@ inline std::string FormatLogHeader(const char *file, int line, const char *func)
 
 // Output log message header in this format: [type] [file:line:function] time -
 // ex: [ERROR] [somefile.cpp:123:doSome()] 2008/07/06 10:00:00 -
-inline void OutputLogHeader(const char *file, int line, const char *func, LogLevel level) {
+inline void OutputLogHeader(std::string_view file, int line, const char *func, LogLevel level) {
 	time_t t = time(nullptr);
 	tm *curTime = localtime(&t); // NOLINT
 	char time_str[32];
@@ -121,5 +89,34 @@ inline void OutputLogHeader(const char *file, int line, const char *func, LogLev
 	std::string formattedHeader = FormatLogHeader(file, line, func);
 	fprintf(LOG_OUTPUT_STREAM, "%s [%s] %s - ", time_str, formattedHeader.c_str(), type);
 }
+
+template <LogLevel level, typename... Args>
+void log_if_enabled_fmt(std::string_view file, int line, const char *func, const std::string message, Args &&...args) {
+	if constexpr (is_log_level_enabled(level)) {
+		OutputLogHeader(file, line, func, level);
+
+		if constexpr (!sizeof...(Args)) {
+			fmt::print(LOG_OUTPUT_STREAM, "{}\n", message);
+		} else {
+			if constexpr (std::is_same_v<std::decay_t<decltype(message)>, const char *>) {
+				// Format with fprintf for const char*
+				std::string formatted_message = fmt::format(fmt::runtime(message), std::forward<Args>(args)...);
+				fprintf(LOG_OUTPUT_STREAM, "%s\n", formatted_message.c_str());
+			} else if constexpr (std::is_same_v<std::decay_t<decltype(message)>, std::string>) {
+				// Format with fmt for std::string
+				auto formatted_message = fmt::format(fmt::runtime(message), std::forward<Args>(args)...);
+				fmt::print(LOG_OUTPUT_STREAM, "{}\n", formatted_message);
+			}
+		}
+
+		fflush(LOG_OUTPUT_STREAM); // Ensure log is flushed
+	}
+}
+
+#define LOG_ERROR(...) log_if_enabled_fmt<LogLevel::ERROR>(__SHORT_FILE__, __LINE__, __FUNCTION__, __VA_ARGS__)
+#define LOG_WARN(...)  log_if_enabled_fmt<LogLevel::WARN>(__SHORT_FILE__, __LINE__, __FUNCTION__, __VA_ARGS__)
+#define LOG_INFO(...)  log_if_enabled_fmt<LogLevel::INFO>(__SHORT_FILE__, __LINE__, __FUNCTION__, __VA_ARGS__)
+#define LOG_DEBUG(...) log_if_enabled_fmt<LogLevel::DEBUG>(__SHORT_FILE__, __LINE__, __FUNCTION__, __VA_ARGS__)
+#define LOG_TRACE(...) log_if_enabled_fmt<LogLevel::TRACE>(__SHORT_FILE__, __LINE__, __FUNCTION__, __VA_ARGS__)
 
 } // namespace db

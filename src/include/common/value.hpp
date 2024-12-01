@@ -98,6 +98,7 @@ public:
 			UNREACHABLE("Value has invalid type id");
 		}
 		}
+		std::unreachable();
 	}
 
 	[[nodiscard]] IndexKeyType ConvertToIndexKeyType() const {
@@ -125,6 +126,7 @@ public:
 			UNREACHABLE("Value has invalid type id");
 		}
 		}
+		std::unreachable();
 	}
 
 	template <typename T>
@@ -139,7 +141,8 @@ public:
 
 #define HANDLE_UNREACHABLE_CASE(type)                                                                                  \
 	case TypeId::type:                                                                                                 \
-		UNREACHABLE(#type " arithmetic not supported");
+		UNREACHABLE(#type " arithmetic not supported");                                                                \
+		return
 
 	void ComputeArithmetic(const Value &other, ArithmeticType expression_type) {
 		switch (expression_type) {
@@ -151,6 +154,7 @@ public:
 				HANDLE_UNREACHABLE_CASE(VARCHAR);
 				HANDLE_UNREACHABLE_CASE(INVALID);
 			}
+			break;
 		case ArithmeticType::Minus:
 			switch (type_id_) {
 				HANDLE_UNREACHABLE_CASE(BOOLEAN);
@@ -159,6 +163,7 @@ public:
 				HANDLE_UNREACHABLE_CASE(VARCHAR);
 				HANDLE_UNREACHABLE_CASE(INVALID);
 			}
+			break;
 		case ArithmeticType::Multiply:
 			switch (type_id_) {
 				HANDLE_UNREACHABLE_CASE(BOOLEAN);
@@ -167,6 +172,7 @@ public:
 				HANDLE_UNREACHABLE_CASE(VARCHAR);
 				HANDLE_UNREACHABLE_CASE(INVALID);
 			}
+			break;
 		}
 		std::unreachable();
 	}

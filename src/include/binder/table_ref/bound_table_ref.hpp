@@ -4,6 +4,7 @@
 
 #include <memory>
 #include <string>
+#include <utility>
 namespace db {
 
 /**
@@ -30,7 +31,7 @@ public:
 	BoundTableRef() = default;
 	virtual ~BoundTableRef() = default;
 
-	virtual auto ToString() const -> std::string {
+	virtual std::string ToString() const {
 		switch (type_) {
 		case TableReferenceType::INVALID:
 			return "";

@@ -6,6 +6,7 @@
 
 #include <cstdint>
 #include <string>
+#include <utility>
 namespace db {
 enum class TypeId : uint8_t { INVALID = 0, BOOLEAN, INTEGER, TIMESTAMP, VARCHAR };
 
@@ -23,6 +24,7 @@ public:
 			UNREACHABLE("Cannot get size of invalid type");
 		}
 		}
+		std::unreachable();
 	}
 	static uint32_t TypeSize(TypeId type_id, uint32_t length = 0) {
 		switch (type_id) {
@@ -38,6 +40,7 @@ public:
 			UNREACHABLE("Cannot get size of invalid type");
 		}
 		}
+		std::unreachable();
 	}
 
 	static std::string TypeIdToString(TypeId type_id) {
@@ -54,6 +57,7 @@ public:
 			UNREACHABLE("Unkown type");
 		}
 		}
+		std::unreachable();
 	}
 
 	static TypeId HsqlColumnTypeToTypeId(hsql::ColumnType col_type) {
@@ -80,6 +84,7 @@ public:
 		case hsql::DataType::TEXT:
 			throw NotImplementedException("Type is not implemented");
 		}
+		throw NotImplementedException("Type is not implemented");
 	}
 };
 } // namespace db
