@@ -39,7 +39,7 @@ public:
 	                                       const Column &key_col, bool is_primary_key, IndexType index_type,
 	                                       const std::unique_ptr<BufferPoolManager> &bpm);
 
-	const std::unique_ptr<TableMeta> &GetTable(const std::string &table_name) const {
+	const std::unique_ptr<TableMeta> &GetTableByName(const std::string &table_name) const {
 		if (table_names_.find(table_name) == table_names_.end()) {
 			throw Exception("Table not found when getting table info");
 		}
@@ -47,7 +47,7 @@ public:
 	};
 
 	const std::unique_ptr<TableMeta> &GetTable(const table_oid_t table_oid) const {
-		return GetTable(GetTableName(table_oid));
+		return GetTableByName(GetTableName(table_oid));
 	}
 
 	std::string &GetTableName(const table_oid_t table_oid) const {

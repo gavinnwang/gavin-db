@@ -21,7 +21,7 @@ public:
 	    : BoundExpression(ExpressionType::COLUMN_REF), col_name_(std::move(col_name)) {
 	}
 
-	static auto Prepend(std::unique_ptr<BoundColumnRef> self, std::string prefix) -> std::unique_ptr<BoundColumnRef> {
+	std::unique_ptr<BoundColumnRef> Prepend(std::unique_ptr<BoundColumnRef> self, std::string prefix) {
 		if (self == nullptr) {
 			return nullptr;
 		}

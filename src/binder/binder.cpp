@@ -1,5 +1,6 @@
 #include "binder/binder.hpp"
 
+#include "binder/table_ref/bound_table_ref.hpp"
 #include "common/exception.hpp"
 #include "common/logger.hpp"
 #include "sql/ColumnType.h"
@@ -48,7 +49,10 @@ std::unique_ptr<CreateStatement> Binder::BindCreate(const hsql::CreateStatement 
 std::unique_ptr<SelectStatement> Binder::BindSelect(const hsql::SelectStatement *stmt) {
 	LOG_TRACE("Binding select statement");
 	hsql::printSelectStatementInfo(stmt, 1);
-	return nullptr;
+
+	// if (stmt->selectList->empty()) {
+	// 	return std::make_unique<BoundTableRef>(TableReferenceType::EMPTY);
+	// }
 	// // Bind VALUES clause.
 	// if (pg_stmt->valuesLists != nullptr) {
 	//   auto values_list_name = fmt::format("__values#{}", universal_id_++);
@@ -67,22 +71,42 @@ std::unique_ptr<SelectStatement> Binder::BindSelect(const hsql::SelectStatement 
 	// }
 
 	// Bind VALUES clause.
-	// if (stmt->selectList != nullptr) {
-	// 	// auto value_list  =
-	// }
+	if (stmt->selectList != nullptr) {
+		auto value_list = BindValuesList(std::as_const(*stmt->selectList));
+		std::vector<std::unique_ptr<BoundExpression>> exprs;
+		size_t expr_length = value_list->values_[0].size();
+		for (size_t i = 0; i < expr_length; i++) {
+			exprs.emplace_back(std::make_unique<BoundColumnRef>(std::vector {values_list_name, fmt::format("{}", i)}));
+		}
+	}
 }
 
 std::unique_ptr<InsertStatement> Binder::BindInsert(const hsql::InsertStatement *stmt) {
 	LOG_TRACE("Binding insert statement");
 	hsql::printInsertStatementInfo(stmt, 1);
-	return nullptr;
+	auto table = BindBaseTableRef(stmt->tableName);
+
+	if (table->GetBoundTableName().starts_with("__")) {
+		throw Exception(fmt::format("invalid table for insert: {}", table->table_));
+	}
+
+	auto select = BindSelect(stmt->select);
+	return std::make_unique<InsertStatement>(std::move(table), std::move(select));
 }
 
-std::unique_ptr<BoundExpressionListRef> Binder::BindValuesList(const std::vector<const hsql::Expr *> &list) {
+std::unique_ptr<BoundExpressionListRef> Binder::BindValuesList(const std::vector<hsql::Expr *> &list) {
 	for ([[maybe_unused]] const auto *expr : list) {
 		// print
 	}
 	return nullptr;
+}
+
+std::unique_ptr<BoundBaseTableRef> Binder::BindBaseTableRef(const std::string &table_name) {
+	const auto &table_info = catalog_manager_->GetTableByName(table_name);
+	if (table_info == nullptr) {
+		throw Exception(fmt::format("invalid table {}", table_name));
+	}
+	return std::make_unique<BoundBaseTableRef>(std::move(table_name), table_info->table_oid_, table_info->schema_);
 }
 
 Column Binder::BindColumnDefinition(const hsql::ColumnDefinition *col_def) const {

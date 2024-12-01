@@ -2,6 +2,8 @@
 
 #include "binder/expressions/bound_expression.hpp"
 #include "binder/table_ref/bound_table_ref.hpp"
+
+#include <vector>
 namespace db {
 
 /**
@@ -9,10 +11,8 @@ namespace db {
  */
 class BoundExpressionListRef : public BoundTableRef {
 public:
-	explicit BoundExpressionListRef(std::vector<std::vector<std::unique_ptr<BoundExpression>>> values,
-	                                std::string identifier)
-	    : BoundTableRef(TableReferenceType::EXPRESSION_LIST), values_(std::move(values)),
-	      identifier_(std::move(identifier)) {
+	explicit BoundExpressionListRef(std::vector<std::vector<std::unique_ptr<BoundExpression>>> values)
+	    : BoundTableRef(TableReferenceType::EXPRESSION_LIST), values_(std::move(values)) {
 	}
 
 	auto ToString() const -> std::string override;
@@ -21,6 +21,5 @@ public:
 	std::vector<std::vector<std::unique_ptr<BoundExpression>>> values_;
 
 	/** A unique identifier for this values list, so that planner / binder can work correctly. */
-	std::string identifier_;
 };
 } // namespace db
