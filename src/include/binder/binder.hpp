@@ -16,7 +16,7 @@
 namespace db {
 class Binder {
 public:
-	explicit Binder(const std::unique_ptr<const CatalogManager> &catalog_manager) : catalog_manager_(catalog_manager) {
+	explicit Binder(const std::unique_ptr<CatalogManager> &catalog_manager) : catalog_manager_(catalog_manager) {
 	}
 	std::unique_ptr<BoundStatement> Bind(const hsql::SQLStatement *stmt);
 	std::unique_ptr<CreateStatement> BindCreate(const hsql::CreateStatement *stmt);
@@ -27,6 +27,6 @@ public:
 	std::unique_ptr<BoundBaseTableRef> BindBaseTableRef(const std::string &table_name);
 
 private:
-	const std::unique_ptr<const CatalogManager> &catalog_manager_;
+	const std::unique_ptr<CatalogManager> &catalog_manager_;
 };
 } // namespace db

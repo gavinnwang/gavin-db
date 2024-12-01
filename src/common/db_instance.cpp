@@ -18,7 +18,7 @@ void DB::ExecuteQuery([[maybe_unused]] Transaction &txn, const std::string &quer
 		LOG_INFO("Query failed to parse!");
 		throw Exception(fmt::format("Query failed to parse: {}", raw_parse_result.errorMsg()));
 	}
-	auto binder = Binder {};
+	auto binder = Binder {catalog_manager_};
 	for (const auto &parsed_stmt : raw_parse_result.getStatements()) {
 		auto binded_stmt = binder.Bind(parsed_stmt);
 		switch (binded_stmt->type_) {

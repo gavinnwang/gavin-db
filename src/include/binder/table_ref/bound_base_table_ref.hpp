@@ -19,7 +19,7 @@ public:
 	      schema_(std::move(schema)) {
 	}
 
-	auto ToString() const -> std::string override {
+	std::string ToString() const override {
 		return fmt::format("BoundBaseTableRef {{ table={}, oid={} }}", table_, oid_);
 	}
 

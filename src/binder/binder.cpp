@@ -1,5 +1,6 @@
 #include "binder/binder.hpp"
 
+#include "binder/table_ref/bound_expression_list.hpp"
 #include "binder/table_ref/bound_table_ref.hpp"
 #include "common/exception.hpp"
 #include "common/logger.hpp"
@@ -76,9 +77,11 @@ std::unique_ptr<SelectStatement> Binder::BindSelect(const hsql::SelectStatement 
 		std::vector<std::unique_ptr<BoundExpression>> exprs;
 		size_t expr_length = value_list->values_[0].size();
 		for (size_t i = 0; i < expr_length; i++) {
-			exprs.emplace_back(std::make_unique<BoundColumnRef>(std::vector {values_list_name, fmt::format("{}", i)}));
+			// exprs.emplace_back(std::make_unique<BoundColumnRef>(std::vector {values_list_name, fmt::format("{}",
+			// i)}));
 		}
 	}
+	return nullptr;
 }
 
 std::unique_ptr<InsertStatement> Binder::BindInsert(const hsql::InsertStatement *stmt) {

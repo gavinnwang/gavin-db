@@ -2,6 +2,7 @@
 
 #include "binder/expressions/bound_expression.hpp"
 #include "binder/table_ref/bound_table_ref.hpp"
+#include "fmt/ranges.h"
 
 #include <vector>
 namespace db {
@@ -15,7 +16,9 @@ public:
 	    : BoundTableRef(TableReferenceType::EXPRESSION_LIST), values_(std::move(values)) {
 	}
 
-	auto ToString() const -> std::string override;
+	std::string ToString() const override {
+		return fmt::format("BoundExpressionListRef {{ values={} }}", values_);
+	}
 
 	/** The value list */
 	std::vector<std::vector<std::unique_ptr<BoundExpression>>> values_;
