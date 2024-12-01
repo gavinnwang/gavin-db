@@ -31,9 +31,7 @@ public:
 	BoundExpression() = default;
 	virtual ~BoundExpression() = default;
 
-	virtual std::string ToString() const {
-		return "";
-	};
+	virtual std::string ToString() const = 0;
 
 	/** The type of this expression. */
 	ExpressionType type_ {ExpressionType::INVALID};

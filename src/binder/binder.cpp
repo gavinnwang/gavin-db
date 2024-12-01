@@ -3,8 +3,6 @@
 #include "common/exception.hpp"
 #include "common/logger.hpp"
 #include "sql/ColumnType.h"
-#include "sql/CreateStatement.h"
-#include "sql/InsertStatement.h"
 #include "sql/SQLStatement.h"
 #include "util/sqlhelper.h"
 
@@ -47,7 +45,7 @@ std::unique_ptr<CreateStatement> Binder::BindCreate(const hsql::CreateStatement 
 	return std::make_unique<CreateStatement>(std::move(table), std::move(columns), std::move(primary_key));
 }
 
-std::unique_ptr<hsql::SelectStatement> BindSelect(const hsql::SelectStatement *stmt) {
+std::unique_ptr<SelectStatement> Binder::BindSelect(const hsql::SelectStatement *stmt) {
 	LOG_TRACE("Binding select statement");
 	hsql::printSelectStatementInfo(stmt, 1);
 	return nullptr;
@@ -72,6 +70,12 @@ std::unique_ptr<hsql::SelectStatement> BindSelect(const hsql::SelectStatement *s
 	// if (stmt->selectList != nullptr) {
 	// 	// auto value_list  =
 	// }
+}
+
+std::unique_ptr<InsertStatement> Binder::BindInsert(const hsql::InsertStatement *stmt) {
+	LOG_TRACE("Binding insert statement");
+	hsql::printInsertStatementInfo(stmt, 1);
+	return nullptr;
 }
 
 std::unique_ptr<BoundExpressionListRef> Binder::BindValuesList(const std::vector<const hsql::Expr *> &list) {

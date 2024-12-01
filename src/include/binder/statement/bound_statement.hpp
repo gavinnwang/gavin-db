@@ -1,6 +1,8 @@
 #pragma once
 #include "binder/statement/statement_type.hpp"
-#include "common/exception.hpp"
+
+#include <string>
+
 namespace db {
 
 class BoundStatement {
@@ -12,9 +14,6 @@ public:
 	const StatementType type_;
 
 public:
-	/** Render this statement as a string. */
-	virtual auto ToString() const -> std::string {
-		throw Exception("ToString not supported for this type of SQLStatement");
-	}
+	virtual auto ToString() const -> std::string = 0;
 };
 } // namespace db
