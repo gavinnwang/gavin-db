@@ -64,7 +64,10 @@ std::optional<RID> TableHeap::InsertTuple(const TupleMeta &meta, const Tuple &tu
 	page_guard.Drop();
 
 	table_meta_->IncreaseTupleCount();
-	return RID({table_meta_->table_oid_, last_page_id}, slot_id);
+
+	const auto rid = RID({table_meta_->table_oid_, last_page_id}, slot_id);
+	LOG_TRACE("Inserted tuple with rid {}", rid.ToString());
+	return rid;
 };
 
 void TableHeap::UpdateTupleMeta(const TupleMeta &meta, RID rid) {

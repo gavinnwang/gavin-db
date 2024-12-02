@@ -36,6 +36,8 @@ void DB::ExecuteQuery([[maybe_unused]] Transaction &txn, const std::string &quer
 			std::vector<Tuple> result_set;
 			auto context = std::make_unique<ExecutorContext>(catalog_manager_, bpm_);
 			execution_engine_->Execute(planner.plan_, result_set, txn, std::move(context));
+			bpm_->FlushAllPages();
+			catalog_manager_->PersistToDisk();
 			continue;
 			// for (const auto & tuple : result_set) {
 			//

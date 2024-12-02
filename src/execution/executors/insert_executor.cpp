@@ -29,6 +29,7 @@ bool InsertExecutor::Next(Tuple &tuple, RID &rid) {
 		if (return_rid.has_value()) {
 			rid = return_rid.value();
 			changed_row_count++;
+			table_meta->tuple_count_++;
 			// TODO: insert to index
 
 			// for (auto index : index_info_) {

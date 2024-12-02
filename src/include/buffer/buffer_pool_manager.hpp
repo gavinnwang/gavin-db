@@ -39,7 +39,7 @@ private:
 		LOG_DEBUG("Printing all pages in BPM: {}", pages);
 	}
 	void PrintFreeList() {
-		LOG_DEBUG("Printing free list: {}", free_list_);
+		// LOG_DEBUG("Printing free list: {}", free_list_);
 	}
 
 	const frame_id_t pool_size_;

@@ -1,5 +1,6 @@
 #include "storage/page/table_page.hpp"
 
+#include "common/logger.hpp"
 #include "common/macros.hpp"
 
 #include <exception>
@@ -10,7 +11,7 @@ void TablePage::Init() {
 	num_tuples_ = 0;
 	num_deleted_tuples_ = 0;
 }
-auto TablePage::GetNextTupleOffset(const Tuple &tuple) const -> std::optional<uint16_t> {
+std::optional<uint16_t> TablePage::GetNextTupleOffset(const Tuple &tuple) const {
 	size_t slot_end_offset;
 	if (num_tuples_ > 0) {
 		auto &[offset, size, meta] = tuple_info_[num_tuples_ - 1];
@@ -43,8 +44,8 @@ auto TablePage::InsertTuple(const TupleMeta &meta, const Tuple &tuple) -> std::o
 	auto tuple_id = num_tuples_;
 	tuple_info_[tuple_id] = std::make_tuple(*tuple_offset, tuple.GetStorageSize(), meta);
 	num_tuples_++;
+	LOG_TRACE("offset={}", *tuple_offset);
 	ASSERT(*tuple_offset + tuple.GetStorageSize() <= PAGE_SIZE, "tuple out of range");
-	// memcpy(page_start_ + *tuple_offset, tuple.GetData(), tuple.GetStorageSize());
 	tuple.SerializeTo(page_start_ + *tuple_offset);
 	return tuple_id;
 }

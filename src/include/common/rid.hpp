@@ -20,7 +20,7 @@ public:
 	}
 
 	[[nodiscard]] std::string ToString() const {
-		return "RID[" + std::to_string(page_id_.page_number_) + ", " + std::to_string(slot_num_) + "]";
+		return fmt::format("RID[{}, {}]", page_id_.page_number_, slot_num_);
 	}
 
 private:

@@ -113,9 +113,6 @@ Page &BufferPoolManager::FetchPage(PageId page_id) {
 
 bool BufferPoolManager::UnpinPage(PageId page_id, bool is_dirty) {
 	assert(page_id.page_number_ != INVALID_PAGE_ID);
-	if (page_id.page_number_ == 0 && is_dirty) {
-		LOG_TRACE("Unpinning page %s", page_id.ToString().c_str());
-	}
 	std::lock_guard<std::mutex> lock(latch_);
 	if (page_table_.find(page_id) == page_table_.end()) {
 		LOG_ERROR("Page %s not found in page table", page_id.ToString().c_str());

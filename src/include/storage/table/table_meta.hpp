@@ -25,6 +25,7 @@ struct TableMeta {
 		serializer.WriteProperty(102, "table_schema", schema_);
 		serializer.WriteProperty(103, "last_table_data_page_id", last_table_data_page_id_);
 		serializer.WriteProperty(104, "last_table_heap_data_page_id", last_table_heap_data_page_id_);
+		serializer.WriteProperty(105, "tuple_count", tuple_count_);
 	}
 
 	[[nodiscard]] static std::unique_ptr<TableMeta> Deserialize(Deserializer &deserializer) {
@@ -34,6 +35,7 @@ struct TableMeta {
 		deserializer.ReadProperty(102, "table_schema", meta->schema_);
 		deserializer.ReadProperty(103, "last_table_data_page_id", meta->last_table_data_page_id_);
 		deserializer.ReadProperty(104, "last_table_heap_data_page_id", meta->last_table_heap_data_page_id_);
+		deserializer.ReadProperty(105, "tuple_count", meta->tuple_count_);
 		return meta;
 	}
 
