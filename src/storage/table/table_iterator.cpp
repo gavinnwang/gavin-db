@@ -9,6 +9,7 @@
 namespace db {
 
 std::optional<std::pair<TupleMeta, Tuple>> TableIterator::GetTuple() {
+	LOG_TRACE("{}", rid_.ToString());
 	return table_heap_.GetTuple(rid_);
 }
 
@@ -20,7 +21,7 @@ auto TableIterator::IsEnd() -> bool {
 	return rid_.GetPageId().page_number_ == INVALID_PAGE_ID;
 }
 
-auto TableIterator::operator++() -> TableIterator & {
+TableIterator &TableIterator::operator++() {
 	auto page_guard = table_heap_.bpm_.FetchPageRead(rid_.GetPageId());
 	const auto &page = page_guard.As<TablePage>();
 	auto next_tuple_id = rid_.GetSlotNum() + 1;

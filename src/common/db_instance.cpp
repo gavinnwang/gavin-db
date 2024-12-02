@@ -33,7 +33,7 @@ void DB::ExecuteQuery([[maybe_unused]] Transaction &txn, const std::string &quer
 			planner.PlanQuery(*bound_stmt);
 			std::vector<Tuple> result_set;
 			auto context = std::make_unique<ExecutorContext>(*catalog_manager_, *bpm_);
-			execution_engine_->Execute(planner.plan_, result_set, txn, *context);
+			execution_engine_->Execute(std::move(planner.plan_), result_set, txn, *context);
 			bpm_->FlushAllPages();
 			catalog_manager_->PersistToDisk();
 			continue;
@@ -44,7 +44,7 @@ void DB::ExecuteQuery([[maybe_unused]] Transaction &txn, const std::string &quer
 			planner.PlanQuery(*bound_stmt);
 			std::vector<Tuple> result_set;
 			auto context = std::make_unique<ExecutorContext>(*catalog_manager_, *bpm_);
-			execution_engine_->Execute(planner.plan_, result_set, txn, *context);
+			execution_engine_->Execute(std::move(planner.plan_), result_set, txn, *context);
 			bpm_->FlushAllPages();
 			catalog_manager_->PersistToDisk();
 			continue;

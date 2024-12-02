@@ -1,6 +1,5 @@
 #pragma once
 
-#include "binder/table_ref/bound_base_table_ref.hpp"
 #include "execution/expressions/abstract_expression.hpp"
 #include "execution/plans/abstract_plan.hpp"
 namespace db {

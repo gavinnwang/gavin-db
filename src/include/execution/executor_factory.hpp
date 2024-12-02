@@ -11,6 +11,6 @@ namespace db {
 class ExecutorFactory {
 public:
 	// Creates a new executor given the executor context and plan node.
-	static std::unique_ptr<AbstractExecutor> CreateExecutor(const ExecutorContext &exec_ctx, AbstractPlanNodeRef &plan);
+	static std::unique_ptr<AbstractExecutor> CreateExecutor(const ExecutorContext &exec_ctx, AbstractPlanNodeRef plan);
 };
 } // namespace db

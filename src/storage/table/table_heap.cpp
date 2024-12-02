@@ -102,7 +102,7 @@ TableIterator TableHeap::MakeIterator() {
 	auto num_tuples = page.GetNumTuples();
 	page_guard.Drop();
 	// iterate from rid 0, 0 to last_page_id and num_tuples
-	return TableIterator {*this, {{table_oid, 0}, 0}, {{table_oid, last_page_id}, num_tuples}};
+	return TableIterator {*this, {{table_oid, 1}, 0}, {{table_oid, last_page_id}, num_tuples}};
 }
 
 } // namespace db
