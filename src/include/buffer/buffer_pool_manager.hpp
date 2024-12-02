@@ -1,6 +1,7 @@
 #pragma once
 
 #include "buffer/replacer.hpp"
+#include "common/logger.hpp"
 #include "common/macros.hpp"
 #include "common/page_id.hpp"
 #include "common/typedef.hpp"
@@ -31,16 +32,14 @@ public:
 private:
 	bool AllocateFrame(frame_id_t &frame_id);
 	void PrintPages() {
+		std::string pages = "";
 		for (const auto &page : pages_) {
-			std::cout << "PageId: " << page.page_id_.page_number_ << " PinCount: " << page.pin_count_
-			          << " Dirty: " << page.is_dirty_ << std::endl;
+			pages += page.ToString();
 		}
+		LOG_DEBUG("Printing all pages in BPM: {}", pages);
 	}
 	void PrintFreeList() {
-		for (const auto &frame_id : free_list_) {
-			std::cout << frame_id << " ";
-		}
-		std::cout << std::endl;
+		LOG_DEBUG("Printing free list: {}", free_list_);
 	}
 
 	const frame_id_t pool_size_;

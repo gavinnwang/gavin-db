@@ -2,6 +2,7 @@
 
 #include "common/config.hpp"
 #include "common/typedef.hpp"
+#include "fmt/core.h"
 
 #include <functional>
 namespace db {
@@ -21,7 +22,7 @@ struct PageId {
 	}
 
 	std::string ToString() const {
-		return "PageId[" + std::to_string(table_id_) + ", " + std::to_string(page_number_) + "]";
+		return fmt::format("PageId[{}, {}]", table_id_, page_number_);
 	}
 };
 

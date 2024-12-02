@@ -4,6 +4,7 @@
 #include "common/macros.hpp"
 #include "common/page_id.hpp"
 #include "common/rwlatch.hpp"
+#include "fmt/format.h"
 
 #include <cstring>
 
@@ -52,6 +53,10 @@ public:
 	void RUnlatch() {
 		rwlatch_.RUnlock();
 	}
+	std::string ToString() const {
+		return fmt::format("Page {{ table_id={}, page_id={} is_dirty={}, pin_count={}, data_size={} }}",
+		                   page_id_.table_id_, page_id_.page_number_, is_dirty_, pin_count_, data_.size());
+	}
 
 private:
 	void ResetMemory() {
@@ -61,7 +66,13 @@ private:
 	bool is_dirty_ = false;
 	uint16_t pin_count_ = 0;
 	ReaderWriterLatch rwlatch_;
-	// std::vector<char> data_;
 	std::array<char, PAGE_SIZE> data_ {};
 };
 } // namespace db
+
+template <>
+struct fmt::formatter<db::Page> : formatter<std::string_view> {
+	auto format(db::Page x, format_context &ctx) const {
+		return formatter<string_view>::format(x.ToString(), ctx);
+	}
+};
