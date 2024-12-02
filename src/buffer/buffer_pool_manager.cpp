@@ -8,6 +8,7 @@
 #include "storage/page_allocator.hpp"
 
 #include <memory>
+#include <mutex>
 #include <vector>
 namespace db {
 BufferPoolManager::BufferPoolManager(frame_id_t pool_size, std::shared_ptr<DiskManager> disk_manager)
