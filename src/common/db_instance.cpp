@@ -20,12 +20,14 @@ void DB::ExecuteQuery([[maybe_unused]] Transaction &txn, const std::string &quer
 	}
 	auto binder = Binder {catalog_manager_};
 	for (const auto &parsed_stmt : raw_parse_result.getStatements()) {
-		auto binded_stmt = binder.Bind(parsed_stmt);
-		switch (binded_stmt->type_) {
+		auto bound_stmt = binder.Bind(parsed_stmt);
+		LOG_DEBUG("Bound statement: {}", bound_stmt->ToString());
+		switch (bound_stmt->type_) {
 		// case StatementType::SELECT_STATEMENT:
-		// case StatementType::INSERT_STATEMENT:
+		case StatementType::INSERT_STATEMENT:
+			// plan
 		case StatementType::CREATE_STATEMENT: {
-			auto *raw_create_stmt = static_cast<CreateStatement *>(binded_stmt.release());
+			auto *raw_create_stmt = static_cast<CreateStatement *>(bound_stmt.release());
 			std::unique_ptr<CreateStatement> create_stmt(raw_create_stmt);
 			HandleCreateStatement(txn, create_stmt);
 			continue;
@@ -35,7 +37,7 @@ void DB::ExecuteQuery([[maybe_unused]] Transaction &txn, const std::string &quer
 		}
 		}
 	}
-	std::cout << "EXECUTED SUCCCESS" << std::endl;
+	LOG_INFO("Query {} executed success.", query);
 }
 
 void DB::HandleCreateStatement([[maybe_unused]] Transaction &txn, const std::unique_ptr<CreateStatement> &stmt) {

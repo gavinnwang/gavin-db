@@ -21,8 +21,9 @@ public:
 	auto GetPageSet() {
 		return page_set_;
 	}
+
 	void AddIntoPageSet(std::reference_wrapper<Page> page) {
-    LOG_TRACE("Adding page %d into page set", page.get().GetPageId().page_number_);
+		LOG_TRACE("Adding page {} into page set", page.get().GetPageId().page_number_);
 		page_set_->push_back(page);
 	}
 

@@ -15,9 +15,8 @@ TEST(QueryTest, SimpleCreateTest) {
 	}
 
 	query = R"(
-		INSERT INTO Users 
-		VALUES
-		    (1, 25, 50000, 'Alice');
+INSERT INTO Users 
+SELECT 1+2, 25, 50000, 'Alice';
 	)";
 	try {
 		db.ExecuteQuery(txn, query);

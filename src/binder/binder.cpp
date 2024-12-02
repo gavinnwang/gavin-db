@@ -6,7 +6,9 @@
 #include "binder/table_ref/bound_table_ref.hpp"
 #include "common/exception.hpp"
 #include "common/logger.hpp"
+#include "magic_enum/magic_enum.hpp"
 #include "sql/ColumnType.h"
+#include "sql/Expr.h"
 #include "sql/SQLStatement.h"
 #include "util/sqlhelper.h"
 
@@ -88,10 +90,12 @@ std::unique_ptr<InsertStatement> Binder::BindInsert(const hsql::InsertStatement 
 		auto select = std::make_unique<SelectStatement>(std::move(value_list), std::move(exprs));
 		return std::make_unique<InsertStatement>(std::move(table), std::move(select));
 	}
+	if (stmt->select) {
+		auto select = BindSelect(stmt->select);
+		return std::make_unique<InsertStatement>(std::move(table), std::move(select));
+	}
 
 	// ASSERT(stmt->select, "select is nullptr");
-	// auto select = BindSelect(stmt->select);
-	// return std::make_unique<InsertStatement>(std::move(table), std::move(select));
 	throw NotImplementedException("Have not implemented insert clause like this");
 }
 
@@ -108,23 +112,31 @@ std::unique_ptr<BoundExpression> Binder::BindExpression(const hsql::Expr *expr) 
 		auto VarcharValue = Value {TypeId::VARCHAR, std::move(string)};
 		return std::make_unique<BoundConstant>(std::move(VarcharValue));
 	}
+	case hsql::kExprOperator: {
+		hsql::OperatorType type = expr->opType;
+		const std::string type_str = (type == hsql::OperatorType::kOpPlus) ? "+" : "?";
+		const auto expr1 = BindExpression(expr->expr);
+		const auto expr2 = BindExpression(expr->expr2);
+		throw NotImplementedException(
+		    fmt::format("This expr type is not supported {}", magic_enum::enum_name(expr->type)));
+	}
+	case hsql::kExprStar:
+	case hsql::kExprColumnRef:
+	case hsql::kExprSelect:
 	case hsql::kExprLiteralFloat:
 	case hsql::kExprLiteralNull:
 	case hsql::kExprLiteralDate:
 	case hsql::kExprLiteralInterval:
-	case hsql::kExprStar:
 	case hsql::kExprParameter:
-	case hsql::kExprColumnRef:
 	case hsql::kExprFunctionRef:
-	case hsql::kExprOperator:
-	case hsql::kExprSelect:
 	case hsql::kExprHint:
 	case hsql::kExprArray:
 	case hsql::kExprArrayIndex:
 	case hsql::kExprExtract:
 	case hsql::kExprCast:
 	default:
-		throw NotImplementedException("This expr type is not supported");
+		throw NotImplementedException(
+		    fmt::format("This expr type is not supported {}", magic_enum::enum_name(expr->type)));
 	}
 	std::unreachable();
 }

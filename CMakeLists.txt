@@ -56,8 +56,12 @@ FetchContent_Declare(
   GIT_REPOSITORY https://github.com/fmtlib/fmt.git
   GIT_TAG 10.2.1
 )
-FetchContent_MakeAvailable(googletest)
-FetchContent_MakeAvailable(fmt)
+FetchContent_Declare(
+  magic_enum
+  GIT_REPOSITORY https://github.com/Neargye/magic_enum.git
+  GIT_TAG master
+)
+FetchContent_MakeAvailable(googletest fmt magic_enum)
 
 
 include(ExternalProject)
@@ -99,7 +103,7 @@ add_custom_command(
     VERBATIM
 )
 
-target_link_libraries(gavindb PRIVATE fmt::fmt "${SQL_PARSER_LIBRARY_DIR}/libsqlparser.so")
+target_link_libraries(gavindb PRIVATE fmt::fmt "${SQL_PARSER_LIBRARY_DIR}/libsqlparser.so" magic_enum::magic_enum)
 
 # Include
 target_include_directories(gavindb PRIVATE 
