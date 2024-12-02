@@ -2,6 +2,7 @@
 
 #include "catalog/column.hpp"
 #include "common/typedef.hpp"
+#include "fmt/ranges.h"
 #include "storage/serializer/deserializer.hpp"
 #include "storage/serializer/serializer.hpp"
 
@@ -57,14 +58,7 @@ public:
 	}
 
 	[[nodiscard]] std::string ToString() const {
-		std::string str = "Schema(";
-		for (const auto &col : columns_) {
-			str += col.ToString() + ", ";
-		}
-		str.pop_back();
-		str.pop_back();
-		str += ")";
-		return str;
+		return fmt::format("Schema({})", columns_);
 	}
 
 private:
@@ -75,3 +69,10 @@ private:
 	uint32_t tuple_inline_part_storage_size_;
 };
 } // namespace db
+
+template <>
+struct fmt::formatter<db::Schema> : formatter<std::string_view> {
+	auto format(db::Schema x, format_context &ctx) const {
+		return formatter<string_view>::format(x.ToString(), ctx);
+	}
+};

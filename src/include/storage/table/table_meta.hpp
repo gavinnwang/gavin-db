@@ -91,3 +91,10 @@ struct TableMeta {
 	std::mutex latch_;
 };
 } // namespace db
+
+template <>
+struct fmt::formatter<db::TableMeta> : formatter<std::string_view> {
+	auto format(db::TableMeta x, format_context &ctx) const {
+		return formatter<string_view>::format(x.ToString(), ctx);
+	}
+};

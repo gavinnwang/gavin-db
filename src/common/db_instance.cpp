@@ -44,9 +44,11 @@ void DB::ExecuteQuery([[maybe_unused]] Transaction &txn, const std::string &quer
 void DB::HandleCreateStatement([[maybe_unused]] Transaction &txn, const std::unique_ptr<CreateStatement> &stmt) {
 	std::unique_lock<std::shared_mutex> l(catalog_manager_lock_);
 	const auto schema = Schema {stmt->columns_};
-	const auto &table_meta = catalog_manager_->CreateTable(stmt->table_name_, schema);
-	if (!table_meta.has_value()) {
-		throw RuntimeException("Failed to create table: table already exists");
+	const auto &table_oid_opt = catalog_manager_->CreateTable(stmt->table_name_, schema);
+	if (!table_oid_opt.has_value()) {
+		const auto &table_meta = catalog_manager_->GetTableByName(stmt->table_name_);
+		throw RuntimeException(
+		    fmt::format("Failed to create table: table already exists with schema: {}", table_meta->schema_));
 	}
 	const auto &table_name = stmt->table_name_;
 	if (!stmt->primary_key_.empty()) {
@@ -62,7 +64,7 @@ void DB::HandleCreateStatement([[maybe_unused]] Transaction &txn, const std::uni
 		}
 	}
 	l.unlock();
-	std::cout << "Create statement success" << std::endl;
+	LOG_INFO("Create statement executed success");
 }
 
 void DB::SetUpInternalSystemCatalogTable() {

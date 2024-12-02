@@ -6,8 +6,7 @@ TEST(QueryTest, SimpleCreateTest) {
 	db::DB db = db::DB {"test_db"};
 	db::Transaction txn {};
 	std::string query = R"(
-		CREATE TABLE Users 
-		(id INT PRIMARY KEY, age INT, networth INT, name VARCHAR(255));
+CREATE TABLE Users (id INT PRIMARY KEY, age INT, networth INT, name VARCHAR(255));
 	)";
 	try {
 		db.ExecuteQuery(txn, query);
@@ -16,7 +15,7 @@ TEST(QueryTest, SimpleCreateTest) {
 
 	query = R"(
 INSERT INTO Users 
-SELECT 1+2, 25, 50000, 'Alice';
+SELECT 1+2+2, 25, 50000, 'Alice';
 	)";
 	try {
 		db.ExecuteQuery(txn, query);

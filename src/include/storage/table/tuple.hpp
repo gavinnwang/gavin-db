@@ -59,7 +59,7 @@ public:
 
 	Value GetValue(const Schema &schema, uint32_t column_idx) const;
 
-	auto ToString(const Schema &schema) const -> std::string;
+	std::string ToString(const Schema &schema) const;
 
 private:
 	// Get the starting storage address of specific column

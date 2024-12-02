@@ -81,19 +81,9 @@ private:
 };
 } // namespace db
 
-template <typename T>
-struct fmt::formatter<T, std::enable_if_t<std::is_base_of<db::Column, T>::value, char>> : fmt::formatter<std::string> {
-	template <typename FormatCtx>
-	auto format(const db::Column &x, FormatCtx &ctx) const {
-		return fmt::formatter<std::string>::format(x.ToString(), ctx);
-	}
-};
-
-template <typename T>
-struct fmt::formatter<std::unique_ptr<T>, std::enable_if_t<std::is_base_of<db::Column, T>::value, char>>
-    : fmt::formatter<std::string> {
-	template <typename FormatCtx>
-	auto format(const std::unique_ptr<db::Column> &x, FormatCtx &ctx) const {
-		return fmt::formatter<std::string>::format(x->ToString(), ctx);
+template <>
+struct fmt::formatter<db::Column> : formatter<std::string_view> {
+	auto format(db::Column x, format_context &ctx) const {
+		return formatter<string_view>::format(x.ToString(), ctx);
 	}
 };
