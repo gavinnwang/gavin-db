@@ -31,7 +31,7 @@ std::optional<table_oid_t> CatalogManager::CreateTable(const std::string &table_
 
 std::optional<index_oid_t> CatalogManager::CreateIndex(const std::string &index_name, const std::string &table_name,
                                                        const Column &key_col, bool is_primary_key, IndexType index_type,
-                                                       const std::unique_ptr<BufferPoolManager> &bpm) {
+                                                       BufferPoolManager &bpm) {
 	if (table_names_.find(table_name) == table_names_.end()) {
 		return std::nullopt;
 	}
@@ -50,7 +50,7 @@ std::optional<index_oid_t> CatalogManager::CreateIndex(const std::string &index_
 	std::unique_ptr<Index> index;
 	const auto &table_meta = tables_.at(table_names_.at(table_name));
 	if (index_type == IndexType::BPlusTreeIndex) {
-		auto btree_index = std::make_unique<BTreeIndex>(index_meta, table_meta, bpm);
+		auto btree_index = std::make_unique<BTreeIndex>(*index_meta, *table_meta, bpm);
 	} else {
 		throw NotImplementedException("Unsupported index type");
 	}

@@ -16,12 +16,13 @@
 namespace db {
 class Binder {
 public:
-	explicit Binder(const std::unique_ptr<CatalogManager> &catalog_manager) : catalog_manager_(catalog_manager) {
+	explicit Binder(const CatalogManager &catalog_manager) : catalog_manager_(catalog_manager) {
 	}
 	std::unique_ptr<BoundStatement> Bind(const hsql::SQLStatement *stmt);
 	std::unique_ptr<CreateStatement> BindCreate(const hsql::CreateStatement *stmt);
 	std::unique_ptr<SelectStatement> BindSelect(const hsql::SelectStatement *stmt);
 	std::unique_ptr<InsertStatement> BindInsert(const hsql::InsertStatement *stmt);
+	std::unique_ptr<BoundTableRef> BindFrom(const hsql::TableRef *table_ref);
 	std::unique_ptr<BoundExpressionListRef> BindValuesList(const std::vector<hsql::Expr *> &list);
 	std::vector<std::unique_ptr<BoundExpression>> BindExpressionList(const std::vector<hsql::Expr *> &list);
 	std::unique_ptr<BoundExpression> BindExpression(const hsql::Expr *expr);
@@ -29,6 +30,7 @@ public:
 	std::unique_ptr<BoundBaseTableRef> BindBaseTableRef(const std::string &table_name);
 
 private:
-	const std::unique_ptr<CatalogManager> &catalog_manager_;
+	const CatalogManager &catalog_manager_;
+	std::unique_ptr<BoundTableRef> *scope_ {nullptr};
 };
 } // namespace db

@@ -27,7 +27,7 @@ TEST(StorageTest, TablePersistTest) {
 
 	cm->CreateTable(table_name, schema);
 	auto &table_meta = cm->GetTableByName(table_name);
-	auto table_heap = std::make_unique<TableHeap>(bpm, table_meta);
+	auto table_heap = std::make_unique<TableHeap>(*bpm, table_meta);
 
 	std::vector<RID> rids;
 	for (int i = 0; i < 200; ++i) {
@@ -55,9 +55,9 @@ TEST(StorageTest, TablePersistTest) {
 	auto bpm2 = std::make_unique<BufferPoolManager>(buffer_pool_size, dm);
 
 	auto &table_meta2 = cm2->GetTableByName(table_name);
-	LOG_DEBUG("table_meta2: %s", table_meta2->name_.c_str());
+	LOG_DEBUG("table_meta2: %s", table_meta2.name_.c_str());
 
-	auto table_heap2 = std::make_unique<TableHeap>(bpm2, table_meta2);
+	auto table_heap2 = std::make_unique<TableHeap>(*bpm2, table_meta2);
 
 	for (int i = 0; i < 200; ++i) {
 		auto ret = table_heap2->GetTuple(rids[i]);

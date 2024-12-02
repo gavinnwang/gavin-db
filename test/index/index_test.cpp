@@ -24,15 +24,15 @@ TEST(IndexTest, IndexTest) {
 	cm->CreateTable(table_name, schema);
 	auto &table_meta = cm->GetTableByName(table_name);
 
-	auto index_meta = std::make_unique<IndexMeta>("user_id_index", table_meta->table_oid_, schema.GetColumn(0),
+	auto index_meta = std::make_unique<IndexMeta>("user_id_index", table_meta.table_oid_, schema.GetColumn(0),
 	                                              IndexConstraintType::PRIMARY, IndexType::BPlusTreeIndex);
 
-	auto btree_index = std::make_unique<BTreeIndex>(index_meta, table_meta, bpm);
+	auto btree_index = std::make_unique<BTreeIndex>(*index_meta, table_meta, *bpm);
 
 	int32_t int_val = 1;
 	std::string str_val = "hi";
 
-	auto table_heap = std::make_unique<TableHeap>(bpm, table_meta);
+	auto table_heap = std::make_unique<TableHeap>(*bpm, table_meta);
 
 	auto v1 = db::Value(db::TypeId::INTEGER, int_val);
 	auto v2 = db::Value(db::TypeId::VARCHAR, str_val);
@@ -60,8 +60,7 @@ TEST(IndexTest, IndexTest) {
 
 	if (rid.has_value()) {
 		LOG_TRACE("tuple %s", tuple.ToString(schema).c_str());
-
-		std::cout << (*rid).GetPageId().page_number_ << (*rid).GetSlotNum() << std::endl;
+		LOG_TRACE("{}", rid->ToString());
 
 		LOG_TRACE("tuple %s", tuple2.ToString(schema).c_str());
 		auto res = btree_index->InsertRecord(tuple2, *rid);
@@ -87,15 +86,15 @@ TEST(IndexTest, IndexManyInsertionsTest) {
 	cm->CreateTable(table_name, schema);
 	auto &table_meta = cm->GetTableByName(table_name);
 
-	auto index_meta = std::make_unique<IndexMeta>("user_id_index", table_meta->table_oid_, schema.GetColumn(0),
+	auto index_meta = std::make_unique<IndexMeta>("user_id_index", table_meta.table_oid_, schema.GetColumn(0),
 	                                              IndexConstraintType::PRIMARY, IndexType::BPlusTreeIndex);
 
-	auto btree_index = std::make_unique<BTreeIndex>(index_meta, table_meta, bpm);
+	auto btree_index = std::make_unique<BTreeIndex>(*index_meta, table_meta, *bpm);
 
 	int32_t int_val = 1;
 	std::string str_val = "hi";
 
-	auto table_heap = std::make_unique<TableHeap>(bpm, table_meta);
+	auto table_heap = std::make_unique<TableHeap>(*bpm, table_meta);
 
 	auto v1 = db::Value(db::TypeId::INTEGER, int_val);
 	auto v2 = db::Value(db::TypeId::VARCHAR, str_val);

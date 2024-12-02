@@ -3,6 +3,7 @@
 #include "binder/expressions/bound_binary_op.hpp"
 #include "binder/expressions/bound_columnn_ref.hpp"
 #include "binder/expressions/bound_constant.hpp"
+#include "binder/expressions/bound_star.hpp"
 #include "binder/table_ref/bound_expression_list.hpp"
 #include "binder/table_ref/bound_table_ref.hpp"
 #include "common/arithmetic_type.hpp"
@@ -21,12 +22,16 @@ namespace db {
 std::unique_ptr<BoundStatement> Binder::Bind(const hsql::SQLStatement *stmt) {
 	switch (stmt->type()) {
 	case hsql::kStmtCreate: {
-		const auto *create_stmt = static_cast<const hsql::CreateStatement *>(stmt);
+		const auto *create_stmt = dynamic_cast<const hsql::CreateStatement *>(stmt);
 		return BindCreate(create_stmt);
 	}
 	case hsql::kStmtInsert: {
-		const auto *insert_stmt = static_cast<const hsql::InsertStatement *>(stmt);
+		const auto *insert_stmt = dynamic_cast<const hsql::InsertStatement *>(stmt);
 		return BindInsert(insert_stmt);
+	}
+	case ::hsql::kStmtSelect: {
+		const auto *select_stmt = dynamic_cast<const hsql::SelectStatement *>(stmt);
+		return BindSelect(select_stmt);
 	}
 	default:
 		throw NotImplementedException("This statement is not supported");
@@ -53,21 +58,35 @@ std::unique_ptr<CreateStatement> Binder::BindCreate(const hsql::CreateStatement 
 	}
 	return std::make_unique<CreateStatement>(std::move(table), std::move(columns), std::move(primary_key));
 }
+std::unique_ptr<BoundTableRef> Binder::BindFrom(const hsql::TableRef *table_ref) {
+	return BindBaseTableRef(table_ref->getName());
+}
 
 std::unique_ptr<SelectStatement> Binder::BindSelect(const hsql::SelectStatement *stmt) {
 	LOG_TRACE("Binding select statement");
 	ASSERT(stmt, "Select statement cannot be nullptr");
 	hsql::printSelectStatementInfo(stmt, 1);
 
-	// Bind VALUES clause.
-	if (stmt->selectList != nullptr) {
-		auto value_list = BindValuesList(std::as_const(*stmt->selectList));
-		std::vector<std::unique_ptr<BoundExpression>> exprs;
-		size_t expr_length = value_list->values_[0].size();
+	// Bind SELECT VALUES clause.
+	if (stmt->fromTable == nullptr && stmt->selectList != nullptr) {
+		LOG_TRACE("Binding SELECT VALUES clause");
+		auto table_value_list = BindValuesList(*stmt->selectList);
+		std::vector<std::unique_ptr<BoundExpression>> select_list;
+		size_t expr_length = table_value_list->values_[0].size();
 		for (size_t i = 0; i < expr_length; i++) {
-			exprs.emplace_back(std::make_unique<BoundColumnRef>(std::vector {fmt::format("Temp Col {}", i)}));
+			select_list.emplace_back(std::make_unique<BoundColumnRef>(std::vector {fmt::format("Temp Col {}", i)}));
 		}
-		return std::make_unique<SelectStatement>(std::move(value_list), std::move(exprs));
+		return std::make_unique<SelectStatement>(std::move(table_value_list), std::move(select_list));
+	}
+
+	// Bind select __ from __ caluse.
+	if (stmt->fromTable != nullptr && stmt->selectList != nullptr) {
+		LOG_TRACE("Binding SELECT __ FROM __ clause");
+		auto from_table = BindFrom(stmt->fromTable);
+		scope_ = &from_table;
+		auto select_list = BindExpressionList(*stmt->selectList);
+		LOG_TRACE("from table: {}, select list {}", from_table, select_list);
+		return std::make_unique<SelectStatement>(std::move(from_table), std::move(select_list));
 	}
 	throw NotImplementedException("Have not implemented select clause like this");
 }
@@ -137,7 +156,9 @@ std::unique_ptr<BoundExpression> Binder::BindExpression(const hsql::Expr *expr) 
 		auto rarg = BindExpression(expr->expr2);
 		return std::make_unique<BoundBinaryOp>(op_type, std::move(larg), std::move(rarg));
 	}
-	case hsql::kExprStar:
+	case hsql::kExprStar: {
+		return std::make_unique<BoundStar>();
+	}
 	case hsql::kExprColumnRef:
 	case hsql::kExprSelect:
 	case hsql::kExprLiteralFloat:
@@ -161,7 +182,21 @@ std::vector<std::unique_ptr<BoundExpression>> Binder::BindExpressionList(const s
 	std::vector<std::unique_ptr<BoundExpression>> expr_list;
 	expr_list.reserve(list.size());
 	for (const auto *expr : list) {
-		expr_list.emplace_back(BindExpression(expr));
+		auto bound_expr = BindExpression(expr);
+		if (bound_expr->type_ == ExpressionType::STAR) {
+			if (list.size() != 1) {
+				throw Exception("select * cannot have other expressions in list");
+			}
+			const auto *base_table_ref = dynamic_cast<BoundBaseTableRef *>(scope_->get());
+			auto bound_table_name = base_table_ref->GetBoundTableName();
+			const auto &schema = base_table_ref->schema_;
+			auto columns = std::vector<std::unique_ptr<BoundExpression>> {};
+			for (const auto &column : schema.GetColumns()) {
+				columns.push_back(std::make_unique<BoundColumnRef>(std::vector {bound_table_name, column.GetName()}));
+			}
+			return columns;
+		}
+		expr_list.emplace_back(std::move(bound_expr));
 	}
 	return expr_list;
 }
@@ -174,11 +209,8 @@ std::unique_ptr<BoundExpressionListRef> Binder::BindValuesList(const std::vector
 }
 
 std::unique_ptr<BoundBaseTableRef> Binder::BindBaseTableRef(const std::string &table_name) {
-	const auto &table_info = catalog_manager_->GetTableByName(table_name);
-	if (table_info == nullptr) {
-		throw Exception(fmt::format("invalid table {}", table_name));
-	}
-	return std::make_unique<BoundBaseTableRef>(std::move(table_name), table_info->table_oid_, table_info->schema_);
+	const auto &table_info = catalog_manager_.GetTableByName(table_name);
+	return std::make_unique<BoundBaseTableRef>(std::move(table_name), table_info.table_oid_, table_info.schema_);
 }
 
 Column Binder::BindColumnDefinition(const hsql::ColumnDefinition *col_def) const {

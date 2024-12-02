@@ -20,8 +20,8 @@ class TableIterator {
 public:
 	DISALLOW_COPY_AND_MOVE(TableIterator);
 
-	TableIterator(TableHeap *table_heap, RID rid, RID stop_at_rid);
-	// TableIterator(TableIterator &&) = default;
+	TableIterator(const TableHeap &table_heap, RID rid, RID stop_at_rid)
+	    : table_heap_(table_heap), rid_(rid), stop_at_rid_(stop_at_rid) {};
 
 	~TableIterator() = default;
 
@@ -34,7 +34,7 @@ public:
 	auto operator++() -> TableIterator &;
 
 private:
-	TableHeap *table_heap_;
+	const TableHeap &table_heap_;
 	RID rid_;
 	RID stop_at_rid_;
 };

@@ -2,6 +2,7 @@
 
 #include "buffer/replacer.hpp"
 #include "common/config.hpp"
+#include "common/logger.hpp"
 
 #include <cstdint>
 #include <unordered_map>
@@ -16,7 +17,7 @@ public:
 	void Unpin(frame_id_t frame_id) override;
 	void Print() override {
 		for (const auto &iter : frame_store_) {
-			std::cout << "frame_id: " << iter.first << " is_pinned: " << (iter.second ? "false" : "true") << std::endl;
+			LOG_TRACE("frame_id: {} is_pinned: {}\n", iter.first, iter.second ? "false" : "true");
 		}
 	}
 

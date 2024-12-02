@@ -13,23 +13,23 @@ class TableHeap : public PageAllocator {
 	// in memory representation of table heap
 public:
 	DISALLOW_COPY_AND_MOVE(TableHeap);
-	explicit TableHeap(const std::unique_ptr<BufferPoolManager> &bpm, const std::unique_ptr<TableMeta> &table_meta);
+	explicit TableHeap(BufferPoolManager &bpm, TableMeta &table_meta);
 	// doesn't ensure the tuple is the same schema as the table
 	[[nodiscard]] std::optional<RID> InsertTuple(const TupleMeta &meta, const Tuple &tuple);
 	void UpdateTupleMeta(const TupleMeta &meta, RID rid);
-	[[nodiscard]] std::optional<std::pair<TupleMeta, Tuple>> GetTuple(RID rid);
+	[[nodiscard]] std::optional<std::pair<TupleMeta, Tuple>> GetTuple(RID rid) const;
 	[[nodiscard]] TupleMeta GetTupleMeta(RID rid);
 	[[nodiscard]] page_id_t GetFirstPageId() const;
 	[[nodiscard]] TableIterator MakeIterator();
-	[[nodiscard]] PageId AllocatePage() final {
-		assert(table_meta_->table_oid_ != INVALID_TABLE_OID);
-		table_meta_->last_table_heap_data_page_id_ = table_meta_->IncrementTableDataPageId();
-		return {table_meta_->table_oid_, table_meta_->last_table_data_page_id_};
+	[[nodiscard]] PageId AllocatePage() override final {
+		assert(table_meta_.table_oid_ != INVALID_TABLE_OID);
+		table_meta_.last_table_heap_data_page_id_ = table_meta_.IncrementTableDataPageId();
+		return {table_meta_.table_oid_, table_meta_.last_table_data_page_id_};
 	}
 
 private:
-	const std::unique_ptr<BufferPoolManager> &bpm_;
-	const std::unique_ptr<TableMeta> &table_meta_;
+	BufferPoolManager &bpm_;
+	TableMeta &table_meta_;
 	std::mutex latch_;
 };
 } // namespace db

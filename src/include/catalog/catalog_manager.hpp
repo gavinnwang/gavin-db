@@ -37,16 +37,16 @@ public:
 	std::optional<table_oid_t> CreateTable(const std::string &table_name, const Schema &schema);
 	std::optional<index_oid_t> CreateIndex(const std::string &index_name, const std::string &table_name,
 	                                       const Column &key_col, bool is_primary_key, IndexType index_type,
-	                                       const std::unique_ptr<BufferPoolManager> &bpm);
+	                                       BufferPoolManager &bpm);
 
-	const std::unique_ptr<TableMeta> &GetTableByName(const std::string &table_name) const {
+	TableMeta &GetTableByName(const std::string &table_name) const {
 		if (table_names_.find(table_name) == table_names_.end()) {
 			throw Exception("Table not found when getting table info");
 		}
-		return tables_.at(table_names_.at(table_name));
+		return *tables_.at(table_names_.at(table_name));
 	};
 
-	const std::unique_ptr<TableMeta> &GetTable(const table_oid_t table_oid) const {
+	TableMeta &GetTable(const table_oid_t table_oid) const {
 		return GetTableByName(GetTableName(table_oid));
 	}
 

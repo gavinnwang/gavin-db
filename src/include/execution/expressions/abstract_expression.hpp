@@ -70,3 +70,12 @@ private:
 };
 
 } // namespace db
+
+template <>
+struct fmt::formatter<std::unique_ptr<db::AbstractExpression>> : fmt::formatter<std::string_view> {
+	template <typename FormatContext>
+	auto format(const std::unique_ptr<db::AbstractExpression> &x, FormatContext &ctx) const {
+		// Use the `ToString` method of the underlying AbstractExpression
+		return fmt::formatter<std::string_view>::format(x ? x->ToString() : "null", ctx);
+	}
+};

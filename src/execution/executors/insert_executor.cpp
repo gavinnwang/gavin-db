@@ -13,9 +13,8 @@ bool InsertExecutor::Next(Tuple &tuple, RID &rid) {
 	Tuple t;
 	RID r;
 
-	const auto &table_meta = exec_ctx_->GetCatalog()->GetTable(plan_->GetTableOid());
-	const auto &bpm = exec_ctx_->GetBufferPoolManager();
-	auto table_heap = std::make_unique<TableHeap>(bpm, table_meta);
+	auto &table_meta = exec_ctx_.GetCatalog().GetTable(plan_->GetTableOid());
+	auto table_heap = std::make_unique<TableHeap>(exec_ctx_.GetBufferPoolManager(), table_meta);
 	LOG_TRACE("created table heap");
 
 	while (child_executor_->Next(t, r)) {
@@ -29,7 +28,7 @@ bool InsertExecutor::Next(Tuple &tuple, RID &rid) {
 		if (return_rid.has_value()) {
 			rid = return_rid.value();
 			changed_row_count++;
-			table_meta->tuple_count_++;
+			table_meta.tuple_count_++;
 			// TODO: insert to index
 
 			// for (auto index : index_info_) {

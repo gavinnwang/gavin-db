@@ -11,7 +11,7 @@
 #include <memory>
 namespace db {
 
-std::unique_ptr<AbstractExecutor> ExecutorFactory::CreateExecutor(const std::unique_ptr<ExecutorContext> &exec_ctx,
+std::unique_ptr<AbstractExecutor> ExecutorFactory::CreateExecutor(const ExecutorContext &exec_ctx,
                                                                   AbstractPlanNodeRef &plan) {
 	switch (plan->GetType()) {
 	case PlanType::Insert: {
@@ -26,6 +26,8 @@ std::unique_ptr<AbstractExecutor> ExecutorFactory::CreateExecutor(const std::uni
 		auto *raw_values_plan = dynamic_cast<ValuesPlanNode *>(plan.release());
 		std::unique_ptr<ValuesPlanNode> values_plan(raw_values_plan);
 		return std::make_unique<ValuesExecutor>(exec_ctx, std::move(values_plan));
+	}
+	case PlanType::SeqScan: {
 	}
 	default:
 		throw NotImplementedException(fmt::format("Plan not supported {}", magic_enum::enum_name(plan->GetType())));

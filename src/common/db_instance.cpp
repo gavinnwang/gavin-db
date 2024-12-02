@@ -23,26 +23,31 @@ void DB::ExecuteQuery([[maybe_unused]] Transaction &txn, const std::string &quer
 		LOG_INFO("Query failed to parse!");
 		throw Exception(fmt::format("Query failed to parse: {}", raw_parse_result.errorMsg()));
 	}
-	auto binder = Binder {catalog_manager_};
+	auto binder = Binder {*catalog_manager_};
 	for (const auto &parsed_stmt : raw_parse_result.getStatements()) {
 		auto bound_stmt = binder.Bind(parsed_stmt);
 		LOG_DEBUG("Bound statement: {}", bound_stmt->ToString());
 		switch (bound_stmt->type_) {
-		// case StatementType::SELECT_STATEMENT:
-		case StatementType::INSERT_STATEMENT: {
-			// plan
-			auto planner = Planner {catalog_manager_};
+		case StatementType::SELECT_STATEMENT: {
+			auto planner = Planner {*catalog_manager_};
 			planner.PlanQuery(*bound_stmt);
 			std::vector<Tuple> result_set;
-			auto context = std::make_unique<ExecutorContext>(catalog_manager_, bpm_);
-			execution_engine_->Execute(planner.plan_, result_set, txn, std::move(context));
+			auto context = std::make_unique<ExecutorContext>(*catalog_manager_, *bpm_);
+			execution_engine_->Execute(planner.plan_, result_set, txn, *context);
 			bpm_->FlushAllPages();
 			catalog_manager_->PersistToDisk();
 			continue;
-			// for (const auto & tuple : result_set) {
-			//
-			// }
-			// throw NotImplementedException("Not implemented statement");
+		}
+		case StatementType::INSERT_STATEMENT: {
+			// plan
+			auto planner = Planner {*catalog_manager_};
+			planner.PlanQuery(*bound_stmt);
+			std::vector<Tuple> result_set;
+			auto context = std::make_unique<ExecutorContext>(*catalog_manager_, *bpm_);
+			execution_engine_->Execute(planner.plan_, result_set, txn, *context);
+			bpm_->FlushAllPages();
+			catalog_manager_->PersistToDisk();
+			continue;
 		}
 		case StatementType::CREATE_STATEMENT: {
 			auto *raw_create_stmt = static_cast<CreateStatement *>(bound_stmt.release());
@@ -65,7 +70,7 @@ void DB::HandleCreateStatement([[maybe_unused]] Transaction &txn, const std::uni
 	if (!table_oid_opt.has_value()) {
 		const auto &table_meta = catalog_manager_->GetTableByName(stmt->table_name_);
 		throw RuntimeException(
-		    fmt::format("Failed to create table: table already exists with schema: {}", table_meta->schema_));
+		    fmt::format("Failed to create table: table already exists with schema: {}", table_meta.schema_));
 	}
 	const auto &table_name = stmt->table_name_;
 	if (!stmt->primary_key_.empty()) {
@@ -75,7 +80,7 @@ void DB::HandleCreateStatement([[maybe_unused]] Transaction &txn, const std::uni
 		    std::ranges::find_if(schema.GetColumns(), [&](const Column col) { return col.GetName() == primary_key; });
 		ASSERT(key_col_it != schema.GetColumns().end(), "Broken invariant pk col not found");
 		const auto index_oid = catalog_manager_->CreateIndex(table_name + "_pk", table_name, *key_col_it, true,
-		                                                     IndexType::BPlusTreeIndex, bpm_);
+		                                                     IndexType::BPlusTreeIndex, *bpm_);
 		if (!index_oid.has_value()) {
 			throw RuntimeException("Failed to create primary key index");
 		}

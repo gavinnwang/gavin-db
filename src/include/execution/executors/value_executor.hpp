@@ -11,11 +11,11 @@ namespace db {
 
 class ValuesExecutor : public AbstractExecutor {
 public:
-	ValuesExecutor(const std::unique_ptr<ExecutorContext> &exec_ctx, std::unique_ptr<ValuesPlanNode> plan)
+	ValuesExecutor(const ExecutorContext &exec_ctx, std::unique_ptr<ValuesPlanNode> plan)
 	    : AbstractExecutor(exec_ctx), plan_(std::move(plan)) {
 	}
 
-	auto Next(Tuple &tuple, RID &rid) -> bool override;
+	bool Next(Tuple &tuple, RID &rid) override;
 
 	const Schema &GetOutputSchema() const override {
 		return plan_->OutputSchema();

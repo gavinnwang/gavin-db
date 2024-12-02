@@ -8,12 +8,12 @@ namespace db {
 
 class InsertExecutor : public AbstractExecutor {
 public:
-	InsertExecutor(const std::unique_ptr<ExecutorContext> &exec_context, std::unique_ptr<InsertPlanNode> plan,
-	               std::unique_ptr<AbstractExecutor> &&child_executor)
+	InsertExecutor(const ExecutorContext &exec_context, std::unique_ptr<InsertPlanNode> plan,
+	               std::unique_ptr<AbstractExecutor> child_executor)
 	    : AbstractExecutor(exec_context), child_executor_(std::move(child_executor)), plan_(std::move(plan)) {
 	}
 
-	auto Next(Tuple &tuple, RID &rid) -> bool override;
+	bool Next(Tuple &tuple, RID &rid) override;
 
 	const Schema &GetOutputSchema() const override {
 		return plan_->OutputSchema();

@@ -8,12 +8,8 @@
 
 namespace db {
 
-TableIterator::TableIterator(TableHeap *table_heap, RID rid, RID stop_at_rid)
-    : table_heap_(table_heap), rid_(rid), stop_at_rid_(stop_at_rid) {
-}
-
 std::optional<std::pair<TupleMeta, Tuple>> TableIterator::GetTuple() {
-	return table_heap_->GetTuple(rid_);
+	return table_heap_.GetTuple(rid_);
 }
 
 auto TableIterator::GetRID() -> RID {
@@ -25,7 +21,7 @@ auto TableIterator::IsEnd() -> bool {
 }
 
 auto TableIterator::operator++() -> TableIterator & {
-	auto page_guard = table_heap_->bpm_->FetchPageRead(rid_.GetPageId());
+	auto page_guard = table_heap_.bpm_.FetchPageRead(rid_.GetPageId());
 	const auto &page = page_guard.As<TablePage>();
 	auto next_tuple_id = rid_.GetSlotNum() + 1;
 
@@ -41,13 +37,13 @@ auto TableIterator::operator++() -> TableIterator & {
 	rid_ = RID {rid_.GetPageId(), next_tuple_id};
 
 	if (rid_ == stop_at_rid_) {
-		rid_ = RID {{table_heap_->table_meta_->table_oid_, INVALID_PAGE_ID}, 0};
+		rid_ = RID {{table_heap_.table_meta_.table_oid_, INVALID_PAGE_ID}, 0};
 	} else if (next_tuple_id < page.GetNumTuples()) {
 		// that's fine
 	} else {
 		auto next_page_id = page.GetNextPageId();
 		// if next page is invalid, RID is set to invalid page; otherwise, it's the first tuple in that page.
-		rid_ = RID {{table_heap_->table_meta_->table_oid_, next_page_id}, 0};
+		rid_ = RID {{table_heap_.table_meta_.table_oid_, next_page_id}, 0};
 	}
 
 	page_guard.Drop();

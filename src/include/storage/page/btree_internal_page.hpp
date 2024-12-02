@@ -122,22 +122,20 @@ public:
 		return GetSize();
 	}
 
-	void MoveHalfTo(BtreeInternalPage &recipient, const std::unique_ptr<BufferPoolManager> &bpm,
-	                table_oid_t table_oid) {
+	void MoveHalfTo(BtreeInternalPage &recipient, BufferPoolManager &bpm, table_oid_t table_oid) {
 		idx_t start_split_indx = GetMinSize();
 		idx_t original_size = GetSize();
 		SetSize(start_split_indx);
 		recipient.CopyNFrom(node_array_ + start_split_indx, original_size - start_split_indx, bpm, table_oid);
 	}
 
-	void CopyNFrom(InternalNode *items, idx_t size, const std::unique_ptr<BufferPoolManager> &bpm,
-	               table_oid_t table_oid) {
+	void CopyNFrom(InternalNode *items, idx_t size, BufferPoolManager &bpm, table_oid_t table_oid) {
 		std::copy(items, items + size, node_array_ + GetSize());
 
 		// because the recipient got the child originally referred by the owner the recipient have to be set the parent
 		// of those child leaf nodes
 		for (idx_t i = 0; i < size; i++) {
-			auto &node_wpg = bpm->FetchPageBasic({table_oid, ValueAt(i + GetSize())}).AsMut<BtreePage>();
+			auto &node_wpg = bpm.FetchPageBasic({table_oid, ValueAt(i + GetSize())}).AsMut<BtreePage>();
 			node_wpg.SetParentPageId(GetPageId());
 		}
 

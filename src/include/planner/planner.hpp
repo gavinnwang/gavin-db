@@ -13,7 +13,7 @@
 namespace db {
 class Planner {
 public:
-	explicit Planner(std::unique_ptr<CatalogManager> &catalog_manager) : catalog_manager_(catalog_manager) {};
+	explicit Planner(CatalogManager &catalog_manager) : catalog_manager_(catalog_manager) {};
 
 	void PlanQuery(const BoundStatement &statement);
 
@@ -28,6 +28,6 @@ public:
 	AbstractPlanNodeRef plan_;
 
 private:
-	[[maybe_unused]] std::unique_ptr<CatalogManager> &catalog_manager_;
+	CatalogManager &catalog_manager_;
 };
 } // namespace db

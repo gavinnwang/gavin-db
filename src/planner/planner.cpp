@@ -7,6 +7,7 @@
 #include "execution/expressions/abstract_expression.hpp"
 #include "execution/expressions/constant_value_expression.hpp"
 #include "execution/plans/insert_plan.hpp"
+#include "execution/plans/seq_scan_plan.hpp"
 #include "execution/plans/values_plan.hpp"
 #include "fmt/core.h"
 #include "magic_enum/magic_enum.hpp"
@@ -16,20 +17,21 @@
 namespace db {
 
 void Planner::PlanQuery(const BoundStatement &statement) {
+	AbstractPlanNodeRef plan;
 	switch (statement.type_) {
 	case StatementType::SELECT_STATEMENT: {
-		plan_ = PlanSelect(dynamic_cast<const SelectStatement &>(statement));
+		plan = PlanSelect(dynamic_cast<const SelectStatement &>(statement));
 		break;
 	}
 	case StatementType::INSERT_STATEMENT: {
-		auto plan = PlanInsert(dynamic_cast<const InsertStatement &>(statement));
-		LOG_TRACE("{}", plan->ToString());
-		plan_ = std::move(plan);
+		plan = PlanInsert(dynamic_cast<const InsertStatement &>(statement));
 		break;
 	}
 	default:
 		throw NotImplementedException("Statement is not supported");
 	}
+	LOG_TRACE("{}", plan->ToString());
+	plan_ = std::move(plan);
 }
 
 AbstractExpressionRef Planner::PlanConstant(const BoundConstant &expr) {
@@ -43,11 +45,11 @@ AbstractExpressionRef Planner::PlanExpression(const BoundExpression &expr,
 		const auto &constant_expr = dynamic_cast<const BoundConstant &>(expr);
 		return PlanConstant(constant_expr);
 	}
+	case ExpressionType::STAR:
 	case ExpressionType::COLUMN_REF:
 	case ExpressionType::TYPE_CAST:
 	case ExpressionType::FUNCTION:
 	case ExpressionType::AGG_CALL:
-	case ExpressionType::STAR:
 	case ExpressionType::UNARY_OP:
 	case ExpressionType::BINARY_OP:
 	case ExpressionType::ALIAS:
@@ -98,8 +100,17 @@ AbstractPlanNodeRef Planner::PlanTableRef(const BoundTableRef &table_ref) {
 		const auto &expression_list = dynamic_cast<const BoundExpressionListRef &>(table_ref);
 		return PlanExpressionListRef(expression_list);
 	}
+	case TableReferenceType::BASE_TABLE: {
+		const auto &base_table_ref = dynamic_cast<const BoundBaseTableRef &>(table_ref);
+		auto &table = catalog_manager_.GetTableByName(base_table_ref.table_);
+		std::vector<Column> cols;
+		for (const auto &col : table.schema_.GetColumns()) {
+			cols.emplace_back(col);
+		}
+		return std::make_unique<SeqScanPlanNode>(std::make_unique<Schema>(cols), table.table_oid_, table.name_,
+		                                         nullptr);
+	}
 	case TableReferenceType::INVALID:
-	case TableReferenceType::BASE_TABLE:
 	case TableReferenceType::JOIN:
 	case TableReferenceType::CROSS_PRODUCT:
 	case TableReferenceType::SUBQUERY:
