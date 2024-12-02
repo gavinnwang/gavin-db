@@ -19,3 +19,10 @@ public:
 };
 
 } // namespace db
+
+template <>
+struct fmt::formatter<db::InsertStatement> : formatter<std::string_view> {
+	auto format(const db::InsertStatement &x, format_context &ctx) const {
+		return formatter<string_view>::format(x.ToString(), ctx);
+	}
+};

@@ -1,6 +1,8 @@
 #pragma once
 
 #include "common/rid.hpp"
+#include "concurrency/transaction.hpp"
+#include "execution/executor_factory.hpp"
 #include "execution/executors/abstract_executor.hpp"
 #include "execution/plans/abstract_plan.hpp"
 #include "storage/table/tuple.hpp"
@@ -8,9 +10,15 @@ namespace db {
 
 class ExecutionEngine {
 public:
-	ExecutionEngine(AbstractPlanNodeRef plan) : plan_(std::move(plan)) {
+	ExecutionEngine() {
 	}
 	DISALLOW_COPY_AND_MOVE(ExecutionEngine);
+
+	void Execute(AbstractPlanNodeRef &plan, std::vector<Tuple> &result_set, [[maybe_unused]] Transaction &txn,
+	             const std::unique_ptr<ExecutorContext> exec_ctx) {
+		auto executor = ExecutorFactory::CreateExecutor(exec_ctx, plan);
+		PollExecutor(executor, result_set);
+	}
 
 private:
 	static void PollExecutor(std::unique_ptr<AbstractExecutor> &executor, std::vector<Tuple> &result_set) {
@@ -20,7 +28,6 @@ private:
 			result_set.push_back(tuple);
 		}
 	}
-	AbstractPlanNodeRef plan_;
 };
 
 } // namespace db

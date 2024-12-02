@@ -15,7 +15,7 @@ CREATE TABLE Users (id INT PRIMARY KEY, age INT, networth INT, name VARCHAR(255)
 
 	query = R"(
 INSERT INTO Users 
-SELECT 1+2+2, 25, 50000, 'Alice';
+SELECT 2, 25, 50000, 'Alice';
 	)";
 	try {
 		db.ExecuteQuery(txn, query);

@@ -6,8 +6,13 @@
 #include "catalog/schema.hpp"
 #include "common/exception.hpp"
 #include "common/macros.hpp"
+#include "execution/execution_engine.hpp"
+#include "execution/executor_context.hpp"
+#include "fmt/ranges.h"
+#include "planner/planner.hpp"
 
 #include <algorithm>
+
 namespace db {
 
 void DB::ExecuteQuery([[maybe_unused]] Transaction &txn, const std::string &query) {
@@ -24,9 +29,19 @@ void DB::ExecuteQuery([[maybe_unused]] Transaction &txn, const std::string &quer
 		LOG_DEBUG("Bound statement: {}", bound_stmt->ToString());
 		switch (bound_stmt->type_) {
 		// case StatementType::SELECT_STATEMENT:
-		case StatementType::INSERT_STATEMENT:
+		case StatementType::INSERT_STATEMENT: {
 			// plan
-			throw NotImplementedException("Not implemented statement");
+			auto planner = Planner {catalog_manager_};
+			planner.PlanQuery(*bound_stmt);
+			std::vector<Tuple> result_set;
+			auto context = std::make_unique<ExecutorContext>(catalog_manager_, bpm_);
+			execution_engine_->Execute(planner.plan_, result_set, txn, std::move(context));
+			continue;
+			// for (const auto & tuple : result_set) {
+			//
+			// }
+			// throw NotImplementedException("Not implemented statement");
+		}
 		case StatementType::CREATE_STATEMENT: {
 			auto *raw_create_stmt = static_cast<CreateStatement *>(bound_stmt.release());
 			std::unique_ptr<CreateStatement> create_stmt(raw_create_stmt);

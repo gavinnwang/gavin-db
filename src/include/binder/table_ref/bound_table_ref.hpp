@@ -1,6 +1,8 @@
 #pragma once
 
+#include "common/exception.hpp"
 #include "fmt/format.h"
+#include "magic_enum/magic_enum.hpp"
 
 #include <memory>
 #include <string>
@@ -38,6 +40,7 @@ public:
 		case TableReferenceType::EMPTY:
 			return "<empty>";
 		default:
+			// For other types of table reference, `ToString` should be derived in child classes.
 			std::unreachable();
 		}
 	}
@@ -52,21 +55,17 @@ public:
 
 } // namespace db
 
-template <typename T>
-struct fmt::formatter<T, std::enable_if_t<std::is_base_of<db::BoundTableRef, T>::value, char>>
-    : fmt::formatter<std::string> {
-	template <typename FormatCtx>
-	auto format(const T &x, FormatCtx &ctx) const {
-		return fmt::formatter<std::string>::format(x.ToString(), ctx);
+template <>
+struct fmt::formatter<std::unique_ptr<db::BoundTableRef>> : formatter<std::string_view> {
+	auto format(std::unique_ptr<db::BoundTableRef> &x, format_context &ctx) const {
+		return formatter<string_view>::format(x->ToString(), ctx);
 	}
 };
 
-template <typename T>
-struct fmt::formatter<std::unique_ptr<T>, std::enable_if_t<std::is_base_of<db::BoundTableRef, T>::value, char>>
-    : fmt::formatter<std::string> {
-	template <typename FormatCtx>
-	auto format(const std::unique_ptr<T> &x, FormatCtx &ctx) const {
-		return fmt::formatter<std::string>::format(x->ToString(), ctx);
+template <>
+struct fmt::formatter<db::BoundTableRef> : formatter<std::string_view> {
+	auto format(db::BoundTableRef x, format_context &ctx) const {
+		return formatter<string_view>::format(x.ToString(), ctx);
 	}
 };
 

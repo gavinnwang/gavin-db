@@ -57,6 +57,12 @@ public:
 		return result;
 	}
 
+	static bool TypeMatch(const Schema &a, const Schema &b) {
+		return std::equal(a.GetColumns().cbegin(), a.GetColumns().cend(), b.GetColumns().cbegin(),
+		                  b.GetColumns().cend(),
+		                  [](auto &&col1, auto &&col2) { return col1.GetType() == col2.GetType(); });
+	}
+
 	[[nodiscard]] std::string ToString() const {
 		return fmt::format("Schema({})", columns_);
 	}

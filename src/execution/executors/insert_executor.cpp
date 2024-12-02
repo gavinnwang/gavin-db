@@ -9,17 +9,20 @@ bool InsertExecutor::Next(Tuple &tuple, RID &rid) {
 		return false;
 	}
 
-	idx_t changed_row_count = 0;
+	int32_t changed_row_count = 0;
 	Tuple t;
 	RID r;
 
 	const auto &table_meta = exec_ctx_->GetCatalog()->GetTable(plan_->GetTableOid());
 	const auto &bpm = exec_ctx_->GetBufferPoolManager();
 	auto table_heap = std::make_unique<TableHeap>(bpm, table_meta);
+	LOG_TRACE("created table heap");
 
 	while (child_executor_->Next(t, r)) {
 		TupleMeta meta = TupleMeta();
 		meta.is_deleted_ = false;
+
+		LOG_TRACE("got tuple {} from child executor", t.ToString(child_executor_->GetOutputSchema()));
 
 		auto return_rid = table_heap->InsertTuple(meta, t);
 

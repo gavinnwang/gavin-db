@@ -29,7 +29,7 @@ enum class PlanType {
 };
 
 class AbstractPlanNode;
-using AbstractPlanNodeRef = std::unique_ptr<const AbstractPlanNode>;
+using AbstractPlanNodeRef = std::unique_ptr<AbstractPlanNode>;
 
 class AbstractPlanNode {
 private:
@@ -63,9 +63,7 @@ public:
 	const std::vector<AbstractPlanNodeRef> &GetChildren() const {
 		return children_;
 	}
-	const AbstractPlanNodeRef &GetChildAt(idx_t child_idx) const {
-		return children_.at(child_idx);
-	}
+
 	virtual PlanType GetType() const = 0;
 
 	virtual std::string ToString() const {
@@ -79,4 +77,3 @@ protected:
 	std::vector<AbstractPlanNodeRef> children_;
 };
 } // namespace db
-//

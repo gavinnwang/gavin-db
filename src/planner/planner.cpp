@@ -1,10 +1,15 @@
 #include "planner/planner.hpp"
 
+#include "binder/expressions/bound_constant.hpp"
 #include "binder/table_ref/bound_expression_list.hpp"
 #include "common/exception.hpp"
+#include "common/macros.hpp"
 #include "execution/expressions/abstract_expression.hpp"
+#include "execution/expressions/constant_value_expression.hpp"
 #include "execution/plans/insert_plan.hpp"
 #include "execution/plans/values_plan.hpp"
+#include "fmt/core.h"
+#include "magic_enum/magic_enum.hpp"
 
 #include <vector>
 
@@ -14,54 +19,80 @@ void Planner::PlanQuery(const BoundStatement &statement) {
 	switch (statement.type_) {
 	case StatementType::SELECT_STATEMENT: {
 		plan_ = PlanSelect(dynamic_cast<const SelectStatement &>(statement));
-		return;
+		break;
 	}
 	case StatementType::INSERT_STATEMENT: {
-		plan_ = PlanInsert(dynamic_cast<const InsertStatement &>(statement));
-		return;
+		auto plan = PlanInsert(dynamic_cast<const InsertStatement &>(statement));
+		LOG_TRACE("{}", plan->ToString());
+		plan_ = std::move(plan);
+		break;
 	}
 	default:
 		throw NotImplementedException("Statement is not supported");
 	}
 }
 
-// auto Planner::PlanTableRef(const BoundTableRef &table_ref) -> AbstractPlanNodeRef {
-//   switch (table_ref.type_) {
-//     case TableReferenceType::BASE_TABLE: {
-//       const auto &base_table_ref = dynamic_cast<const BoundBaseTableRef &>(table_ref);
-//       return PlanBaseTableRef(base_table_ref);
-//     }
-//     case TableReferenceType::CROSS_PRODUCT: {
-//       const auto &cross_product = dynamic_cast<const BoundCrossProductRef &>(table_ref);
-//       return PlanCrossProductRef(cross_product);
-//     }
-//     case TableReferenceType::JOIN: {
-//       const auto &join = dynamic_cast<const BoundJoinRef &>(table_ref);
-//       return PlanJoinRef(join);
-//     }
-//     case TableReferenceType::EXPRESSION_LIST: {
-//       const auto &expression_list = dynamic_cast<const BoundExpressionListRef &>(table_ref);
-//       return PlanExpressionListRef(expression_list);
-//     }
-//     case TableReferenceType::SUBQUERY: {
-//       const auto &subquery = dynamic_cast<const BoundSubqueryRef &>(table_ref);
-//       return PlanSubquery(subquery, subquery.alias_);
-//     }
-//     case TableReferenceType::CTE: {
-//       const auto &cte = dynamic_cast<const BoundCTERef &>(table_ref);
-//       return PlanCTERef(cte);
-//     }
-//     default:
-//       break;
-//   }
-//   throw Exception(fmt::format("the table ref type {} is not supported in planner yet", table_ref.type_));
-// }
+AbstractExpressionRef Planner::PlanConstant(const BoundConstant &expr) {
+	return std::make_unique<ConstantValueExpression>(expr.val_);
+}
 
-auto Planner::PlanExpressionListRef([[maybe_unused]] const BoundExpressionListRef &table_ref) -> AbstractPlanNodeRef {
-	return nullptr;
+AbstractExpressionRef Planner::PlanExpression(const BoundExpression &expr,
+                                              [[maybe_unused]] const std::vector<AbstractPlanNodeRef> &children) {
+	switch (expr.type_) {
+	case ExpressionType::CONSTANT: {
+		const auto &constant_expr = dynamic_cast<const BoundConstant &>(expr);
+		return PlanConstant(constant_expr);
+	}
+	case ExpressionType::COLUMN_REF:
+	case ExpressionType::TYPE_CAST:
+	case ExpressionType::FUNCTION:
+	case ExpressionType::AGG_CALL:
+	case ExpressionType::STAR:
+	case ExpressionType::UNARY_OP:
+	case ExpressionType::BINARY_OP:
+	case ExpressionType::ALIAS:
+	case ExpressionType::FUNC_CALL:
+	case ExpressionType::WINDOW:
+	case ExpressionType::INVALID:
+	default:
+		throw NotImplementedException(
+		    fmt::format("Not supported expression type {}", magic_enum::enum_name(expr.type_)));
+	}
+}
+
+AbstractPlanNodeRef Planner::PlanExpressionListRef(const BoundExpressionListRef &table_ref) {
+	std::vector<std::vector<AbstractExpressionRef>> all_exprs;
+	for (const auto &row : table_ref.values_) {
+		std::vector<AbstractExpressionRef> row_exprs;
+		for (const auto &col : row) {
+			auto expr = PlanExpression(*col, {});
+			row_exprs.push_back(std::move(expr));
+		}
+		all_exprs.emplace_back(std::move(row_exprs));
+	}
+
+	const auto &first_row = all_exprs[0];
+	std::vector<Column> cols;
+	cols.reserve(first_row.size());
+	size_t idx = 0;
+	for (const auto &col : first_row) {
+		auto col_name = fmt::format("Temp Col{}", idx);
+		if (col->GetReturnType() != TypeId::VARCHAR) {
+			cols.emplace_back(col_name, col->GetReturnType());
+		} else {
+			cols.emplace_back(col_name, col->GetReturnType(), VARCHAR_DEFAULT_LENGTH);
+		}
+		idx += 1;
+	}
+	auto schema = std::make_unique<Schema>(cols);
+
+	return std::make_unique<ValuesPlanNode>(std::move(schema), std::move(all_exprs));
 }
 
 AbstractPlanNodeRef Planner::PlanTableRef(const BoundTableRef &table_ref) {
+	// use to string here to trigger the virtual method
+	// something goes wrong with the overriding of fmt formmatter
+	LOG_TRACE("Planning table ref {}", table_ref.ToString());
 	switch (table_ref.type_) {
 	case TableReferenceType::EXPRESSION_LIST: {
 		const auto &expression_list = dynamic_cast<const BoundExpressionListRef &>(table_ref);
@@ -81,6 +112,7 @@ AbstractPlanNodeRef Planner::PlanTableRef(const BoundTableRef &table_ref) {
 }
 
 AbstractPlanNodeRef Planner::PlanSelect(const SelectStatement &statement) {
+	LOG_TRACE("Planning select statement");
 	AbstractPlanNodeRef plan = nullptr;
 
 	// plan from clause
@@ -95,17 +127,20 @@ AbstractPlanNodeRef Planner::PlanSelect(const SelectStatement &statement) {
 		plan = PlanTableRef(*statement.table_);
 		break;
 	}
-	return nullptr;
+
+	// projection
+	return plan;
 }
 
 AbstractPlanNodeRef Planner::PlanInsert(const InsertStatement &statement) {
+	LOG_TRACE("Planning insert statement");
 	auto select = PlanSelect(*statement.select_);
 
-	const auto &table_schema = statement.table_->schema_.GetColumns();
-	const auto &child_schema = select->OutputSchema().GetColumns();
-	if (!std::equal(table_schema.cbegin(), table_schema.cend(), child_schema.cbegin(), child_schema.cend(),
-	                [](auto &&col1, auto &&col2) { return col1.GetType() == col2.GetType(); })) {
-		throw db::Exception("table schema mismatch");
+	const auto &table_schema = statement.table_->schema_;
+	const auto &child_schema = select->OutputSchema();
+	if (!Schema::TypeMatch(table_schema, child_schema)) {
+		throw Exception(
+		    fmt::format("Table schema mismatch for insert statement: {} vs {}", table_schema, child_schema));
 	}
 
 	auto insert_schema = std::make_unique<Schema>(std::vector {Column("inserted_rows", TypeId::INTEGER)});

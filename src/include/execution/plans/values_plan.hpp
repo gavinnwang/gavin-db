@@ -2,7 +2,10 @@
 
 #include "execution/expressions/abstract_expression.hpp"
 #include "execution/plans/abstract_plan.hpp"
-#include "fmt/core.h"
+
+#include <fmt/core.h>
+#include <fmt/format.h>
+#include <fmt/ranges.h>
 namespace db {
 
 class ValuesPlanNode : public AbstractPlanNode {
@@ -17,7 +20,7 @@ public:
 
 	const AbstractPlanNodeRef &GetChildPlan() const {
 		assert(GetChildren().size() == 1);
-		return GetChildAt(0);
+		return children_.at(0);
 	}
 
 	auto GetValues() const -> const std::vector<std::vector<AbstractExpressionRef>> & {
@@ -25,7 +28,25 @@ public:
 	}
 
 	std::string ToString() const override {
-		return fmt::format("Values {{ }}");
+		std::string values = "{ ";
+		for (const auto &value_list : values_) {
+			values += "[";
+			for (const auto &value : value_list) {
+				values += value->ToString() + ", ";
+			}
+			if (!value_list.empty()) {
+				values.pop_back();
+				values.pop_back();
+			}
+			values += "], ";
+		}
+		if (!values_.empty()) {
+			values.pop_back();
+			values.pop_back();
+		}
+		values += " }";
+
+		return fmt::format("ValuesPlanNode {{ values={} }}", values);
 	}
 
 private:

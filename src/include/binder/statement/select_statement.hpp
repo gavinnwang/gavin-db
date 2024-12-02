@@ -23,4 +23,12 @@ public:
 	/** Bound SELECT list. */
 	std::vector<std::unique_ptr<BoundExpression>> select_list_;
 };
+
 } // namespace db
+
+template <>
+struct fmt::formatter<db::SelectStatement> : fmt::formatter<std::string_view> {
+	auto format(const db::SelectStatement &x, fmt::format_context &ctx) const {
+		return fmt::formatter<std::string_view>::format(x.ToString(), ctx);
+	}
+};

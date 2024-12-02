@@ -40,8 +40,8 @@ public:
 	template <typename T>
 	Value(TypeId type, T &&value) : type_id_(type), value_(std::forward<T>(value)) {
 		if (!ValueIsCorrectType<T>(type)) {
-			LOG_ERROR("Value isn't assigned to the correct type id, expected %s, got %s",
-			          Type::TypeIdToString(type).c_str(), typeid(T).name());
+			LOG_ERROR("Value isn't assigned to the correct type id, expected {}, got {}", Type::TypeIdToString(type),
+			          typeid(T).name());
 			throw RuntimeException("Value isn't assigned to the correct type id");
 		}
 	};

@@ -14,7 +14,7 @@ public:
 	}
 	const AbstractPlanNodeRef &GetChildPlan() const {
 		assert(GetChildren().size() == 1);
-		return GetChildAt(0);
+		return children_.at(0);
 	}
 
 	const std::vector<AbstractExpressionRef> &GetExpressions() const {

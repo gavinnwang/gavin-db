@@ -2,7 +2,7 @@
 
 #include "common/typedef.hpp"
 #include "execution/plans/abstract_plan.hpp"
-#include "fmt/core.h"
+#include "fmt/ranges.h"
 namespace db {
 
 // only has one child
@@ -17,12 +17,16 @@ public:
 	table_oid_t GetTableOid() const {
 		return table_oid_;
 	}
-	const AbstractPlanNodeRef &GetChildPlan() const {
+	AbstractPlanNodeRef &GetChildPlan() {
 		assert(GetChildren().size() == 1);
-		return GetChildAt(0);
+		return children_.at(0);
 	}
 	std::string ToString() const override {
-		return fmt::format("Insert {{ table_oid={} }}", table_oid_);
+		std::string children = "";
+		for (const auto &child : children_) {
+			children += child->ToString();
+		}
+		return fmt::format("InsertPlanNode {{ table_oid={}, children={} }}", table_oid_, children);
 	}
 
 private:

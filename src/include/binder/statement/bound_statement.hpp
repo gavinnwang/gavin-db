@@ -14,6 +14,6 @@ public:
 	const StatementType type_;
 
 public:
-	virtual auto ToString() const -> std::string = 0;
+	virtual std::string ToString() const = 0;
 };
 } // namespace db

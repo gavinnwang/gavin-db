@@ -26,3 +26,10 @@ public:
 	/** A unique identifier for this values list, so that planner / binder can work correctly. */
 };
 } // namespace db
+
+template <>
+struct fmt::formatter<db::BoundExpressionListRef> : formatter<std::string_view> {
+	auto format(const db::BoundExpressionListRef &x, format_context &ctx) const {
+		return formatter<string_view>::format(x.ToString(), ctx);
+	}
+};
