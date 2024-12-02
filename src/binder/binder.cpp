@@ -1,9 +1,11 @@
 #include "binder/binder.hpp"
 
+#include "binder/expressions/bound_binary_op.hpp"
 #include "binder/expressions/bound_columnn_ref.hpp"
 #include "binder/expressions/bound_constant.hpp"
 #include "binder/table_ref/bound_expression_list.hpp"
 #include "binder/table_ref/bound_table_ref.hpp"
+#include "common/arithmetic_type.hpp"
 #include "common/exception.hpp"
 #include "common/logger.hpp"
 #include "magic_enum/magic_enum.hpp"
@@ -113,12 +115,27 @@ std::unique_ptr<BoundExpression> Binder::BindExpression(const hsql::Expr *expr) 
 		return std::make_unique<BoundConstant>(std::move(VarcharValue));
 	}
 	case hsql::kExprOperator: {
-		hsql::OperatorType type = expr->opType;
-		const std::string type_str = (type == hsql::OperatorType::kOpPlus) ? "+" : "?";
-		const auto expr1 = BindExpression(expr->expr);
-		const auto expr2 = BindExpression(expr->expr2);
-		throw NotImplementedException(
-		    fmt::format("This expr type is not supported {}", magic_enum::enum_name(expr->type)));
+		ArithmeticType op_type;
+		switch (expr->opType) {
+		case hsql::OperatorType::kOpPlus: {
+			op_type = ArithmeticType::Plus;
+			break;
+		}
+		case hsql::OperatorType::kOpMinus: {
+			op_type = ArithmeticType::Minus;
+			break;
+		}
+		case hsql::OperatorType::kOpAsterisk: {
+			op_type = ArithmeticType::Multiply;
+			break;
+		}
+		default:
+			throw NotImplementedException(
+			    fmt::format("Operator type is not supported {}", magic_enum::enum_name(expr->opType)));
+		}
+		auto larg = BindExpression(expr->expr);
+		auto rarg = BindExpression(expr->expr2);
+		return std::make_unique<BoundBinaryOp>(op_type, std::move(larg), std::move(rarg));
 	}
 	case hsql::kExprStar:
 	case hsql::kExprColumnRef:

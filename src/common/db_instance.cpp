@@ -26,6 +26,7 @@ void DB::ExecuteQuery([[maybe_unused]] Transaction &txn, const std::string &quer
 		// case StatementType::SELECT_STATEMENT:
 		case StatementType::INSERT_STATEMENT:
 			// plan
+			throw NotImplementedException("Not implemented statement");
 		case StatementType::CREATE_STATEMENT: {
 			auto *raw_create_stmt = static_cast<CreateStatement *>(bound_stmt.release());
 			std::unique_ptr<CreateStatement> create_stmt(raw_create_stmt);
