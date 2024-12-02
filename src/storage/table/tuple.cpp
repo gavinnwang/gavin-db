@@ -81,22 +81,14 @@ const_data_ptr_t Tuple::GetDataPtr(const Column &col) const {
 }
 
 auto Tuple::ToString(const Schema &schema) const -> std::string {
-	std::stringstream ostream;
-
+	std::vector<std::string> values;
 	uint32_t column_count = schema.GetColumnCount();
-	bool first = true;
-	ostream << "(";
-	for (uint32_t column_itr = 0; column_itr < column_count; column_itr++) {
-		if (first) {
-			first = false;
-		} else {
-			ostream << ", ";
-		}
-		Value val = (GetValue(schema, column_itr));
-		ostream << val.ToString();
-	}
-	ostream << ")";
 
-	return ostream.str();
+	for (uint32_t column_itr = 0; column_itr < column_count; ++column_itr) {
+		Value val = GetValue(schema, column_itr);
+		values.push_back(val.ToString());
+	}
+
+	return fmt::format("({})", fmt::join(values, ", "));
 }
 } // namespace db
