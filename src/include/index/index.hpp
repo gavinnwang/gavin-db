@@ -148,7 +148,7 @@ private:
 		return (lhs < rhs) ? -1 : (lhs > rhs) ? 1 : 0;
 	}
 
-	IndexKeyType ConvertTupleToKey(const Tuple &tuple) {
+	[[nodiscard]] IndexKeyType ConvertTupleToKey(const Tuple &tuple) const {
 		auto value = tuple.GetValue(index_meta_.key_col_);
 		LOG_TRACE("converted to key: {}", value.ToString());
 		return value.ConvertToIndexKeyType();

@@ -11,6 +11,6 @@ public:
 	std::vector<Column> columns_;
 	std::vector<std::string> primary_key_;
 
-	auto ToString() const -> std::string override;
+	[[nodiscard]] std::string ToString() const   override;
 };
 } // namespace db

@@ -21,7 +21,7 @@ public:
 	[[nodiscard]] TupleMeta GetTupleMeta(RID rid);
 	[[nodiscard]] page_id_t GetFirstPageId() const;
 	[[nodiscard]] TableIterator MakeIterator();
-	[[nodiscard]] PageId AllocatePage() override final {
+	[[nodiscard]] PageId AllocatePage() final {
 		assert(table_meta_.table_oid_ != INVALID_TABLE_OID);
 		table_meta_.last_table_heap_data_page_id_ = table_meta_.IncrementTableDataPageId();
 		return {table_meta_.table_oid_, table_meta_.last_table_data_page_id_};

@@ -14,7 +14,7 @@ void TablePage::Init() {
 std::optional<uint16_t> TablePage::GetNextTupleOffset(const Tuple &tuple) const {
 	size_t slot_end_offset;
 	if (num_tuples_ > 0) {
-		auto &[offset, size, meta] = tuple_info_[num_tuples_ - 1];
+		const auto &[offset, size, meta] = tuple_info_[num_tuples_ - 1];
 		slot_end_offset = offset;
 	} else {
 		slot_end_offset = PAGE_SIZE;
@@ -32,7 +32,7 @@ std::optional<uint16_t> TablePage::GetNextTupleOffset(const Tuple &tuple) const 
 	if (tuple_offset < offset_size) {
 		return std::nullopt;
 	}
-	ENSURE(tuple_offset >= TABLE_PAGE_HEADER_SIZE && tuple_offset < PAGE_SIZE, "invalid tuple offset");
+	ASSERT(tuple_offset >= TABLE_PAGE_HEADER_SIZE && tuple_offset < PAGE_SIZE, "invalid tuple offset");
 	return tuple_offset;
 }
 
@@ -68,7 +68,7 @@ auto TablePage::GetTuple(const RID &rid) const -> std::optional<std::pair<TupleM
 		// return std::nullopt;
 		throw Exception(fmt::format("Tuple ID out of range, {} >= {}", tuple_id, num_tuples_));
 	}
-	auto &[offset, size, meta] = tuple_info_[tuple_id];
+	const auto &[offset, size, meta] = tuple_info_[tuple_id];
 	Tuple tuple;
 	tuple.data_.resize(size);
 	ASSERT(offset + size <= PAGE_SIZE, "tuple out of range");
@@ -84,7 +84,7 @@ auto TablePage::GetTupleMeta(const RID &rid) const -> TupleMeta {
 	if (tuple_id >= num_tuples_) {
 		throw Exception("Tuple ID out of range");
 	}
-	auto &[_1, _2, meta] = tuple_info_[tuple_id];
+	const auto &[_1, _2, meta] = tuple_info_[tuple_id];
 	return meta;
 }
 

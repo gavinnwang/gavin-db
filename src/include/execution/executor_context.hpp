@@ -13,11 +13,11 @@ public:
 
 	DISALLOW_COPY_AND_MOVE(ExecutorContext);
 
-	CatalogManager &GetCatalog() const {
+	[[nodiscard]] CatalogManager &GetCatalog() const {
 		return catalog_;
 	}
 
-	BufferPoolManager &GetBufferPoolManager() const {
+	[[nodiscard]] BufferPoolManager &GetBufferPoolManager() const {
 		return bpm_;
 	}
 

@@ -9,7 +9,7 @@
 
 namespace db {
 
-const std::vector<std::unique_ptr<const hsql::SQLStatement>> Parser::Parse(const std::string &query) const {
+std::vector<std::unique_ptr<const hsql::SQLStatement>> Parser::Parse(const std::string &query) const {
 
 	hsql::SQLParserResult parse_result;
 	hsql::SQLParser::parse(query, &parse_result);
@@ -20,7 +20,7 @@ const std::vector<std::unique_ptr<const hsql::SQLStatement>> Parser::Parse(const
 
 	std::vector<std::unique_ptr<const hsql::SQLStatement>> result;
 
-	for (const auto stmt : parse_result.getStatements()) {
+	for (auto *const stmt : parse_result.getStatements()) {
 		hsql::printStatementInfo(stmt);
 		result.emplace_back(std::unique_ptr<const hsql::SQLStatement>(stmt));
 	}

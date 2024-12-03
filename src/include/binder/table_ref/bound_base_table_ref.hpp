@@ -19,11 +19,11 @@ public:
 	      schema_(std::move(schema)) {
 	}
 
-	std::string ToString() const override {
+	[[nodiscard]] std::string ToString() const override {
 		return fmt::format("BoundBaseTableRef {{ table={}, oid={} }}", table_, oid_);
 	}
 
-	auto GetBoundTableName() const -> std::string {
+	[[nodiscard]] auto GetBoundTableName() const -> std::string {
 		return table_;
 	}
 

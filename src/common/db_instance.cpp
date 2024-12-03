@@ -77,7 +77,7 @@ void DB::HandleCreateStatement([[maybe_unused]] Transaction &txn, const std::uni
 		ASSERT(stmt->primary_key_.size() == 1, "Only support one primary key");
 		const auto &primary_key = stmt->primary_key_.at(0);
 		const auto key_col_it =
-		    std::ranges::find_if(schema.GetColumns(), [&](const Column col) { return col.GetName() == primary_key; });
+		    std::ranges::find_if(schema.GetColumns(), [&](const Column& col) { return col.GetName() == primary_key; });
 		ASSERT(key_col_it != schema.GetColumns().end(), "Broken invariant pk col not found");
 		const auto index_oid = catalog_manager_->CreateIndex(table_name + "_pk", table_name, *key_col_it, true,
 		                                                     IndexType::BPlusTreeIndex, *bpm_);

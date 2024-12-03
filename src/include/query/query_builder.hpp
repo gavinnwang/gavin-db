@@ -2,7 +2,6 @@
 
 namespace db {
 class QueryBuilder {
-	explicit QueryBuilder() {
-	}
+	explicit QueryBuilder() = default;
 };
 } // namespace db

@@ -43,7 +43,7 @@ std::unique_ptr<CreateStatement> Binder::BindCreate(const hsql::CreateStatement 
 	auto columns = std::vector<Column> {};
 	std::vector<std::string> primary_key;
 	if (stmt->type == hsql::CreateType::kCreateTable) {
-		for (const auto col_def : *stmt->columns) {
+		for (auto *const col_def : *stmt->columns) {
 			auto col = BindColumnDefinition(col_def);
 			if (col_def->column_constraints->contains(hsql::ConstraintType::PrimaryKey)) {
 				primary_key.push_back(col.GetName());
@@ -92,6 +92,7 @@ std::unique_ptr<SelectStatement> Binder::BindSelect(const hsql::SelectStatement 
 }
 
 std::unique_ptr<InsertStatement> Binder::BindInsert(const hsql::InsertStatement *stmt) {
+	ASSERT(stmt, "Insert statement cannot be nullptr");
 	LOG_TRACE("Binding insert statement");
 	hsql::printInsertStatementInfo(stmt, 1);
 	auto table = BindBaseTableRef(stmt->tableName);
@@ -100,7 +101,7 @@ std::unique_ptr<InsertStatement> Binder::BindInsert(const hsql::InsertStatement 
 		throw Exception(fmt::format("invalid table for insert: {}", table->table_));
 	}
 
-	if (stmt->values) {
+	if (stmt->values != nullptr) {
 		auto value_list = BindValuesList(*stmt->values);
 		LOG_TRACE("{}", value_list->ToString());
 		std::vector<std::unique_ptr<BoundExpression>> exprs;
@@ -111,7 +112,7 @@ std::unique_ptr<InsertStatement> Binder::BindInsert(const hsql::InsertStatement 
 		auto select = std::make_unique<SelectStatement>(std::move(value_list), std::move(exprs));
 		return std::make_unique<InsertStatement>(std::move(table), std::move(select));
 	}
-	if (stmt->select) {
+	if (stmt->select != nullptr) {
 		auto select = BindSelect(stmt->select);
 		return std::make_unique<InsertStatement>(std::move(table), std::move(select));
 	}
@@ -124,14 +125,14 @@ std::unique_ptr<BoundExpression> Binder::BindExpression(const hsql::Expr *expr) 
 	switch (expr->type) {
 	case hsql::kExprLiteralInt: {
 		LOG_TRACE("int expr {}", expr->ival);
-		auto IntValue = Value {TypeId::INTEGER, static_cast<int32_t>(expr->ival)};
-		return std::make_unique<BoundConstant>(std::move(IntValue));
+		auto int_value = Value {TypeId::INTEGER, static_cast<int32_t>(expr->ival)};
+		return std::make_unique<BoundConstant>(std::move(int_value));
 	}
 	case hsql::kExprLiteralString: {
 		std::string string {expr->getName()};
 		LOG_TRACE("string expr {}", string);
-		auto VarcharValue = Value {TypeId::VARCHAR, std::move(string)};
-		return std::make_unique<BoundConstant>(std::move(VarcharValue));
+		auto varchar_value = Value {TypeId::VARCHAR, std::move(string)};
+		return std::make_unique<BoundConstant>(std::move(varchar_value));
 	}
 	case hsql::kExprOperator: {
 		ArithmeticType op_type;
@@ -209,14 +210,14 @@ std::unique_ptr<BoundExpressionListRef> Binder::BindValuesList(const std::vector
 }
 
 std::unique_ptr<BoundBaseTableRef> Binder::BindBaseTableRef(const std::string &table_name) {
-	const auto &table_info = catalog_manager_.GetTableByName(table_name);
-	return std::make_unique<BoundBaseTableRef>(std::move(table_name), table_info.table_oid_, table_info.schema_);
+	auto &table_info = catalog_manager_.GetTableByName(table_name);
+	return std::make_unique<BoundBaseTableRef>(table_name, table_info.table_oid_, table_info.schema_);
 }
 
 Column Binder::BindColumnDefinition(const hsql::ColumnDefinition *col_def) const {
 	auto col_type = col_def->type;
 	std::string col_name = std::string(col_def->name);
-	const auto col = (col_type.data_type == hsql::DataType::VARCHAR)
+	auto col = (col_type.data_type == hsql::DataType::VARCHAR)
 	                     ? Column {std::move(col_name), Type::HsqlColumnTypeToTypeId(col_type),
 	                               static_cast<uint32_t>(col_def->type.length)}
 	                     : Column {std::move(col_name), Type::HsqlColumnTypeToTypeId(col_type)};

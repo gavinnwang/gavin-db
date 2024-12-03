@@ -83,7 +83,7 @@ private:
 
 template <>
 struct fmt::formatter<db::Column> : formatter<std::string_view> {
-	auto format(db::Column x, format_context &ctx) const {
+	auto format(const db::Column& x, format_context &ctx) const {
 		return formatter<string_view>::format(x.ToString(), ctx);
 	}
 };

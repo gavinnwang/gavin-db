@@ -47,23 +47,23 @@ public:
 		rid_ = rid;
 	}
 
-	const_data_ptr_t GetData() const {
+	[[nodiscard]] const_data_ptr_t GetData() const {
 		return data_.data();
 	}
 
-	inline auto GetStorageSize() const -> uint32_t {
+	[[nodiscard]] inline auto GetStorageSize() const -> uint32_t {
 		return data_.size();
 	}
 
-	Value GetValue(const Column &col) const;
+	[[nodiscard]] Value GetValue(const Column &col) const;
 
-	Value GetValue(const Schema &schema, uint32_t column_idx) const;
+	[[nodiscard]] Value GetValue(const Schema &schema, uint32_t column_idx) const;
 
-	std::string ToString(const Schema &schema) const;
+	[[nodiscard]] std::string ToString(const Schema &schema) const;
 
 private:
 	// Get the starting storage address of specific column
-	const_data_ptr_t GetDataPtr(const Column &col) const;
+	[[nodiscard]] const_data_ptr_t GetDataPtr(const Column &col) const;
 
 	RID rid_ {};
 

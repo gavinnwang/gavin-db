@@ -39,18 +39,18 @@ public:
 	                                       const Column &key_col, bool is_primary_key, IndexType index_type,
 	                                       BufferPoolManager &bpm);
 
-	TableMeta &GetTableByName(const std::string &table_name) const {
+	[[nodiscard]] TableMeta &GetTableByName(const std::string &table_name) const {
 		if (table_names_.find(table_name) == table_names_.end()) {
 			throw Exception("Table not found when getting table info");
 		}
 		return *tables_.at(table_names_.at(table_name));
 	};
 
-	TableMeta &GetTable(const table_oid_t table_oid) const {
+	[[nodiscard]] TableMeta &GetTable(const table_oid_t table_oid) const {
 		return GetTableByName(GetTableName(table_oid));
 	}
 
-	std::string &GetTableName(const table_oid_t table_oid) const {
+	[[nodiscard]] std::string &GetTableName(const table_oid_t table_oid) const {
 		if (tables_.find(table_oid) == tables_.end()) {
 			throw Exception("Table not found when getting table name");
 		}
@@ -91,7 +91,7 @@ public:
 		    103, "index_names", index_names_,
 		    std::unordered_map<std::string, std::unordered_map<std::string, index_oid_t>>());
 
-		serializer.WriteProperty(104, "magic_bytes", magic_bytes);
+		serializer.WriteProperty(104, "magic_bytes", magic_bytes_);
 	}
 
 	void Deserialize(Deserializer &deserializer) {
@@ -111,7 +111,7 @@ public:
 		std::string deserialized_magic_bytes;
 		deserializer.ReadProperty(104, "magic_bytes", deserialized_magic_bytes);
 
-		if (deserialized_magic_bytes != magic_bytes) {
+		if (deserialized_magic_bytes != magic_bytes_) {
 			throw std::runtime_error("Catalog file is corrupted or incompatible.");
 		}
 	}
@@ -134,6 +134,6 @@ private:
 	std::unordered_map<std::string, std::unordered_map<std::string, index_oid_t>> index_names_;
 	std::unordered_map<std::string, table_oid_t> table_names_;
 	// magic bytes to ensure catalog manager is not corrupt
-	std::string magic_bytes {"GAVINDB_CATALOG_MANAGER"};
+	std::string magic_bytes_ {"GAVINDB_CATALOG_MANAGER"};
 };
 } // namespace db

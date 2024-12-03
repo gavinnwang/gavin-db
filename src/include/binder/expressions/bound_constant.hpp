@@ -15,10 +15,10 @@ class BoundExpression;
  */
 class BoundConstant : public BoundExpression {
 public:
-	explicit BoundConstant(const Value &val) : BoundExpression(ExpressionType::CONSTANT), val_(val) {
+	explicit BoundConstant(Value val) : BoundExpression(ExpressionType::CONSTANT), val_(std::move(val)) {
 	}
 
-	std::string ToString() const override {
+	[[nodiscard]] std::string ToString() const override {
 		return val_.ToString();
 	}
 

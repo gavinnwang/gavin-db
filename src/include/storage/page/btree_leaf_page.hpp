@@ -40,13 +40,13 @@ public:
 		assert(GetMaxSize() > 0);
 	}
 
-	page_id_t GetNextPageId() const {
+	[[nodiscard]] page_id_t GetNextPageId() const {
 		return next_page_id_;
 	}
 	void SetNextPageId(page_id_t next_page_id) {
 		next_page_id_ = next_page_id;
 	}
-	IndexKeyType KeyAt(int index) const {
+	[[nodiscard]] IndexKeyType KeyAt(int index) const {
 		return node_array_[index].first;
 	}
 	void Insert(const IndexKeyType &key, const IndexValueType &value, const Comparator &comparator) {
@@ -75,14 +75,14 @@ public:
 		}
 		IncreaseSize(1);
 	}
-	idx_t FindKeyIndex(const IndexKeyType &key, const Comparator &comparator) const {
+	[[nodiscard]] idx_t FindKeyIndex(const IndexKeyType &key, const Comparator &comparator) const {
 		assert(GetMaxSize() > 0);
 		auto target_idx =
 		    std::lower_bound(node_array_, node_array_ + GetSize(), key,
 		                     [&comparator](const auto &pair, auto k) { return comparator(pair.first, k) < 0; });
 		return std::distance(node_array_, target_idx);
 	}
-	std::optional<IndexValueType> Lookup(const IndexKeyType &key, const Comparator &comparator) const {
+	[[nodiscard]] std::optional<IndexValueType> Lookup(const IndexKeyType &key, const Comparator &comparator) const {
 
 		idx_t target_index = FindKeyIndex(key, comparator);
 
@@ -110,11 +110,11 @@ public:
 		IncreaseSize(size);
 	}
 
-	IndexValueType ValueAt(int index) const {
+	[[nodiscard]] IndexValueType ValueAt(int index) const {
 		return node_array_[index].second;
 	}
 
-	std::string ToString() const {
+	[[nodiscard]] std::string ToString() const {
 
 		std::string result = "\n(";
 		bool first = true;

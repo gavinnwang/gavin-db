@@ -16,7 +16,7 @@ public:
 	      rarg_(std::move(rarg)) {
 	}
 
-	std::string ToString() const override {
+	[[nodiscard]] std::string ToString() const override {
 		return fmt::format("({}{}{})", larg_, ArithmeticTypeHelper::ToString(op_), rarg_);
 	}
 

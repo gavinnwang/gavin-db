@@ -10,11 +10,10 @@ namespace db {
 
 class ExecutionEngine {
 public:
-	ExecutionEngine() {
-	}
+	ExecutionEngine() = default;
 	DISALLOW_COPY_AND_MOVE(ExecutionEngine);
 
-	void Execute(AbstractPlanNodeRef plan, std::vector<Tuple> &result_set, [[maybe_unused]] Transaction &txn,
+	static void Execute(AbstractPlanNodeRef plan, std::vector<Tuple> &result_set, [[maybe_unused]] Transaction &txn,
 	             const ExecutorContext &exec_ctx) {
 		auto executor = ExecutorFactory::CreateExecutor(exec_ctx, std::move(plan));
 		PollExecutor(executor, result_set);

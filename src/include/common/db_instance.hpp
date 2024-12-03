@@ -20,7 +20,7 @@ public:
 	      execution_engine_(std::make_unique<ExecutionEngine>()) {
 	          // DeletePathIfExists(db::FilePathManager::GetInstance().GetDatabaseRootPath());
 	      };
-	~DB() {};
+	~DB() = default;;
 
 	void HandleCreateStatement(Transaction &txn, const std::unique_ptr<CreateStatement> &stmt);
 	void ExecuteQuery([[maybe_unused]] Transaction &txn, const std::string &query);

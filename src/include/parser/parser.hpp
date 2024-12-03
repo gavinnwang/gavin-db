@@ -6,10 +6,9 @@ namespace db {
 class Parser {
 
 public:
-	explicit Parser() {
-	}
+	explicit Parser() = default;
 
-	const std::vector<std::unique_ptr<const hsql::SQLStatement>> Parse(const std::string &query) const;
+	[[nodiscard]] std::vector<std::unique_ptr<const hsql::SQLStatement>> Parse(const std::string &query) const;
 };
 
 } // namespace db

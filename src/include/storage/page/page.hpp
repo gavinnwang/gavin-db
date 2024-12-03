@@ -53,7 +53,7 @@ public:
 	void RUnlatch() {
 		rwlatch_.RUnlock();
 	}
-	std::string ToString() const {
+	[[nodiscard]] std::string ToString() const {
 		return fmt::format("Page {{ table_id={}, page_id={} is_dirty={}, pin_count={}, data_size={} }}",
 		                   page_id_.table_id_, page_id_.page_number_, is_dirty_, pin_count_, data_.size());
 	}

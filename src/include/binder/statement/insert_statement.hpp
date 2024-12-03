@@ -11,7 +11,7 @@ public:
 	explicit InsertStatement(std::unique_ptr<BoundBaseTableRef> table, std::unique_ptr<SelectStatement> select)
 	    : BoundStatement(StatementType::INSERT_STATEMENT), table_(std::move(table)), select_(std::move(select)) {};
 
-	std::string ToString() const override;
+	[[nodiscard]] std::string ToString() const override;
 
 	std::unique_ptr<BoundBaseTableRef> table_;
 

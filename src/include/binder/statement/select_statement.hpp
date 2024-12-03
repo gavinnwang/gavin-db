@@ -15,7 +15,7 @@ public:
 	      select_list_(std::move(select_list)) {
 	}
 
-	std::string ToString() const override;
+	[[nodiscard]] std::string ToString() const override;
 
 	/** Bound FROM clause. */
 	std::unique_ptr<BoundTableRef> table_;

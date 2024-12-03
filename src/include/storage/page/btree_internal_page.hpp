@@ -35,7 +35,7 @@ public:
 		LOG_TRACE("Setting internal page size to 0 and max size to %d", static_cast<int>(INTERNAL_MAX_NODE_SIZE));
 	}
 
-	IndexKeyType KeyAt(idx_t index) const {
+	[[nodiscard]] IndexKeyType KeyAt(idx_t index) const {
 		return node_array_[index].first;
 	}
 

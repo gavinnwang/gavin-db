@@ -10,7 +10,7 @@ class BoundStar : public BoundExpression {
 public:
 	BoundStar() : BoundExpression(ExpressionType::STAR) {
 	}
-	std::string ToString() const override {
+	[[nodiscard]] std::string ToString() const override {
 		return "*";
 	}
 };

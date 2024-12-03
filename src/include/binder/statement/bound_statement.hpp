@@ -13,7 +13,6 @@ public:
 	/** The statement type. */
 	const StatementType type_;
 
-public:
-	virtual std::string ToString() const = 0;
+	[[nodiscard]] virtual std::string ToString() const = 0;
 };
 } // namespace db

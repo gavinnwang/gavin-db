@@ -33,7 +33,7 @@ public:
 	BoundTableRef() = default;
 	virtual ~BoundTableRef() = default;
 
-	virtual std::string ToString() const {
+	[[nodiscard]] virtual std::string ToString() const {
 		switch (type_) {
 		case TableReferenceType::INVALID:
 			return "";
@@ -45,7 +45,7 @@ public:
 		}
 	}
 
-	auto IsInvalid() const -> bool {
+	[[nodiscard]] auto IsInvalid() const -> bool {
 		return type_ == TableReferenceType::INVALID;
 	}
 
