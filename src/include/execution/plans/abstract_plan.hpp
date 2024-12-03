@@ -50,26 +50,26 @@ public:
 	// }
 
 	template <typename... Args>
-	AbstractPlanNode(SchemaRef output_schema, Args &&...args)
+	explicit AbstractPlanNode(SchemaRef output_schema, Args &&...args)
 	    : output_schema_(std::move(output_schema)),
 	      children_(BuildVectorFromMoveOnlyObjects<AbstractPlanNodeRef>(std::forward<Args>(args)...)) {
 	}
 	virtual ~AbstractPlanNode() = default;
 
-	const Schema &OutputSchema() const {
+	[[nodiscard]] const Schema &OutputSchema() const {
 		return *output_schema_;
 	}
 
-	const std::vector<AbstractPlanNodeRef> &GetChildren() const {
+	[[nodiscard]] const std::vector<AbstractPlanNodeRef> &GetChildren() const {
 		return children_;
 	}
 
-	virtual PlanType GetType() const = 0;
+	[[nodiscard]] virtual PlanType GetType() const = 0;
 
-	virtual std::string ToString() const {
+	[[nodiscard]] virtual std::string ToString() const {
 		return "<unknown>";
 	}
-	std::string ChildrenToString(int indent, bool with_schema = true) const;
+	[[nodiscard]] std::string ChildrenToString(int indent, bool with_schema = true) const;
 
 protected:
 	SchemaRef output_schema_;

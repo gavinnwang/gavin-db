@@ -9,15 +9,15 @@ public:
 	ProjectionPlanNode(SchemaRef output, std::vector<AbstractExpressionRef> expressions, AbstractPlanNodeRef child)
 	    : AbstractPlanNode(std::move(output), std::move(child)), expressions_(std::move(expressions)) {
 	}
-	PlanType GetType() const override {
+	[[nodiscard]] PlanType GetType() const override {
 		return PlanType::Projection;
 	}
-	const AbstractPlanNodeRef &GetChildPlan() const {
+	[[nodiscard]] const AbstractPlanNodeRef &GetChildPlan() const {
 		assert(GetChildren().size() == 1);
 		return children_.at(0);
 	}
 
-	const std::vector<AbstractExpressionRef> &GetExpressions() const {
+	[[nodiscard]] const std::vector<AbstractExpressionRef> &GetExpressions() const {
 		return expressions_;
 	}
 

@@ -14,20 +14,20 @@ public:
 	    : AbstractPlanNode {std::move(output)}, values_ {std::move(values)} {
 	}
 
-	PlanType GetType() const override {
+	[[nodiscard]] PlanType GetType() const override {
 		return PlanType::Values;
 	}
 
-	const AbstractPlanNodeRef &GetChildPlan() const {
+	[[nodiscard]] const AbstractPlanNodeRef &GetChildPlan() const {
 		assert(GetChildren().size() == 1);
 		return children_.at(0);
 	}
 
-	auto GetValues() const -> const std::vector<std::vector<AbstractExpressionRef>> & {
+	[[nodiscard]] const std::vector<std::vector<AbstractExpressionRef>> & GetValues() const   {
 		return values_;
 	}
 
-	std::string ToString() const override {
+	[[nodiscard]] std::string ToString() const override {
 		std::string values = "{ ";
 		for (const auto &value_list : values_) {
 			values += "[";

@@ -13,15 +13,15 @@ public:
 	      filter_predicate_(std::move(filter_predicate)) {
 	}
 
-	PlanType GetType() const override {
+	[[nodiscard]] PlanType GetType() const override {
 		return PlanType::SeqScan;
 	}
 
-	table_oid_t GetTableOid() const {
+	[[nodiscard]] table_oid_t GetTableOid() const {
 		return table_oid_;
 	}
 
-	std::string ToString() const override {
+	[[nodiscard]] std::string ToString() const override {
 		if (filter_predicate_) {
 			return fmt::format("SeqScan {{ table={}, filter={} }}", table_name_, filter_predicate_);
 		}
