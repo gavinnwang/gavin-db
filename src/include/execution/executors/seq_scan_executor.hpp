@@ -18,13 +18,13 @@ public:
 
 	bool Next(Tuple &tuple, RID &rid) override;
 
-	const Schema &GetOutputSchema() const override {
+	[[nodiscard]] const Schema &GetOutputSchema() const override {
 		return plan_->OutputSchema();
 	}
 
 private:
 	std::unique_ptr<SeqScanPlanNode> plan_;
-	// TODO add table heap pool
+	// TODO(gavinwang): add table heap pool
 	TableHeap table_heap_;
 	TableIterator table_iter_;
 };

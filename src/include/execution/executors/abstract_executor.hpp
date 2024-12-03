@@ -15,7 +15,7 @@ public:
 
 	virtual bool Next(Tuple &tuple, RID &rid) = 0;
 
-	virtual const Schema &GetOutputSchema() const = 0;
+	[[nodiscard]] virtual const Schema &GetOutputSchema() const = 0;
 
 	virtual ~AbstractExecutor() = default;
 

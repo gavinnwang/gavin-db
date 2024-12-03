@@ -15,7 +15,7 @@ public:
 
 	bool Next(Tuple &tuple, RID &rid) override;
 
-	const Schema &GetOutputSchema() const override {
+	[[nodiscard]] const Schema &GetOutputSchema() const override {
 		return plan_->OutputSchema();
 	};
 
