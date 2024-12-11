@@ -3,6 +3,7 @@
 #include "catalog/catalog_manager.hpp"
 #include "common/config.hpp"
 #include "common/fs_utils.hpp"
+#include "common/logger.hpp"
 #include "storage/file_path_manager.hpp"
 
 #include <cstddef>
@@ -67,7 +68,7 @@ void DiskManager::ReadPage(PageId page_id, char *page_data) {
 	int gcount = data_fs.gcount();
 	if (gcount < PAGE_SIZE) {
 		// todo investigate this
-		std::cerr << "io read less than a page, read " << gcount << " rather than " << PAGE_SIZE << std::endl;
+		LOG_ERROR("IO read less than a page, read {} rather than {}", gcount, PAGE_SIZE);
 		data_fs.clear();
 		memset(page_data + gcount, 0, PAGE_SIZE - gcount);
 		data_fs.seekp(offset);

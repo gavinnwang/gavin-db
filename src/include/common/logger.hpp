@@ -3,9 +3,6 @@
 #include "fmt/core.h"
 
 #include <ctime>
-#include <format>
-#include <print>
-#include <sstream>
 #include <string>
 
 namespace db {
@@ -46,12 +43,12 @@ constexpr bool IsLogLevelEnabled(LogLevel level) {
 }
 
 constexpr int HEADER_LENGTH = 40;
-inline std::string FormatLogHeader(std::string_view file, int line, const char* func) {
-    std::string full_str = fmt::format("{}:{}:{}", file, line, func);
-    if (full_str.length() > HEADER_LENGTH) {
-        return full_str.substr(0, HEADER_LENGTH);
-    }
-    return full_str + std::string(HEADER_LENGTH - full_str.length(), ' ');
+inline std::string FormatLogHeader(std::string_view file, int line, const char *func) {
+	std::string full_str = fmt::format("{}:{}:{}", file, line, func);
+	if (full_str.length() > HEADER_LENGTH) {
+		return full_str.substr(0, HEADER_LENGTH);
+	}
+	return full_str + std::string(HEADER_LENGTH - full_str.length(), ' ');
 }
 
 // Output log message header in this format: [type] [file:line:function] time -
@@ -86,7 +83,7 @@ inline std::string FormatLogHeader(std::string_view file, int line, const char* 
 }
 
 template <LogLevel level, typename... Args>
-void Log(std::string_view file, int line, const char *func, const std::string& message, Args &&...args) {
+void Log(std::string_view file, int line, const char *func, const std::string &message, Args &&...args) {
 	if constexpr (IsLogLevelEnabled(level)) {
 		auto header = LogHeader(file, line, func, level);
 		if constexpr (!sizeof...(Args)) {
