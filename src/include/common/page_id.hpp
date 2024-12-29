@@ -21,12 +21,12 @@ struct PageId {
 		return table_id_ == other.table_id_ && page_number_ == other.page_number_;
 	}
 
-	std::string ToString() const {
+	[[nodiscard]] std::string ToString() const {
 		return fmt::format("PageId[{}, {}]", table_id_, page_number_);
 	}
 };
 
-struct PageId_Hash {
+struct PageIdHash {
 	std::size_t operator()(const PageId &page_id) const {
 		return page_id.table_id_ << 31 | page_id.page_number_;
 	}

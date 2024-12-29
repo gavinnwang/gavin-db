@@ -66,7 +66,6 @@ protected:
 	//-------------------------------------------------------------------------
 	// Primitive Types
 	//-------------------------------------------------------------------------
-	void WriteNull() final = delete;
 	void WriteValue(char value) final;
 	// template <typename T>
 	// typename std::enable_if<std::is_arithmetic<T>::value>::type WriteValue(T value);
@@ -88,5 +87,8 @@ protected:
 
 private:
 	WriteStream &stream_;
+
+public:
+	void WriteNull() final = delete;
 };
 } // namespace db

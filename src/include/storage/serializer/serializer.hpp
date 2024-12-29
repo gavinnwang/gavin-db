@@ -136,11 +136,11 @@ protected:
 	// 	OnObjectEnd();
 	// }
 
-protected:
+
 	// Hooks for subclasses to override to implement custom behavior
-	virtual void OnPropertyBegin(const field_id_t field_id, const char *tag) = 0;
+	virtual void OnPropertyBegin( field_id_t field_id, const char *tag) = 0;
 	virtual void OnPropertyEnd() = 0;
-	virtual void OnOptionalPropertyBegin(const field_id_t field_id, const char *tag, bool present) = 0;
+	virtual void OnOptionalPropertyBegin( field_id_t field_id, const char *tag, bool present) = 0;
 	virtual void OnOptionalPropertyEnd(bool present) = 0;
 	virtual void OnObjectBegin() = 0;
 	virtual void OnObjectEnd() = 0;
@@ -149,8 +149,6 @@ protected:
 	virtual void OnNullableBegin(bool present) = 0;
 	virtual void OnNullableEnd() = 0;
 
-	// Handle primitive types, a serializer needs to implement these.
-	virtual void WriteNull() = delete;
 	virtual void WriteValue(char value) {
 		(void)value;
 		throw Exception("Write char value not implemented");
@@ -173,12 +171,15 @@ protected:
 	virtual void WriteValue(const std::string &value) = 0;
 	virtual void WriteValue(const char *str) = 0;
 	virtual void WriteDataPtr(const_data_ptr_t ptr, idx_t count) = 0;
+public:
+	// Handle primitive types, a serializer needs to implement these.
+	virtual void WriteNull() = delete;
 };
 
 //
 // Specialization for Value (default Value comparison throws when comparing
 // nulls)
 template <>
-void Serializer::WritePropertyWithDefault<Value>(const field_id_t field_id, const char *tag, const Value &value,
+void Serializer::WritePropertyWithDefault<Value>(field_id_t field_id, const char *tag, const Value &value,
                                                  const Value &&default_value);
 } // namespace db

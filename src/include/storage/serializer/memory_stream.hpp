@@ -41,13 +41,13 @@ public:
 	void Release();
 
 	// Get a pointer to the underlying backing buffer
-	data_ptr_t GetData() const;
+	[[nodiscard]] data_ptr_t GetData() const;
 
 	// Get the current position in the stream
-	idx_t GetPosition() const;
+	[[nodiscard]] idx_t GetPosition() const;
 
 	// Get the capacity of the stream
-	idx_t GetCapacity() const;
+	[[nodiscard]] idx_t GetCapacity() const;
 
 	void Print() {
 		for (idx_t i = 0; i < position_; i++) {

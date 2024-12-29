@@ -33,14 +33,14 @@ FileStream::~FileStream() {
 }
 
 void FileStream::WriteData(const_data_ptr_t buffer, idx_t write_size) {
-	if (!file_.write(const_char_ptr_cast(buffer), write_size)) {
+	if (!file_.write(const_char_ptr_cast(buffer), static_cast<int64_t>(write_size))) {
 		throw Exception("Failed to write data to file");
 	}
 	file_.flush();
 }
 
 void FileStream::ReadData(data_ptr_t buffer, idx_t read_size) {
-	if (!file_.read(reinterpret_cast<char *>(buffer), read_size)) {
+	if (!file_.read(reinterpret_cast<char *>(buffer), static_cast<int64_t>(read_size))) {
 		std::ostringstream error_msg;
 		error_msg << "Failed to read data from file. ";
 

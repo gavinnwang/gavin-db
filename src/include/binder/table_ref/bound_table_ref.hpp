@@ -64,7 +64,7 @@ struct fmt::formatter<std::unique_ptr<db::BoundTableRef>> : formatter<std::strin
 
 template <>
 struct fmt::formatter<db::BoundTableRef> : formatter<std::string_view> {
-	auto format(db::BoundTableRef x, format_context &ctx) const {
+	auto format(const db::BoundTableRef& x, format_context &ctx) const {
 		return formatter<string_view>::format(x.ToString(), ctx);
 	}
 };

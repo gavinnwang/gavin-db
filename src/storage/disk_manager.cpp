@@ -59,7 +59,7 @@ void DiskManager::ReadPage(PageId page_id, char *page_data) {
 		                  std::to_string(GetFileSize(data_file_path)));
 	}
 	auto &data_fs = table_data_files_.at(page_id.table_id_);
-	data_fs.seekp(offset);
+	data_fs.seekp(static_cast<int64_t>(offset));
 	data_fs.read(page_data, PAGE_SIZE);
 	if (data_fs.bad()) {
 		throw IOException("failed to read from table data file");
@@ -71,7 +71,7 @@ void DiskManager::ReadPage(PageId page_id, char *page_data) {
 		LOG_ERROR("IO read less than a page, read {} rather than {}", gcount, PAGE_SIZE);
 		data_fs.clear();
 		memset(page_data + gcount, 0, PAGE_SIZE - gcount);
-		data_fs.seekp(offset);
+		data_fs.seekp(static_cast<int64_t>(offset));
 		data_fs.write(page_data, PAGE_SIZE);
 	}
 }
