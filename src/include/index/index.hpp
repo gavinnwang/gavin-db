@@ -15,6 +15,9 @@
 #include <sstream>
 
 namespace db {
+using IndexKeyType = std::array<data_t, INDEX_KEY_SIZE>;
+using IndexValueType = RID;
+using InternalValueType = page_id_t;
 enum class IndexConstraintType : uint8_t {
 	NONE = 0,    // no constraint
 	UNIQUE = 1,  // built to enforce a UNIQUE constraint

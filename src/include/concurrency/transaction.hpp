@@ -1,6 +1,7 @@
 #pragma once
 
 #include "common/logger.hpp"
+#include "common/typedef.hpp"
 #include "storage/page/page.hpp"
 
 #include <deque>
@@ -13,8 +14,9 @@ enum class IsolationLevel { READ_UNCOMMITTED, REPEATABLE_READ, READ_COMMITTED };
 enum class WType { INSERT = 0, DELETE, UPDATE };
 class Transaction {
 public:
-	explicit Transaction()
-	    : page_set_(std::make_shared<std::deque<std::reference_wrapper<Page>>>()),
+	explicit Transaction(txn_id_t txn_id, IsolationLevel isolation_level)
+	    : txn_id_(txn_id), isolation_level_(isolation_level),
+	      page_set_(std::make_shared<std::deque<std::reference_wrapper<Page>>>()),
 	      deleted_page_set_(std::make_shared<std::unordered_set<page_id_t>>()) {
 	}
 
@@ -28,6 +30,8 @@ public:
 	}
 
 private:
+	txn_id_t txn_id_;
+	IsolationLevel isolation_level_;
 	// pages latched during index operation
 	std::shared_ptr<std::deque<std::reference_wrapper<Page>>> page_set_;
 	// pages deleted during index operation

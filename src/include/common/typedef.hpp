@@ -1,8 +1,5 @@
 #pragma once
 
-#include "common/config.hpp"
-
-#include <array>
 #include <cstddef>
 #include <cstdint>
 namespace db {
@@ -15,13 +12,10 @@ using column_t = uint32_t;
 using table_oid_t = int32_t;
 using index_oid_t = int32_t;
 using slot_offset_t = idx_t; // slot offset type
+using txn_id_t = int64_t;    // transaction id type
 using data_t = uint8_t;
 using data_ptr_t = data_t *;
 using const_data_ptr_t = const data_t *;
-
-using IndexKeyType = std::array<data_t, INDEX_KEY_SIZE>;
-using IndexValueType = RID;
-using InternalValueType = page_id_t;
 
 template <class SRC>
 data_ptr_t data_ptr_cast(SRC *src) { // NOLINT: naming
