@@ -13,6 +13,7 @@ using table_oid_t = int32_t;
 using index_oid_t = int32_t;
 using slot_offset_t = idx_t; // slot offset type
 using txn_id_t = int64_t;    // transaction id type
+using timestamp_t = int64_t;
 using data_t = uint8_t;
 using data_ptr_t = data_t *;
 using const_data_ptr_t = const data_t *;

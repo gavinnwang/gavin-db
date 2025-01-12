@@ -6,6 +6,7 @@
 #include "common/logger.hpp"
 #include "common/macros.hpp"
 #include "common/type.hpp"
+#include "index/index_typdef.hpp"
 #include "storage/serializer/deserializer.hpp"
 #include "storage/serializer/serializer.hpp"
 

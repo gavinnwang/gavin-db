@@ -7,6 +7,7 @@
 #include "common/rid.hpp"
 #include "common/typedef.hpp"
 #include "common/value.hpp"
+#include "concurrency/transaction.hpp"
 #include "storage/serializer/serializer.hpp"
 #include "storage/table/table_meta.hpp"
 #include "storage/table/tuple.hpp"
@@ -15,9 +16,7 @@
 #include <sstream>
 
 namespace db {
-using IndexKeyType = std::array<data_t, INDEX_KEY_SIZE>;
-using IndexValueType = RID;
-using InternalValueType = page_id_t;
+
 enum class IndexConstraintType : uint8_t {
 	NONE = 0,    // no constraint
 	UNIQUE = 1,  // built to enforce a UNIQUE constraint
@@ -99,14 +98,14 @@ public:
 		auto new_page = table_meta_.IncrementTableDataPageId();
 		return {table_meta_.table_oid_, new_page};
 	}
-	bool InsertRecord(const Tuple &tuple, const RID rid) {
+	bool InsertRecord(Transaction &txn, const Tuple &tuple, const RID rid) {
 		auto key = ConvertTupleToKey(tuple);
 		LOG_TRACE("Inserting key: %s", IndexKeyTypeToString(key).c_str());
-		return InternalInsertRecord(key, rid);
+		return InternalInsertRecord(txn, key, rid);
 	}
-	bool DeleteRecord(const Tuple &tuple) {
+	bool DeleteRecord(Transaction &txn, const Tuple &tuple) {
 		auto key = ConvertTupleToKey(tuple);
-		return InternalDeleteRecord(key);
+		return InternalDeleteRecord(txn, key);
 	}
 
 	bool ScanKey(const Tuple &tuple, std::vector<RID> &rids) {
@@ -120,8 +119,8 @@ public:
 	// debug
 
 protected:
-	virtual bool InternalInsertRecord(IndexKeyType key, RID rid) = 0;
-	virtual bool InternalDeleteRecord(IndexKeyType key) = 0;
+	virtual bool InternalInsertRecord(Transaction &txn, IndexKeyType key, RID rid) = 0;
+	virtual bool InternalDeleteRecord(Transaction &txn, IndexKeyType key) = 0;
 	virtual bool InternalScanKey(IndexKeyType key, std::vector<RID> &rids) = 0;
 	IndexMeta &index_meta_;
 	TableMeta &table_meta_;

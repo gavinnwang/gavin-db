@@ -5,6 +5,7 @@
 #include "catalog/catalog_manager.hpp"
 #include "common/config.hpp"
 #include "concurrency/transaction.hpp"
+#include "concurrency/transaction_manager.hpp"
 #include "execution/execution_engine.hpp"
 
 #include <memory>
@@ -17,10 +18,12 @@ public:
 	    : catalog_manager_(std::make_unique<CatalogManager>()),
 	      disk_manager_(std::make_shared<DiskManager>(catalog_manager_)),
 	      bpm_(std::make_unique<BufferPoolManager>(DEFAULT_POOL_SIZE, disk_manager_)),
-	      execution_engine_(std::make_unique<ExecutionEngine>()) {
+	      execution_engine_(std::make_unique<ExecutionEngine>()),
+	      txn_manager_(std::make_unique<TransactionManager>()) {
 	          // DeletePathIfExists(db::FilePathManager::GetInstance().GetDatabaseRootPath());
 	      };
-	~DB() = default;;
+	~DB() = default;
+	;
 
 	void HandleCreateStatement(Transaction &txn, const std::unique_ptr<CreateStatement> &stmt);
 	void ExecuteQuery([[maybe_unused]] Transaction &txn, const std::string &query);
@@ -35,6 +38,9 @@ private:
 
 	/** Lock for CatalogManager */
 	std::shared_mutex catalog_manager_lock_;
+
+public:
+	std::unique_ptr<TransactionManager> txn_manager_;
 };
 
 }; // namespace db

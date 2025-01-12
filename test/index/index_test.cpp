@@ -2,6 +2,7 @@
 
 #include "catalog/catalog_manager.hpp"
 #include "common/test_utils.hpp"
+#include "concurrency/transaction.hpp"
 #include "index/bplus_tree_index.hpp"
 #include "index/index.hpp"
 #include "storage/table/table_heap.hpp"
@@ -47,8 +48,9 @@ TEST(IndexTest, IndexTest) {
 
 	auto rid = table_heap->InsertTuple(meta, tuple);
 
+	Transaction txn {1, IsolationLevel::READ_UNCOMMITTED};
 	if (rid.has_value()) {
-		auto res = btree_index->InsertRecord(tuple, *rid);
+		auto res = btree_index->InsertRecord(txn, tuple, *rid);
 		assert(res);
 		std::vector<RID> rids;
 		btree_index->ScanKey(tuple, rids);
@@ -63,7 +65,7 @@ TEST(IndexTest, IndexTest) {
 		LOG_TRACE("{}", rid->ToString());
 
 		LOG_TRACE("tuple %s", tuple2.ToString(schema).c_str());
-		auto res = btree_index->InsertRecord(tuple2, *rid);
+		auto res = btree_index->InsertRecord(txn, tuple2, *rid);
 		assert(res);
 		std::vector<RID> rids;
 		btree_index->ScanKey(tuple2, rids);
@@ -111,6 +113,7 @@ TEST(IndexTest, IndexManyInsertionsTest) {
 	std::vector<Tuple> tuples;
 
 	constexpr int n = 15000;
+	Transaction txn {1, IsolationLevel::READ_UNCOMMITTED};
 	for (int i = 0; i < n; ++i) {
 		int32_t int_val = i;
 		std::string str_val = GenerateRandomString(1, 50);
@@ -123,7 +126,7 @@ TEST(IndexTest, IndexManyInsertionsTest) {
 
 		auto rid = table_heap->InsertTuple(meta, tuple);
 
-		btree_index->InsertRecord(tuple, *rid);
+		btree_index->InsertRecord(txn, tuple, *rid);
 		tuples.push_back(tuple);
 
 		ASSERT_EQ(rid.has_value(), true);

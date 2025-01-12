@@ -65,7 +65,7 @@ void DiskManager::ReadPage(PageId page_id, char *page_data) {
 		throw IOException("failed to read from table data file");
 	}
 	// if file ends before reading PAGE_SIZE
-	int gcount = data_fs.gcount();
+	uint32_t gcount = data_fs.gcount();
 	if (gcount < PAGE_SIZE) {
 		// todo investigate this
 		LOG_ERROR("IO read less than a page, read {} rather than {}", gcount, PAGE_SIZE);

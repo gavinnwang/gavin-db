@@ -2,9 +2,10 @@
 #include "concurrency/transaction.hpp"
 
 #include "gtest/gtest.h"
+namespace db {
 TEST(QueryTest, SimpleCreateTest) {
-	db::DB db = db::DB {"test_db"};
-	db::Transaction txn {};
+	DB db = DB {"test_db"};
+	Transaction txn {1, IsolationLevel::READ_UNCOMMITTED};
 	std::string query = R"(
 	CREATE TABLE Users (id INT PRIMARY KEY, age INT, networth INT, name VARCHAR(255));
 		)";
@@ -35,4 +36,5 @@ SELECT * FROM Users;
 	// 	db.ExecuteQuery(txn, query);
 	// } catch (const std::exception &e) {
 	// }
+}
 } // namespace db

@@ -14,5 +14,6 @@ static constexpr uint32_t DEFAULT_POOL_SIZE = 10;
 static constexpr uint32_t INDEX_KEY_SIZE = 8;
 static constexpr uint32_t VARCHAR_DEFAULT_LENGTH = 128; // default length for varchar when constructing the column
 static constexpr table_oid_t SYSTEM_CATALOG_ID = -1;
+static constexpr timestamp_t INVALID_TS = -1;
 const txn_id_t TXN_START_ID = 1LL << 62; // first txn id
 } // namespace db

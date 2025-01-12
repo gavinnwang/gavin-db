@@ -13,7 +13,6 @@
 #include "storage/page/page_guard.hpp"
 
 #include <memory>
-#include <utility>
 namespace db {
 
 // Define the trait to identify leaf and internal pages
@@ -62,7 +61,8 @@ protected:
 
 		auto &header_raw_page = bpm_.FetchPage({table_meta_.table_oid_, index_meta_.header_page_id_});
 		header_raw_page.RLatch();
-		Transaction transaction {};
+		// TODO lol
+		Transaction transaction {0, IsolationLevel::READ_COMMITTED};
 
 		auto &leaf_raw_page = SearchLeafPage(key, Operation::SEARCH, transaction, header_raw_page);
 
@@ -89,24 +89,23 @@ protected:
 	// if key has less than n. key values, insert
 	// if has n. keys, split the leaf
 	// create node L'
-	bool InternalInsertRecord(const IndexKeyType key, const IndexValueType value) override {
+	bool InternalInsertRecord(Transaction &txn, const IndexKeyType key, const IndexValueType value) override {
 		// latch the root page
 		auto &header_raw_page = bpm_.FetchPage({table_meta_.table_oid_, index_meta_.header_page_id_});
 		header_raw_page.WLatch();
-		Transaction transaction {};
 		LOG_TRACE("Adding header page id {} into page set (header)", header_raw_page.GetPageId().page_number_);
-		transaction.AddIntoPageSet(header_raw_page);
+		txn.AddIntoPageSet(header_raw_page);
 
 		auto &header_page = header_raw_page.AsMut<BtreeHeaderPage>();
 
 		if (header_page.TreeIsEmpty()) {
 			LOG_TRACE("Inserting into empty tree, create new root.");
 			CreateNewRoot(key, value, header_page);
-			ReleaseParentWriteLatches(transaction);
+			ReleaseParentWriteLatches(txn);
 			return true;
 		}
 
-		return InsertIntoLeaf(key, value, transaction, header_raw_page);
+		return InsertIntoLeaf(key, value, txn, header_raw_page);
 	}
 
 	bool InsertIntoLeaf(const IndexKeyType &key, const IndexValueType &value, Transaction &transaction,
@@ -151,21 +150,20 @@ protected:
 
 		return new_size != size;
 	}
-	bool InternalDeleteRecord(const IndexKeyType key) override {
+	bool InternalDeleteRecord(Transaction &txn, const IndexKeyType key) override {
 		auto &header_raw_page = bpm_.FetchPage({table_meta_.table_oid_, index_meta_.header_page_id_});
 		header_raw_page.WLatch();
-		Transaction transaction {};
 		LOG_TRACE("Adding header page id {} into page set (header)", header_raw_page.GetPageId().page_number_);
-		transaction.AddIntoPageSet(header_raw_page);
+		txn.AddIntoPageSet(header_raw_page);
 
 		auto &header_page = header_raw_page.AsMut<BtreeHeaderPage>();
 
 		if (header_page.TreeIsEmpty()) {
-			ReleaseParentWriteLatches(transaction);
+			ReleaseParentWriteLatches(txn);
 			return false;
 		}
 
-		auto &leaf_page = SearchLeafPage(key, Operation::DELETE, transaction, header_raw_page);
+		auto &leaf_page = SearchLeafPage(key, Operation::DELETE, txn, header_raw_page);
 		auto &leaf_node = leaf_page.AsMut<BtreeLeafPage>();
 
 		(void)leaf_node;
