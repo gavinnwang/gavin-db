@@ -34,10 +34,10 @@ public:
 		if (current_reads_[read_ts] == 0) {
 			current_reads_.erase(read_ts);
 		}
-		// if (current_reads_.empty()) {
-		// 	watermark_ = commit_ts_;
-		// 	return;
-		// }
+		if (current_reads_.empty()) {
+			watermark_ = commit_ts_;
+			return;
+		}
 		for (timestamp_t i = watermark_;; i++) {
 			if (current_reads_.find(i) != current_reads_.end()) {
 				watermark_ = i;
