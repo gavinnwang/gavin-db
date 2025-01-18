@@ -1,10 +1,9 @@
-#include "storage/buffer/buffer_pool.hpp"
 #include "common/typedef.hpp"
+#include "storage/buffer/buffer_pool.hpp"
 #include "storage/table/table_iterator.hpp"
 #include "storage/table/table_meta.hpp"
 #include "storage/table/tuple.hpp"
 
-#include <memory>
 #include <optional>
 namespace db {
 
