@@ -17,7 +17,10 @@ public:
 		ResetMemory();
 	}
 
-	DISALLOW_COPY_AND_MOVE(Page);
+	Page(const Page &) = delete;
+	Page &operator=(const Page &) = delete;
+	Page(Page &&) = delete;
+	Page &operator=(Page &&) = delete;
 
 	~Page() = default;
 

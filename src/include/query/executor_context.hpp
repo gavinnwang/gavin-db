@@ -1,7 +1,7 @@
 #pragma once
 
-#include "storage/buffer/buffer_pool.hpp"
 #include "meta/catalog.hpp"
+#include "storage/buffer/buffer_pool.hpp"
 
 namespace db {
 class ExecutorContext {
@@ -11,7 +11,10 @@ public:
 
 	~ExecutorContext() = default;
 
-	DISALLOW_COPY_AND_MOVE(ExecutorContext);
+	ExecutorContext(const ExecutorContext &) = delete;
+	ExecutorContext &operator=(const ExecutorContext &) = delete;
+	ExecutorContext(ExecutorContext &&) = delete;
+	ExecutorContext &operator=(ExecutorContext &&) = delete;
 
 	[[nodiscard]] Catalog &GetCatalog() const {
 		return catalog;

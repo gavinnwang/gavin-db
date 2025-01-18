@@ -89,7 +89,8 @@ class Index : public PageAllocator {
 
 public:
 	Index() = delete;
-	DISALLOW_COPY(Index);
+	Index(const Index &) = delete;
+	Index &operator=(const Index &) = delete;
 	Index(IndexMeta &index_meta, TableMeta &table_meta)
 	    : index_meta_(index_meta), table_meta_(table_meta), comparator_(GetComparator(index_meta.key_col_.GetType())) {
 	}
