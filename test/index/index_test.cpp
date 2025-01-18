@@ -1,10 +1,10 @@
 
 
-#include "meta/catalog.hpp"
 #include "common/test_utils.hpp"
 #include "concurrency/transaction.hpp"
 #include "index/bplus_tree_index.hpp"
 #include "index/index.hpp"
+#include "meta/catalog.hpp"
 #include "storage/table/table_heap.hpp"
 
 #include "gtest/gtest.h"
@@ -14,8 +14,8 @@ namespace db {
 TEST(IndexTest, IndexTest) {
 	const size_t buffer_pool_size = 10;
 	auto cm = std::make_unique<Catalog>();
-	auto dm = std::make_shared<DiskManager>(cm);
-	auto bpm = std::make_unique<BufferPool>(buffer_pool_size, dm);
+	auto dm = std::make_unique<DiskManager>(*cm);
+	auto bpm = std::make_unique<BufferPool>(buffer_pool_size, *dm);
 
 	auto c1 = db::Column("user_id", db::TypeId::INTEGER);
 	auto c2 = db::Column("user_name", db::TypeId::VARCHAR, 256);
@@ -77,8 +77,8 @@ TEST(IndexTest, IndexTest) {
 TEST(IndexTest, IndexManyInsertionsTest) {
 	const size_t buffer_pool_size = 13;
 	auto cm = std::make_unique<db::Catalog>();
-	auto dm = std::make_shared<db::DiskManager>(cm);
-	auto bpm = std::make_unique<db::BufferPool>(buffer_pool_size, dm);
+	auto dm = std::make_unique<DiskManager>(*cm);
+	auto bpm = std::make_unique<db::BufferPool>(buffer_pool_size, *dm);
 
 	auto c1 = db::Column("user_id", db::TypeId::INTEGER);
 	auto c2 = db::Column("user_name", db::TypeId::VARCHAR, 64);

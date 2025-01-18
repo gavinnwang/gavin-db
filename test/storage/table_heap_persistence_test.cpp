@@ -1,9 +1,9 @@
-#include "storage/buffer/buffer_pool.hpp"
-#include "meta/catalog.hpp"
 #include "common/logger.hpp"
 #include "common/test_utils.hpp"
 #include "common/typedef.hpp"
 #include "common/value.hpp"
+#include "meta/catalog.hpp"
+#include "storage/buffer/buffer_pool.hpp"
 #include "storage/table/table_heap.hpp"
 #include "storage/table/tuple.hpp"
 
@@ -17,8 +17,8 @@ TEST(StorageTest, TablePersistTest) {
 	// DeletePathIfExists(db::FilePathManager::GetInstance().GetDatabaseRootPath());
 	const size_t buffer_pool_size = 10;
 	auto cm = std::make_unique<Catalog>();
-	auto dm = std::make_shared<DiskManager>(cm);
-	auto bpm = std::make_unique<BufferPool>(buffer_pool_size, dm);
+	auto dm = std::make_unique<DiskManager>(*cm);
+	auto bpm = std::make_unique<BufferPool>(buffer_pool_size, *dm);
 
 	auto c1 = Column("user_id", db::TypeId::INTEGER);
 	auto c2 = Column("user_name", db::TypeId::VARCHAR, 256);
@@ -51,8 +51,8 @@ TEST(StorageTest, TablePersistTest) {
 	cm->PersistToDisk();
 
 	auto cm2 = std::make_unique<Catalog>();
-	auto dm2 = std::make_shared<DiskManager>(cm);
-	auto bpm2 = std::make_unique<BufferPool>(buffer_pool_size, dm);
+	auto dm2 = std::make_unique<DiskManager>(*cm2);
+	auto bpm2 = std::make_unique<BufferPool>(buffer_pool_size, *dm2);
 
 	auto &table_meta2 = cm2->GetTableByName(table_name);
 	LOG_DEBUG("table_meta2: %s", table_meta2.name_.c_str());
@@ -68,7 +68,6 @@ TEST(StorageTest, TablePersistTest) {
 		}
 		auto [meta, tuple] = *ret;
 		LOG_DEBUG("tuple: %s", tuple.ToString(schema).c_str());
-		// ASSERT_EQ(tuple.ToString(schema), ans[i]);
 	}
 	auto it = table_heap2->MakeIterator();
 	while (!it.IsEnd()) {

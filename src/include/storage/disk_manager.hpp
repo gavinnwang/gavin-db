@@ -1,11 +1,9 @@
 #pragma once
 
-#include "common/macros.hpp"
 #include "common/page_id.hpp"
 #include "common/typedef.hpp"
 
 #include <fstream>
-#include <memory>
 #include <unordered_map>
 
 namespace db {
@@ -15,7 +13,8 @@ class DiskManager {
 public:
 	explicit DiskManager(Catalog &catalog) : cm_(catalog) {};
 	DiskManager(const DiskManager &) = delete;
-	DiskManager& operator=(const DiskManager &) = delete;;
+	DiskManager &operator=(const DiskManager &) = delete;
+	;
 	void ShutDown();
 	void WritePage(PageId page_id, const char *page_data);
 	void ReadPage(PageId page_id, char *page_data);

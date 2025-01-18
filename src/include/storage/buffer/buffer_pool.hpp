@@ -1,10 +1,8 @@
 #pragma once
 
-#include "storage/buffer/replacer.hpp"
-#include "common/logger.hpp"
-#include "common/macros.hpp"
 #include "common/page_id.hpp"
 #include "common/typedef.hpp"
+#include "storage/buffer/replacer.hpp"
 #include "storage/disk_manager.hpp"
 #include "storage/page/page.hpp"
 #include "storage/page/page_guard.hpp"
@@ -16,9 +14,9 @@
 namespace db {
 class BufferPool {
 public:
-	BufferPool(frame_id_t pool_size, DiskManager& disk_manager);
+	BufferPool(frame_id_t pool_size, DiskManager &disk_manager);
 	BufferPool(const BufferPool &) = delete;
-	BufferPool& operator=(const BufferPool &) = delete;;
+	BufferPool &operator=(const BufferPool &) = delete;
 	bool FlushPage(PageId page_id);
 	void FlushAllPages();
 	BasicPageGuard FetchPageBasic(PageId page_id);
@@ -35,7 +33,7 @@ private:
 
 	const frame_id_t pool_size_;
 	std::unique_ptr<Replacer> replacer_;
-	DiskManager& disk_manager_;
+	DiskManager &disk_manager_;
 	std::list<frame_id_t> free_list_;
 	std::unordered_map<PageId, frame_id_t, PageIdHash> page_table_;
 	std::vector<Page> pages_;

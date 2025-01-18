@@ -1,9 +1,9 @@
 #include "storage/disk_manager.hpp"
 
-#include "meta/catalog.hpp"
 #include "common/config.hpp"
 #include "common/fs_utils.hpp"
 #include "common/logger.hpp"
+#include "meta/catalog.hpp"
 #include "storage/file_path_manager.hpp"
 
 #include <cstddef>
@@ -19,7 +19,7 @@ void DiskManager::AddTableDataIfNotExist(table_oid_t table_id) {
 		if (table_id == SYSTEM_CATALOG_ID) {
 			table_data_path = FilePathManager::GetInstance().GetSystemCatalogPath();
 		} else {
-			auto table_name = cm_->GetTableName(table_id);
+			auto table_name = cm_.GetTableName(table_id);
 			table_data_path = FilePathManager::GetInstance().GetTableDataPath(table_name);
 		}
 		auto data_fs = std::fstream(table_data_path, std::ios::binary | std::ios::in | std::ios::out);
@@ -53,7 +53,7 @@ void DiskManager::ReadPage(PageId page_id, char *page_data) {
 	AddTableDataIfNotExist(page_id.table_id_);
 
 	size_t offset = static_cast<size_t>(page_id.page_number_) * PAGE_SIZE;
-	auto data_file_path = FilePathManager::GetInstance().GetTableDataPath(cm_->GetTableName(page_id.table_id_));
+	auto data_file_path = FilePathManager::GetInstance().GetTableDataPath(cm_.GetTableName(page_id.table_id_));
 	if (offset > GetFileSize(data_file_path)) {
 		throw IOException("read page out of file size" + std::to_string(offset) + " " +
 		                  std::to_string(GetFileSize(data_file_path)));
