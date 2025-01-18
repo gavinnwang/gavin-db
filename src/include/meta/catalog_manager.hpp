@@ -1,6 +1,6 @@
 #pragma once
 
-#include "storage/buffer/buffer_pool_manager.hpp"
+#include "storage/buffer/buffer_pool.hpp"
 #include "meta/schema.hpp"
 #include "common/fs_utils.hpp"
 #include "common/typedef.hpp"
@@ -37,7 +37,7 @@ public:
 	std::optional<table_oid_t> CreateTable(const std::string &table_name, const Schema &schema);
 	std::optional<index_oid_t> CreateIndex(const std::string &index_name, const std::string &table_name,
 	                                       const Column &key_col, bool is_primary_key, IndexType index_type,
-	                                       BufferPoolManager &bpm);
+	                                       BufferPool &bpm);
 
 	[[nodiscard]] TableMeta &GetTableByName(const std::string &table_name) const {
 		if (table_names_.find(table_name) == table_names_.end()) {

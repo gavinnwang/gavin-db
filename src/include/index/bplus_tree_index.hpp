@@ -1,6 +1,6 @@
 #pragma once
 
-#include "storage/buffer/buffer_pool_manager.hpp"
+#include "storage/buffer/buffer_pool.hpp"
 #include "common/config.hpp"
 #include "common/logger.hpp"
 #include "common/macros.hpp"
@@ -34,7 +34,7 @@ class BTreeIndex : public Index {
 	enum class Operation { SEARCH, INSERT, DELETE };
 
 public:
-	BTreeIndex(IndexMeta &index_meta, TableMeta &table_meta, BufferPoolManager &bpm)
+	BTreeIndex(IndexMeta &index_meta, TableMeta &table_meta, BufferPool &bpm)
 	    : Index(index_meta, table_meta), bpm_(bpm) {
 
 		LOG_TRACE("BTreeIndex constructor called");
@@ -404,6 +404,6 @@ private:
 		leaf_page.Insert(key, value, comparator_);
 	}
 
-	BufferPoolManager &bpm_;
+	BufferPool &bpm_;
 };
 } // namespace db

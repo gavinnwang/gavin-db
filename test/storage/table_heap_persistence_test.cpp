@@ -1,4 +1,4 @@
-#include "storage/buffer/buffer_pool_manager.hpp"
+#include "storage/buffer/buffer_pool.hpp"
 #include "meta/catalog_manager.hpp"
 #include "common/logger.hpp"
 #include "common/test_utils.hpp"
@@ -18,7 +18,7 @@ TEST(StorageTest, TablePersistTest) {
 	const size_t buffer_pool_size = 10;
 	auto cm = std::make_unique<CatalogManager>();
 	auto dm = std::make_shared<DiskManager>(cm);
-	auto bpm = std::make_unique<BufferPoolManager>(buffer_pool_size, dm);
+	auto bpm = std::make_unique<BufferPool>(buffer_pool_size, dm);
 
 	auto c1 = Column("user_id", db::TypeId::INTEGER);
 	auto c2 = Column("user_name", db::TypeId::VARCHAR, 256);
@@ -52,7 +52,7 @@ TEST(StorageTest, TablePersistTest) {
 
 	auto cm2 = std::make_unique<CatalogManager>();
 	auto dm2 = std::make_shared<DiskManager>(cm);
-	auto bpm2 = std::make_unique<BufferPoolManager>(buffer_pool_size, dm);
+	auto bpm2 = std::make_unique<BufferPool>(buffer_pool_size, dm);
 
 	auto &table_meta2 = cm2->GetTableByName(table_name);
 	LOG_DEBUG("table_meta2: %s", table_meta2.name_.c_str());

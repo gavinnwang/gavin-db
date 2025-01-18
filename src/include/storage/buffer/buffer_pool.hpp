@@ -14,10 +14,10 @@
 #include <memory>
 #include <vector>
 namespace db {
-class BufferPoolManager {
+class BufferPool {
 public:
-	BufferPoolManager(frame_id_t pool_size, std::shared_ptr<DiskManager> disk_manager);
-	DISALLOW_COPY(BufferPoolManager);
+	BufferPool(frame_id_t pool_size, std::shared_ptr<DiskManager> disk_manager);
+	DISALLOW_COPY(BufferPool);
 	bool FlushPage(PageId page_id);
 	void FlushAllPages();
 	BasicPageGuard FetchPageBasic(PageId page_id);

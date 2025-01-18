@@ -1,7 +1,7 @@
 
 #include "storage/table/table_heap.hpp"
 
-#include "storage/buffer/buffer_pool_manager.hpp"
+#include "storage/buffer/buffer_pool.hpp"
 #include "common/logger.hpp"
 #include "common/macros.hpp"
 #include "common/page_id.hpp"
@@ -12,7 +12,7 @@
 #include <utility>
 namespace db {
 
-TableHeap::TableHeap(BufferPoolManager &bpm, TableMeta &table_meta) : bpm_(bpm), table_meta_(table_meta) {
+TableHeap::TableHeap(BufferPool &bpm, TableMeta &table_meta) : bpm_(bpm), table_meta_(table_meta) {
 	if (table_meta_.GetLastTableHeapDataPageId() == INVALID_PAGE_ID) {
 		PageId new_page_id {table_meta_.table_oid_};
 		auto guard = bpm.NewPageGuarded(*this, new_page_id);

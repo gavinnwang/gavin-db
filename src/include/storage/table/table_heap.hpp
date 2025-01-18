@@ -1,4 +1,4 @@
-#include "storage/buffer/buffer_pool_manager.hpp"
+#include "storage/buffer/buffer_pool.hpp"
 #include "common/typedef.hpp"
 #include "storage/table/table_iterator.hpp"
 #include "storage/table/table_meta.hpp"
@@ -13,7 +13,7 @@ class TableHeap : public PageAllocator {
 	// in memory representation of table heap
 public:
 	DISALLOW_COPY_AND_MOVE(TableHeap);
-	explicit TableHeap(BufferPoolManager &bpm, TableMeta &table_meta);
+	explicit TableHeap(BufferPool &bpm, TableMeta &table_meta);
 	// doesn't ensure the tuple is the same schema as the table
 	[[nodiscard]] std::optional<RID> InsertTuple(const TupleMeta &meta, const Tuple &tuple);
 	void UpdateTupleMeta(const TupleMeta &meta, RID rid);
@@ -28,7 +28,7 @@ public:
 	}
 
 private:
-	BufferPoolManager &bpm_;
+	BufferPool &bpm_;
 	TableMeta &table_meta_;
 	std::mutex latch_;
 };

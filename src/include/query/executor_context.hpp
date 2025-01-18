@@ -1,12 +1,12 @@
 #pragma once
 
-#include "storage/buffer/buffer_pool_manager.hpp"
+#include "storage/buffer/buffer_pool.hpp"
 #include "meta/catalog_manager.hpp"
 
 namespace db {
 class ExecutorContext {
 public:
-	ExecutorContext(CatalogManager &catalog, BufferPoolManager &bpm) : catalog_ {catalog}, bpm_ {bpm} {
+	ExecutorContext(CatalogManager &catalog, BufferPool &bpm) : catalog_ {catalog}, bpm_ {bpm} {
 	}
 
 	~ExecutorContext() = default;
@@ -17,12 +17,12 @@ public:
 		return catalog_;
 	}
 
-	[[nodiscard]] BufferPoolManager &GetBufferPoolManager() const {
+	[[nodiscard]] BufferPool &GetBufferPoolManager() const {
 		return bpm_;
 	}
 
 private:
 	CatalogManager &catalog_;
-	BufferPoolManager &bpm_;
+	BufferPool &bpm_;
 };
 } // namespace db

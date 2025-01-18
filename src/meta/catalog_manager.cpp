@@ -31,7 +31,7 @@ std::optional<table_oid_t> CatalogManager::CreateTable(const std::string &table_
 
 std::optional<index_oid_t> CatalogManager::CreateIndex(const std::string &index_name, const std::string &table_name,
                                                        const Column &key_col, bool is_primary_key, IndexType index_type,
-                                                       BufferPoolManager &bpm) {
+                                                       BufferPool &bpm) {
 	if (table_names_.find(table_name) == table_names_.end()) {
 		return std::nullopt;
 	}

@@ -1,4 +1,5 @@
-#include "storage/buffer/buffer_pool_manager.hpp"
+
+#include "storage/buffer/buffer_pool.hpp"
 
 #include "storage/buffer/random_replacer.h"
 #include "common/config.hpp"
@@ -11,7 +12,7 @@
 #include <mutex>
 #include <vector>
 namespace db {
-BufferPoolManager::BufferPoolManager(frame_id_t pool_size, std::shared_ptr<DiskManager> disk_manager)
+BufferPool::BufferPool(frame_id_t pool_size, std::shared_ptr<DiskManager> disk_manager)
     : pool_size_(pool_size), replacer_(std::make_unique<RandomBogoReplacer>()), disk_manager_(std::move(disk_manager)),
       pages_(pool_size) {
 	for (frame_id_t i = 0; i < pool_size_; ++i) {
@@ -24,7 +25,7 @@ BufferPoolManager::BufferPoolManager(frame_id_t pool_size, std::shared_ptr<DiskM
 // 	return {table_oid, new_page_num};
 // }
 
-bool BufferPoolManager::AllocateFrame(frame_id_t &frame_id) {
+bool BufferPool::AllocateFrame(frame_id_t &frame_id) {
 	if (free_list_.empty()) {
 		// gotta evict a random frame because
 		if (!replacer_->Evict(frame_id)) {
@@ -47,7 +48,7 @@ bool BufferPoolManager::AllocateFrame(frame_id_t &frame_id) {
 	return true;
 }
 
-Page &BufferPoolManager::NewPage(PageAllocator &page_allocator, PageId &page_id) {
+Page &BufferPool::NewPage(PageAllocator &page_allocator, PageId &page_id) {
 	std::lock_guard<std::mutex> lock(latch_);
 	frame_id_t frame_id = -1;
 	if (!AllocateFrame(frame_id)) {
@@ -82,7 +83,7 @@ Page &BufferPoolManager::NewPage(PageAllocator &page_allocator, PageId &page_id)
 	return page;
 }
 
-Page &BufferPoolManager::FetchPage(PageId page_id) {
+Page &BufferPool::FetchPage(PageId page_id) {
 	ASSERT(page_id.page_number_ != INVALID_PAGE_ID, "page number should be valid");
 	std::lock_guard<std::mutex> lock(latch_);
 	if (page_table_.find(page_id) != page_table_.end()) {
@@ -112,7 +113,7 @@ Page &BufferPoolManager::FetchPage(PageId page_id) {
 	return page;
 }
 
-bool BufferPoolManager::UnpinPage(PageId page_id, bool is_dirty) {
+bool BufferPool::UnpinPage(PageId page_id, bool is_dirty) {
 	assert(page_id.page_number_ != INVALID_PAGE_ID);
 	std::lock_guard<std::mutex> lock(latch_);
 	if (page_table_.find(page_id) == page_table_.end()) {
@@ -136,7 +137,7 @@ bool BufferPoolManager::UnpinPage(PageId page_id, bool is_dirty) {
 	return true;
 }
 
-bool BufferPoolManager::FlushPage(PageId page_id) {
+bool BufferPool::FlushPage(PageId page_id) {
 	std::lock_guard<std::mutex> lock(latch_);
 	if (page_table_.find(page_id) == page_table_.end()) {
 		return false;
@@ -148,13 +149,13 @@ bool BufferPoolManager::FlushPage(PageId page_id) {
 	return true;
 }
 
-void BufferPoolManager::FlushAllPages() {
+void BufferPool::FlushAllPages() {
 	for (frame_id_t i = 0; i < pool_size_; i++) {
 		FlushPage(pages_[i].page_id_);
 	}
 }
 
-bool BufferPoolManager::DeletePage(PageId page_id) {
+bool BufferPool::DeletePage(PageId page_id) {
 	std::lock_guard<std::mutex> lock(latch_);
 	if (page_table_.find(page_id) == page_table_.end()) {
 		return true;
@@ -174,24 +175,24 @@ bool BufferPoolManager::DeletePage(PageId page_id) {
 	return true;
 }
 
-BasicPageGuard BufferPoolManager::FetchPageBasic(PageId page_id) {
+BasicPageGuard BufferPool::FetchPageBasic(PageId page_id) {
 	auto &page = FetchPage(page_id);
 	return {*this, page};
 }
 
-ReadPageGuard BufferPoolManager::FetchPageRead(PageId page_id) {
+ReadPageGuard BufferPool::FetchPageRead(PageId page_id) {
 	auto &page = FetchPage(page_id);
 	page.RLatch();
 	return {*this, page};
 }
 
-WritePageGuard BufferPoolManager::FetchPageWrite(PageId page_id) {
+WritePageGuard BufferPool::FetchPageWrite(PageId page_id) {
 	auto &page = FetchPage(page_id);
 	page.WLatch();
 	return {*this, page};
 }
 
-BasicPageGuard BufferPoolManager::NewPageGuarded(PageAllocator &page_allocator, PageId &page_id) {
+BasicPageGuard BufferPool::NewPageGuarded(PageAllocator &page_allocator, PageId &page_id) {
 	auto &page = NewPage(page_allocator, page_id);
 	return {*this, page};
 }

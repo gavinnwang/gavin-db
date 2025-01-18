@@ -10,7 +10,7 @@
 
 namespace db {
 class Page {
-	friend class BufferPoolManager;
+	friend class BufferPool;
 
 public:
 	explicit Page() {

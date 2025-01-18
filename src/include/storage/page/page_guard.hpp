@@ -1,7 +1,7 @@
 #pragma once
 #include "storage/page/page.hpp"
 namespace db {
-class BufferPoolManager;
+class BufferPool;
 class ReadPageGuard;
 class WritePageGuard;
 
@@ -11,7 +11,7 @@ class BasicPageGuard {
 
 public:
 	BasicPageGuard() = default;
-	BasicPageGuard(BufferPoolManager &bpm, Page &page) : bpm_(&bpm), page_(&page) {
+	BasicPageGuard(BufferPool &bpm, Page &page) : bpm_(&bpm), page_(&page) {
 	}
 	// copy constructor is disabled
 	BasicPageGuard(const BasicPageGuard &) = delete;
@@ -48,14 +48,14 @@ public:
 
 private:
 	// TODO(gavinnwang): convert to shared_ptr maybe?
-	BufferPoolManager *bpm_ {nullptr};
+	BufferPool *bpm_ {nullptr};
 	Page *page_ {nullptr};
 	bool is_dirty_ {false};
 };
 class WritePageGuard {
 public:
 	WritePageGuard() = default;
-	WritePageGuard(BufferPoolManager &bpm, Page &page) : guard_(bpm, page) {
+	WritePageGuard(BufferPool &bpm, Page &page) : guard_(bpm, page) {
 	}
 	WritePageGuard(const WritePageGuard &) = delete;
 	WritePageGuard &operator=(const WritePageGuard &) = delete;
@@ -87,7 +87,7 @@ private:
 class ReadPageGuard {
 public:
 	ReadPageGuard() = default;
-	ReadPageGuard(BufferPoolManager &bpm, Page &page) : guard_(bpm, page) {
+	ReadPageGuard(BufferPool &bpm, Page &page) : guard_(bpm, page) {
 	}
 	ReadPageGuard(const ReadPageGuard &) = delete;
 	ReadPageGuard &operator=(const ReadPageGuard &) = delete;
