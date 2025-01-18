@@ -1,5 +1,5 @@
 #pragma once
-#include "catalog/schema.hpp"
+#include "meta/schema.hpp"
 #include "common/config.hpp"
 #include "common/logger.hpp"
 #include "common/typedef.hpp"

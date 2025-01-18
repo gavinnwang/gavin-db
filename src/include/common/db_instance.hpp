@@ -1,12 +1,12 @@
 #pragma once
 
-#include "binder/statement/create_statement.hpp"
-#include "buffer/buffer_pool_manager.hpp"
-#include "catalog/catalog_manager.hpp"
+#include "query/binder/statement/create_statement.hpp"
+#include "storage/buffer/buffer_pool_manager.hpp"
+#include "meta/catalog_manager.hpp"
 #include "common/config.hpp"
 #include "concurrency/transaction.hpp"
 #include "concurrency/transaction_manager.hpp"
-#include "execution/execution_engine.hpp"
+#include "query/execution_engine.hpp"
 
 #include <memory>
 #include <string>

@@ -1,4 +1,4 @@
-#include "catalog/schema.hpp"
+#include "meta/schema.hpp"
 #include "common/value.hpp"
 #include "storage/table/tuple.hpp"
 

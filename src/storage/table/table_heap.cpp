@@ -1,7 +1,7 @@
 
 #include "storage/table/table_heap.hpp"
 
-#include "buffer/buffer_pool_manager.hpp"
+#include "storage/buffer/buffer_pool_manager.hpp"
 #include "common/logger.hpp"
 #include "common/macros.hpp"
 #include "common/page_id.hpp"

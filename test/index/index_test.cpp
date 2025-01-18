@@ -1,6 +1,6 @@
 
 
-#include "catalog/catalog_manager.hpp"
+#include "meta/catalog_manager.hpp"
 #include "common/test_utils.hpp"
 #include "concurrency/transaction.hpp"
 #include "index/bplus_tree_index.hpp"

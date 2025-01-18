@@ -1,4 +1,4 @@
-#include "buffer/buffer_pool_manager.hpp"
+#include "storage/buffer/buffer_pool_manager.hpp"
 #include "common/typedef.hpp"
 #include "storage/table/table_iterator.hpp"
 #include "storage/table/table_meta.hpp"

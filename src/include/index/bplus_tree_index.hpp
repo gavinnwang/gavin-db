@@ -1,6 +1,6 @@
 #pragma once
 
-#include "buffer/buffer_pool_manager.hpp"
+#include "storage/buffer/buffer_pool_manager.hpp"
 #include "common/config.hpp"
 #include "common/logger.hpp"
 #include "common/macros.hpp"

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "catalog/column.hpp"
+#include "meta/column.hpp"
 #include "common/exception.hpp"
 #include "common/logger.hpp"
 #include "common/macros.hpp"

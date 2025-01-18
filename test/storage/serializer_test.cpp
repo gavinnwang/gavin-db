@@ -1,5 +1,5 @@
-#include "catalog/column.hpp"
-#include "catalog/schema.hpp"
+#include "meta/column.hpp"
+#include "meta/schema.hpp"
 #include "common/logger.hpp"
 #include "common/type.hpp"
 #include "common/value.hpp"

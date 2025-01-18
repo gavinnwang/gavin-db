@@ -1,6 +1,6 @@
 
-#include "execution/expressions/arithmetic_expression.hpp"
-#include "execution/expressions/constant_value_expression.hpp"
+#include "query/expressions/arithmetic_expression.hpp"
+#include "query/expressions/constant_value_expression.hpp"
 
 #include "gtest/gtest.h"
 #include <memory>

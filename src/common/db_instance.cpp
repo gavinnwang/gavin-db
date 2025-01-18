@@ -1,22 +1,22 @@
 #include "common/db_instance.hpp"
 
 #include "SQLParser.h"
-#include "binder/binder.hpp"
-#include "binder/statement/create_statement.hpp"
-#include "catalog/schema.hpp"
+#include "query/binder/binder.hpp"
+#include "query/binder/statement/create_statement.hpp"
+#include "meta/schema.hpp"
 #include "common/exception.hpp"
 #include "common/macros.hpp"
-#include "execution/execution_engine.hpp"
-#include "execution/executor_context.hpp"
+#include "query/execution_engine.hpp"
+#include "query/executor_context.hpp"
 #include "fmt/ranges.h"
-#include "planner/planner.hpp"
+#include "query/planner.hpp"
 
 #include <algorithm>
 
 namespace db {
 
 void DB::ExecuteQuery([[maybe_unused]] Transaction &txn, const std::string &query) {
-	ASSERT(catalog_manager_ && bpm_, "catalog manager and buffer pool manager must be initialized");
+	ASSERT(catalog_manager_ && bpm_, "meta manager and buffer pool manager must be initialized");
 	hsql::SQLParserResult raw_parse_result;
 	hsql::SQLParser::parse(query, &raw_parse_result);
 	if (!raw_parse_result.isValid()) {

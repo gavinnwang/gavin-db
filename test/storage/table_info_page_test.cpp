@@ -1,5 +1,5 @@
-#include "buffer/buffer_pool_manager.hpp"
-#include "catalog/catalog_manager.hpp"
+#include "storage/buffer/buffer_pool_manager.hpp"
+#include "meta/catalog_manager.hpp"
 #include "common/fs_utils.hpp"
 #include "storage/file_path_manager.hpp"
 #include "storage/table/table_heap.hpp"
