@@ -1,8 +1,8 @@
 #pragma once
 
-#include "meta/column.hpp"
 #include "common/typedef.hpp"
 #include "fmt/ranges.h"
+#include "meta/column.hpp"
 #include "storage/serializer/deserializer.hpp"
 #include "storage/serializer/serializer.hpp"
 

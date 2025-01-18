@@ -1,15 +1,15 @@
 #include "query/binder/binder.hpp"
 
+#include "common/arithmetic_type.hpp"
+#include "common/exception.hpp"
+#include "common/logger.hpp"
+#include "magic_enum/magic_enum.hpp"
 #include "query/binder/expressions/bound_binary_op.hpp"
 #include "query/binder/expressions/bound_columnn_ref.hpp"
 #include "query/binder/expressions/bound_constant.hpp"
 #include "query/binder/expressions/bound_star.hpp"
 #include "query/binder/table_ref/bound_expression_list.hpp"
 #include "query/binder/table_ref/bound_table_ref.hpp"
-#include "common/arithmetic_type.hpp"
-#include "common/exception.hpp"
-#include "common/logger.hpp"
-#include "magic_enum/magic_enum.hpp"
 #include "sql/ColumnType.h"
 #include "sql/Expr.h"
 #include "sql/SQLStatement.h"
@@ -64,7 +64,7 @@ std::unique_ptr<BoundTableRef> Binder::BindFrom(const hsql::TableRef *table_ref)
 
 std::unique_ptr<SelectStatement> Binder::BindSelect(const hsql::SelectStatement *stmt) {
 	LOG_TRACE("Binding select statement");
-	ASSERT(stmt, "Select statement cannot be nullptr");
+	assert(stmt && "Select statement cannot be nullptr");
 	hsql::printSelectStatementInfo(stmt, 1);
 
 	// Bind SELECT VALUES clause.
@@ -92,7 +92,7 @@ std::unique_ptr<SelectStatement> Binder::BindSelect(const hsql::SelectStatement 
 }
 
 std::unique_ptr<InsertStatement> Binder::BindInsert(const hsql::InsertStatement *stmt) {
-	ASSERT(stmt, "Insert statement cannot be nullptr");
+	assert(stmt && "Insert statement cannot be nullptr");
 	LOG_TRACE("Binding insert statement");
 	hsql::printInsertStatementInfo(stmt, 1);
 	auto table = BindBaseTableRef(stmt->tableName);
@@ -218,9 +218,9 @@ Column Binder::BindColumnDefinition(const hsql::ColumnDefinition *col_def) const
 	auto col_type = col_def->type;
 	std::string col_name = std::string(col_def->name);
 	auto col = (col_type.data_type == hsql::DataType::VARCHAR)
-	                     ? Column {std::move(col_name), Type::HsqlColumnTypeToTypeId(col_type),
-	                               static_cast<uint32_t>(col_def->type.length)}
-	                     : Column {std::move(col_name), Type::HsqlColumnTypeToTypeId(col_type)};
+	               ? Column {std::move(col_name), Type::HsqlColumnTypeToTypeId(col_type),
+	                         static_cast<uint32_t>(col_def->type.length)}
+	               : Column {std::move(col_name), Type::HsqlColumnTypeToTypeId(col_type)};
 
 	LOG_TRACE("Binding Column Def: {}", col.ToString());
 	return col;

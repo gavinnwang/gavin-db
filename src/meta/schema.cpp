@@ -2,7 +2,6 @@
 #include "meta/schema.hpp"
 
 #include "meta/column.hpp"
-#include "common/macros.hpp"
 
 #include <cstdint>
 namespace db {
@@ -23,10 +22,10 @@ Schema::Schema(const std::vector<Column> &columns) {
 			// varlen at the end of tuple
 			curr_offset += sizeof(uint32_t);
 		}
-		ASSERT(column.length_ > 0, "Invalid column length");
+		assert(column.length_ > 0 && "Invalid column length");
 		columns_.push_back(column);
 	}
-	ASSERT(columns.size() == columns_.size(), "Column count mismatch");
+	assert(columns.size() == columns_.size() && "Column count mismatch");
 	tuple_inline_part_storage_size_ = curr_offset;
 }
 

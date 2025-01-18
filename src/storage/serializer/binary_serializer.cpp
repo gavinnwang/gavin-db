@@ -1,13 +1,12 @@
 #include "storage/serializer/binary_serializer.hpp"
 
-#include "common/macros.hpp"
-
+#include <cassert>
 #include <cstring>
 namespace db {
 
 void BinarySerializer::OnPropertyBegin(field_id_t field_id, const char *tag) {
 	// Just write the field id straight up
-	ASSERT(field_id != MESSAGE_TERMINATOR_FIELD_ID, "Field id cannot be MESSAGE_TERMINATOR_FIELD_ID");
+	assert(field_id != MESSAGE_TERMINATOR_FIELD_ID && "Field id cannot be MESSAGE_TERMINATOR_FIELD_ID");
 	Write<field_id_t>(field_id);
 	(void)tag;
 }

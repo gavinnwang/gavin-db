@@ -1,14 +1,12 @@
 #include "common/db_instance.hpp"
 
 #include "SQLParser.h"
+#include "common/exception.hpp"
+#include "meta/schema.hpp"
 #include "query/binder/binder.hpp"
 #include "query/binder/statement/create_statement.hpp"
-#include "meta/schema.hpp"
-#include "common/exception.hpp"
-#include "common/macros.hpp"
 #include "query/execution_engine.hpp"
 #include "query/executor_context.hpp"
-#include "fmt/ranges.h"
 #include "query/planner.hpp"
 
 #include <algorithm>
@@ -16,7 +14,7 @@
 namespace db {
 
 void DB::ExecuteQuery([[maybe_unused]] Transaction &txn, const std::string &query) {
-	ASSERT(catalog_ && bpm_, "meta manager and buffer pool manager must be initialized");
+	assert(catalog_ && bpm_ && "meta manager and buffer pool manager must be initialized");
 	hsql::SQLParserResult raw_parse_result;
 	hsql::SQLParser::parse(query, &raw_parse_result);
 	if (!raw_parse_result.isValid()) {
@@ -74,13 +72,13 @@ void DB::HandleCreateStatement([[maybe_unused]] Transaction &txn, const std::uni
 	}
 	const auto &table_name = stmt->table_name_;
 	if (!stmt->primary_key_.empty()) {
-		ASSERT(stmt->primary_key_.size() == 1, "Only support one primary key");
+		assert(stmt->primary_key_.size() == 1 && "Only support one primary key");
 		const auto &primary_key = stmt->primary_key_.at(0);
 		const auto key_col_it =
 		    std::ranges::find_if(schema.GetColumns(), [&](const Column &col) { return col.GetName() == primary_key; });
-		ASSERT(key_col_it != schema.GetColumns().end(), "Broken invariant pk col not found");
-		const auto index_oid = catalog_->CreateIndex(table_name + "_pk", table_name, *key_col_it, true,
-		                                                     IndexType::BPlusTreeIndex, *bpm_);
+		assert(key_col_it != schema.GetColumns().end() && "Broken invariant pk col not found");
+		const auto index_oid =
+		    catalog_->CreateIndex(table_name + "_pk", table_name, *key_col_it, true, IndexType::BPlusTreeIndex, *bpm_);
 		if (!index_oid.has_value()) {
 			throw RuntimeException("Failed to create primary key index");
 		}

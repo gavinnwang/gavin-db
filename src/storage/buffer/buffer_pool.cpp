@@ -3,7 +3,6 @@
 
 #include "common/config.hpp"
 #include "common/logger.hpp"
-#include "common/macros.hpp"
 #include "storage/buffer/random_replacer.h"
 #include "storage/page/page_guard.hpp"
 #include "storage/page_allocator.hpp"
@@ -49,10 +48,10 @@ Page &BufferPool::NewPage(PageAllocator &page_allocator, PageId &page_id) {
 		// return nullptr;
 	}
 	// assert that frame id is not in the free list
-	ASSERT(std::find(free_list_.begin(), free_list_.end(), frame_id) == free_list_.end(),
+	assert(std::find(free_list_.begin(), free_list_.end(), frame_id) == free_list_.end() &&
 	       "frame id should not be in the free list");
 	// assert that frame id is valid
-	ASSERT(frame_id != -1, "frame id has to be assigned a valid value here");
+	assert(frame_id != -1 && "frame id has to be assigned a valid value here");
 
 	replacer_->Pin(frame_id);
 
@@ -64,8 +63,8 @@ Page &BufferPool::NewPage(PageAllocator &page_allocator, PageId &page_id) {
 	// page_id = AllocatePage(page_id.table_id_);
 	page_id = page_allocator.AllocatePage();
 	page_table_[page_id] = frame_id;
-	ASSERT(page_table_.at(page_id) == frame_id, "page table should have the new page id");
-	ASSERT(page_table_.contains(page_id_to_replace) == false, "page table should not have the old page id");
+	assert(page_table_.at(page_id) == frame_id && "page table should have the new page id");
+	assert(page_table_.contains(page_id_to_replace) == false && "page table should not have the old page id");
 	// reset the memory and metadata for the new page
 	Page &page = pages_[frame_id];
 	page.page_id_ = page_id;
@@ -77,7 +76,7 @@ Page &BufferPool::NewPage(PageAllocator &page_allocator, PageId &page_id) {
 }
 
 Page &BufferPool::FetchPage(PageId page_id) {
-	ASSERT(page_id.page_number_ != INVALID_PAGE_ID, "page number should be valid");
+	assert(page_id.page_number_ != INVALID_PAGE_ID && "page number should be valid");
 	std::lock_guard<std::mutex> lock(latch_);
 	if (page_table_.find(page_id) != page_table_.end()) {
 		frame_id_t frame_id = page_table_[page_id];
@@ -92,7 +91,7 @@ Page &BufferPool::FetchPage(PageId page_id) {
 		throw std::runtime_error("Failed to allocate frame");
 		// return nullptr;
 	}
-	ASSERT(frame_id != -1, "frame id has to be assigned a valid value here");
+	assert(frame_id != -1 && "frame id has to be assigned a valid value here");
 
 	page_table_.erase(pages_[frame_id].page_id_);
 	page_table_.insert({page_id, frame_id});

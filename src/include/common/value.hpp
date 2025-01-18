@@ -92,7 +92,7 @@ public:
 		}
 		case TypeId::VARCHAR: {
 			uint32_t var_len = *reinterpret_cast<const uint32_t *>(storage);
-			ASSERT(var_len < PAGE_SIZE, "Invalid varchar length");
+			assert(var_len < PAGE_SIZE && "Invalid varchar length");
 			return {type_id, std::string(reinterpret_cast<const char *>(storage) + sizeof(uint32_t), var_len)};
 		}
 		case TypeId::INVALID: {

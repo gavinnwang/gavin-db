@@ -19,15 +19,15 @@ public:
 	// fixed length col
 	Column(std::string column_name, TypeId type)
 	    : column_name_(std::move(column_name)), column_type_(type), length_(Type::TypeSize(type)) {
-		ASSERT(type != TypeId::VARCHAR, "Wrong constructor for VARCHAR type.");
-		ASSERT(length_ > 0, "Invalid column length");
+		assert(type != TypeId::VARCHAR && "Wrong constructor for VARCHAR type.");
+		assert(length_ > 0 && "Invalid column length");
 	}
 
 	// variable length col
 	Column(std::string column_name, TypeId type, uint32_t length)
 	    : column_name_(std::move(column_name)), column_type_(type), length_(Type::TypeSize(type, length)) {
-		ASSERT(type == TypeId::VARCHAR, "Wrong constructor for non-VARCHAR type.");
-		ASSERT(length_ > 0, "Invalid column length");
+		assert(type == TypeId::VARCHAR && "Wrong constructor for non-VARCHAR type.");
+		assert(length_ > 0 && "Invalid column length");
 	}
 
 	[[nodiscard]] std::string GetName() const {
@@ -83,7 +83,7 @@ private:
 
 template <>
 struct fmt::formatter<db::Column> : formatter<std::string_view> {
-	auto format(const db::Column& x, format_context &ctx) const {
+	auto format(const db::Column &x, format_context &ctx) const {
 		return formatter<string_view>::format(x.ToString(), ctx);
 	}
 };

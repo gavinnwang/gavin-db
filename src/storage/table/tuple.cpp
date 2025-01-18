@@ -3,7 +3,6 @@
 #include "common/typedef.hpp"
 #include "common/value.hpp"
 
-#include <sstream>
 namespace db {
 
 Tuple::Tuple(std::vector<Value> values, const Schema &schema) {
@@ -11,8 +10,8 @@ Tuple::Tuple(std::vector<Value> values, const Schema &schema) {
 
 	// 1. calc the size of tuple: inline storage size + variable storage size
 	uint32_t tuple_size = schema.GetTupleInlinePartStorageSize();
-	ASSERT(tuple_size > 0, "Tuple size must be greater than 0");
-	ASSERT(tuple_size < PAGE_SIZE, "Tuple size must be less than PAGE_SIZE");
+	assert(tuple_size > 0 && "Tuple size must be greater than 0");
+	assert(tuple_size < PAGE_SIZE && "Tuple size must be less than PAGE_SIZE");
 	for (const auto &uninline_col : schema.GetUninlinedColumns()) {
 		auto len = values[uninline_col].GetStorageSize();
 
@@ -70,7 +69,7 @@ Value Tuple::GetValue(const Schema &schema, uint32_t column_idx) const {
 const_data_ptr_t Tuple::GetDataPtr(const Column &col) const {
 	bool is_inlined = col.IsInlined();
 	if (is_inlined) {
-		ASSERT(col.GetStorageOffset() < data_.size(), "offset out of range");
+		assert(col.GetStorageOffset() < data_.size() && "offset out of range");
 		return (data_.data() + col.GetStorageOffset());
 	}
 
