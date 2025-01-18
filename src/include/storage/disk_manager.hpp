@@ -13,17 +13,17 @@ class Catalog; // forward declaration
 
 class DiskManager {
 public:
-	explicit DiskManager(std::unique_ptr<Catalog> &catalog) : cm_(catalog) {
-	}
+	explicit DiskManager(Catalog &catalog) : cm_(catalog) {};
+	DiskManager(const DiskManager &) = delete;
+	DiskManager& operator=(const DiskManager &) = delete;;
 	void ShutDown();
 	void WritePage(PageId page_id, const char *page_data);
 	void ReadPage(PageId page_id, char *page_data);
 	~DiskManager();
-	DISALLOW_COPY(DiskManager);
 
 private:
 	void AddTableDataIfNotExist(table_oid_t table_id);
-	std::unique_ptr<Catalog> &cm_;
+	Catalog &cm_;
 	std::unordered_map<table_oid_t, std::fstream> table_data_files_;
 	std::unordered_map<table_oid_t, std::fstream> table_meta_files_;
 };

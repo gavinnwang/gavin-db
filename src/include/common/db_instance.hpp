@@ -16,8 +16,8 @@ class DB {
 public:
 	explicit DB([[maybe_unused]] const std::string &db_file_name)
 	    : catalog_(std::make_unique<Catalog>()),
-	      disk_manager_(std::make_shared<DiskManager>(catalog_)),
-	      bpm_(std::make_unique<BufferPool>(DEFAULT_POOL_SIZE, disk_manager_)),
+	      disk_manager_(std::make_shared<DiskManager>(*catalog_)),
+	      bpm_(std::make_unique<BufferPool>(DEFAULT_POOL_SIZE, *disk_manager_)),
 	      execution_engine_(std::make_unique<ExecutionEngine>()),
 	      txn_manager_(std::make_unique<TransactionManager>()) {
 	          // DeletePathIfExists(db::FilePathManager::GetInstance().GetDatabaseRootPath());

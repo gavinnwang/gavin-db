@@ -1,10 +1,10 @@
 
 #include "storage/buffer/buffer_pool.hpp"
 
-#include "storage/buffer/random_replacer.h"
 #include "common/config.hpp"
 #include "common/logger.hpp"
 #include "common/macros.hpp"
+#include "storage/buffer/random_replacer.h"
 #include "storage/page/page_guard.hpp"
 #include "storage/page_allocator.hpp"
 
@@ -12,33 +12,26 @@
 #include <mutex>
 #include <vector>
 namespace db {
-BufferPool::BufferPool(frame_id_t pool_size, std::shared_ptr<DiskManager> disk_manager)
-    : pool_size_(pool_size), replacer_(std::make_unique<RandomBogoReplacer>()), disk_manager_(std::move(disk_manager)),
+BufferPool::BufferPool(frame_id_t pool_size, DiskManager &disk_manager)
+    : pool_size_(pool_size), replacer_(std::make_unique<RandomBogoReplacer>()), disk_manager_(disk_manager),
       pages_(pool_size) {
 	for (frame_id_t i = 0; i < pool_size_; ++i) {
 		free_list_.emplace_back(i);
 	}
 }
 
-// PageId BufferPoolManager::AllocatePage(table_oid_t table_oid) {
-//   auto new_page_num = catalog_->GetLastPageId(table_oid) + 1;
-// 	return {table_oid, new_page_num};
-// }
-
 bool BufferPool::AllocateFrame(frame_id_t &frame_id) {
 	if (free_list_.empty()) {
 		// gotta evict a random frame because
 		if (!replacer_->Evict(frame_id)) {
-			PrintPages();
 			replacer_->Print();
-			PrintFreeList();
 			return false;
 		}
 		assert(pages_[frame_id].pin_count_ == 0);
 		assert(pages_[frame_id].page_id_.page_number_ >= 0);
 		if (pages_[frame_id].is_dirty_) {
 			auto &evict_page = pages_[frame_id];
-			disk_manager_->WritePage(evict_page.GetPageId(), evict_page.GetData());
+			disk_manager_.WritePage(evict_page.GetPageId(), evict_page.GetData());
 		}
 		pages_[frame_id].ResetMemory();
 		return true;
@@ -108,7 +101,7 @@ Page &BufferPool::FetchPage(PageId page_id) {
 	page.page_id_ = page_id;
 	page.pin_count_++;
 	page.is_dirty_ = false;
-	disk_manager_->ReadPage(page_id, page.GetData());
+	disk_manager_.ReadPage(page_id, page.GetData());
 
 	return page;
 }
@@ -144,7 +137,7 @@ bool BufferPool::FlushPage(PageId page_id) {
 	}
 	frame_id_t frame_id = page_table_[page_id];
 	Page &page = pages_[frame_id];
-	disk_manager_->WritePage(page_id, page.GetData());
+	disk_manager_.WritePage(page_id, page.GetData());
 	page.is_dirty_ = false;
 	return true;
 }

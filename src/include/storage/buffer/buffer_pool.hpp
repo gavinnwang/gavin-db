@@ -16,8 +16,9 @@
 namespace db {
 class BufferPool {
 public:
-	BufferPool(frame_id_t pool_size, std::shared_ptr<DiskManager> disk_manager);
-	DISALLOW_COPY(BufferPool);
+	BufferPool(frame_id_t pool_size, DiskManager& disk_manager);
+	BufferPool(const BufferPool &) = delete;
+	BufferPool& operator=(const BufferPool &) = delete;;
 	bool FlushPage(PageId page_id);
 	void FlushAllPages();
 	BasicPageGuard FetchPageBasic(PageId page_id);
@@ -31,21 +32,10 @@ public:
 
 private:
 	bool AllocateFrame(frame_id_t &frame_id);
-	void PrintPages() {
-		std::string pages = "";
-		for (const auto &page : pages_) {
-			pages += page.ToString();
-		}
-		LOG_DEBUG("Printing all pages in BPM: {}", pages);
-	}
-	void PrintFreeList() {
-		// LOG_DEBUG("Printing free list: {}", free_list_);
-	}
 
 	const frame_id_t pool_size_;
-
 	std::unique_ptr<Replacer> replacer_;
-	std::shared_ptr<DiskManager> disk_manager_;
+	DiskManager& disk_manager_;
 	std::list<frame_id_t> free_list_;
 	std::unordered_map<PageId, frame_id_t, PageIdHash> page_table_;
 	std::vector<Page> pages_;
