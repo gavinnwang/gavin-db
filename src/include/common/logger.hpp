@@ -87,6 +87,7 @@ template <LogLevel level, typename... Args>
 void Log(std::string_view file, int line, const char *func, const std::string &message, Args &&...args) {
 	if constexpr (IsLogLevelEnabled(level)) {
 		auto header = LogHeader(file, line, func, level);
+		fmt::print(LOG_OUTPUT_STREAM, "{}", header);
 		if constexpr (!sizeof...(Args)) {
 			fmt::print(LOG_OUTPUT_STREAM, "{}\n", message);
 		} else {
