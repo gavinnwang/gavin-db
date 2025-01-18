@@ -1,6 +1,5 @@
 #pragma once
 
-#include "common/macros.hpp"
 #include "common/typedef.hpp"
 namespace db {
 class Replacer {

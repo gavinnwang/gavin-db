@@ -18,7 +18,6 @@ void Planner::PlanQuery(const BoundStatement &statement) {
 	switch (statement.type_) {
 	case StatementType::SELECT_STATEMENT: {
 		plan = PlanSelect(dynamic_cast<const SelectStatement &>(statement));
-		break;
 	}
 	case StatementType::INSERT_STATEMENT: {
 		plan = PlanInsert(dynamic_cast<const InsertStatement &>(statement));

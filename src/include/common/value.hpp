@@ -4,12 +4,12 @@
 #include "common/config.hpp"
 #include "common/exception.hpp"
 #include "common/logger.hpp"
-#include "common/macros.hpp"
 #include "common/type.hpp"
 #include "index/index_typdef.hpp"
 #include "storage/serializer/deserializer.hpp"
 #include "storage/serializer/serializer.hpp"
 
+#include <cassert>
 #include <cstdint>
 #include <cstring>
 #include <utility>
@@ -96,7 +96,7 @@ public:
 			return {type_id, std::string(reinterpret_cast<const char *>(storage) + sizeof(uint32_t), var_len)};
 		}
 		case TypeId::INVALID: {
-			UNREACHABLE("Value has invalid type id");
+			throw RuntimeException("Invalid type");
 		}
 		}
 		std::unreachable();
@@ -124,7 +124,7 @@ public:
 			return ret;
 		}
 		case TypeId::INVALID: {
-			UNREACHABLE("Value has invalid type id");
+			throw RuntimeException("Invalid type");
 		}
 		}
 		std::unreachable();
@@ -142,7 +142,7 @@ public:
 
 #define HANDLE_UNREACHABLE_CASE(type)                                                                                  \
 	case TypeId::type:                                                                                                 \
-		UNREACHABLE(#type " arithmetic not supported");                                                                \
+		throw RuntimeException(#type " arithmetic not supported");                                                     \
 		return
 
 	void ComputeArithmetic(const Value &other, ArithmeticType expression_type) {

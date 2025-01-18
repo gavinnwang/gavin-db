@@ -1,12 +1,11 @@
 #pragma once
 
-#include "storage/buffer/buffer_pool.hpp"
 #include "common/config.hpp"
 #include "common/logger.hpp"
-#include "common/macros.hpp"
 #include "common/typedef.hpp"
 #include "concurrency/transaction.hpp"
 #include "index/index.hpp"
+#include "storage/buffer/buffer_pool.hpp"
 #include "storage/page/btree_header_page.hpp"
 #include "storage/page/btree_internal_page.hpp"
 #include "storage/page/btree_leaf_page.hpp"
@@ -264,7 +263,7 @@ protected:
 			// not prepared for spliting internal node yet
 			node.MoveHalfTo(new_node, bpm_, table_meta_.table_oid_);
 		} else {
-			UNREACHABLE("Invalid node type");
+			throw RuntimeException("Invalid node type");
 		}
 
 		return new_node;

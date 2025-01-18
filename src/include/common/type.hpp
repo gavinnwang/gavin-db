@@ -1,7 +1,6 @@
 #pragma once
 
 #include "common/exception.hpp"
-#include "common/macros.hpp"
 #include "sql/ColumnType.h"
 
 #include <cstdint>
@@ -21,7 +20,7 @@ public:
 		case TypeId::VARCHAR:
 			return false;
 		default: {
-			UNREACHABLE("Cannot get size of invalid type");
+			throw RuntimeException("Invalid type");
 		}
 		}
 		std::unreachable();
@@ -37,7 +36,7 @@ public:
 		case TypeId::VARCHAR:
 			return length;
 		default: {
-			UNREACHABLE("Cannot get size of invalid type");
+			throw RuntimeException("Invalid type");
 		}
 		}
 		std::unreachable();
@@ -54,7 +53,7 @@ public:
 		case TypeId::VARCHAR:
 			return "VARCHAR";
 		default: {
-			UNREACHABLE("Unkown type");
+			throw RuntimeException("Invalid type");
 		}
 		}
 		std::unreachable();

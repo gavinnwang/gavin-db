@@ -7,6 +7,7 @@
 #include "storage/page/page_guard.hpp"
 #include "storage/page_allocator.hpp"
 
+#include <cassert>
 #include <memory>
 #include <mutex>
 #include <vector>

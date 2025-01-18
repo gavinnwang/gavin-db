@@ -1,11 +1,11 @@
 #pragma once
 
-#include "common/macros.hpp"
 #include "common/type.hpp"
 #include "fmt/format.h"
 #include "storage/serializer/deserializer.hpp"
 #include "storage/serializer/serializer.hpp"
 
+#include <cassert>
 #include <string>
 
 namespace db {

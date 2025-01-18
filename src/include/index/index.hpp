@@ -1,18 +1,15 @@
 #pragma once
 
-#include "meta/column.hpp"
-#include "common/exception.hpp"
 #include "common/logger.hpp"
-#include "common/macros.hpp"
 #include "common/rid.hpp"
 #include "common/typedef.hpp"
 #include "common/value.hpp"
 #include "concurrency/transaction.hpp"
+#include "meta/column.hpp"
 #include "storage/serializer/serializer.hpp"
 #include "storage/table/table_meta.hpp"
 #include "storage/table/tuple.hpp"
 
-#include <iomanip>
 #include <sstream>
 
 namespace db {

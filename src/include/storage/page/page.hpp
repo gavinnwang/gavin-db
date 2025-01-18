@@ -1,7 +1,6 @@
 #pragma once
 
 #include "common/config.hpp"
-#include "common/macros.hpp"
 #include "common/page_id.hpp"
 #include "common/rwlatch.hpp"
 #include "fmt/format.h"

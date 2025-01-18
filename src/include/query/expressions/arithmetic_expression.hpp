@@ -3,8 +3,8 @@
 #include "common/arithmetic_type.hpp"
 #include "common/exception.hpp"
 #include "common/value.hpp"
-#include "query/expressions/abstract_expression.hpp"
 #include "fmt/core.h"
+#include "query/expressions/abstract_expression.hpp"
 #include "storage/table/tuple.hpp"
 namespace db {
 
@@ -24,14 +24,14 @@ public:
 	}
 
 	[[nodiscard]] Value EvaluateJoin(const Tuple &left_tuple, const Schema &left_schema, const Tuple &right_tuple,
-	                   const Schema &right_schema) const override {
+	                                 const Schema &right_schema) const override {
 		Value lhs = GetChildAt(0)->EvaluateJoin(left_tuple, left_schema, right_tuple, right_schema);
 		Value rhs = GetChildAt(1)->EvaluateJoin(left_tuple, left_schema, right_tuple, right_schema);
 		return PerformComputation(std::move(lhs), std::move(rhs));
 	}
 
 	[[nodiscard]] Value GetConstValue() const override {
-		UNREACHABLE("Arithmetic Expression cannot return a constant value");
+		throw RuntimeException("Arithmetic Expression cannot return a constant value");
 	}
 
 	[[nodiscard]] std::string ToString() const override {

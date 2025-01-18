@@ -1,6 +1,6 @@
 #include "common/value.hpp"
 
-#include "common/macros.hpp"
+#include "common/exception.hpp"
 #include "common/type.hpp"
 
 #include <cstdint>
@@ -17,7 +17,7 @@ void Value::Serialize(Serializer &serializer) const {
 	if (!IsNull()) {
 		switch (type_id_) {
 		case TypeId::INVALID:
-			UNREACHABLE("Cannot serialize invalid type value");
+			throw RuntimeException("Invalid type");
 		case TypeId::BOOLEAN:
 			serializer.WriteProperty(102, "value", std::get<int8_t>(value_));
 			break;
@@ -46,7 +46,7 @@ Value Value::Deserialize(Deserializer &deserializer) {
 	new_value.is_null_ = false;
 	switch (type_id) {
 	case TypeId::INVALID:
-		UNREACHABLE("Cannot serialize invalid type value");
+		throw RuntimeException("Cannot serialize invalid type");
 	case TypeId::BOOLEAN:
 		new_value.value_ = deserializer.ReadProperty<int8_t>(102, "value");
 		break;
@@ -89,7 +89,7 @@ void Value::SerializeTo(data_ptr_t storage) const {
 		return;
 	}
 	case TypeId::INVALID: {
-		UNREACHABLE("Cannot serialize invalid type valye");
+		throw RuntimeException("Invalid type");
 		return;
 	}
 	}
@@ -106,7 +106,7 @@ auto Value::ToString() const -> std::string {
 	case TypeId::VARCHAR:
 		return std::get<std::string>(value_);
 	case TypeId::INVALID:
-		UNREACHABLE("Value has invalid type id");
+		throw RuntimeException("Invalid type");
 	}
 	std::unreachable();
 }
