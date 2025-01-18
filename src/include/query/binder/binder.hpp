@@ -5,7 +5,7 @@
 #include "query/binder/statement/insert_statement.hpp"
 #include "query/binder/statement/select_statement.hpp"
 #include "query/binder/table_ref/bound_expression_list.hpp"
-#include "meta/catalog_manager.hpp"
+#include "meta/catalog.hpp"
 #include "meta/column.hpp"
 #include "sql/CreateStatement.h"
 #include "sql/InsertStatement.h"
@@ -16,7 +16,7 @@
 namespace db {
 class Binder {
 public:
-	explicit Binder(const CatalogManager &catalog_manager) : catalog_manager_(catalog_manager) {
+	explicit Binder(const Catalog &catalog) : catalog_(catalog) {
 	}
 	std::unique_ptr<BoundStatement> Bind(const hsql::SQLStatement *stmt);
 	std::unique_ptr<CreateStatement> BindCreate(const hsql::CreateStatement *stmt);
@@ -30,7 +30,7 @@ public:
 	std::unique_ptr<BoundBaseTableRef> BindBaseTableRef(const std::string &table_name);
 
 private:
-	const CatalogManager &catalog_manager_;
+	const Catalog &catalog_;
 	std::unique_ptr<BoundTableRef> *scope_ {nullptr};
 };
 } // namespace db

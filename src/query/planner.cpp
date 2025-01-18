@@ -102,7 +102,7 @@ AbstractPlanNodeRef Planner::PlanTableRef(const BoundTableRef &table_ref) {
 	}
 	case TableReferenceType::BASE_TABLE: {
 		const auto &base_table_ref = dynamic_cast<const BoundBaseTableRef &>(table_ref);
-		auto &table = catalog_manager_.GetTableByName(base_table_ref.table_);
+		auto &table = catalog_.GetTableByName(base_table_ref.table_);
 		std::vector<Column> cols;
 		for (const auto &col : table.schema_.GetColumns()) {
 			cols.emplace_back(col);

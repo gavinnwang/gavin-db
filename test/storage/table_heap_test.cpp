@@ -1,5 +1,5 @@
 #include "storage/buffer/buffer_pool.hpp"
-#include "meta/catalog_manager.hpp"
+#include "meta/catalog.hpp"
 #include "common/fs_utils.hpp"
 #include "common/logger.hpp"
 #include "common/test_utils.hpp"
@@ -15,7 +15,7 @@ TEST(StorageTest, TableHeapSimpleTest) {
 
 	DeletePathIfExists(db::FilePathManager::GetInstance().GetDatabaseRootPath());
 	const size_t buffer_pool_size = 10;
-	auto cm = std::make_unique<CatalogManager>();
+	auto cm = std::make_unique<Catalog>();
 	auto dm = std::make_shared<DiskManager>(cm);
 	auto bpm = std::make_unique<BufferPool>(buffer_pool_size, dm);
 
@@ -58,7 +58,7 @@ TEST(StorageTest, TableHeapSimpleTest) {
 TEST(StorageTest, TableHeapManyInsertionTest) {
 	DeletePathIfExists(db::FilePathManager::GetInstance().GetDatabaseRootPath());
 	const size_t buffer_pool_size = 25;
-	auto cm = std::make_unique<CatalogManager>();
+	auto cm = std::make_unique<Catalog>();
 	auto dm = std::make_shared<DiskManager>(cm);
 	auto bpm = std::make_unique<BufferPool>(buffer_pool_size, dm);
 

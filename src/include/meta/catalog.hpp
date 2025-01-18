@@ -17,15 +17,15 @@
 #include <string>
 #include <unordered_map>
 namespace db {
-class CatalogManager {
+class Catalog {
 public:
-	CatalogManager() {
+	Catalog() {
 		LOG_TRACE("Initializing meta manager...");
-		std::filesystem::path catalog_path = FilePathManager::GetInstance().GetSystemCatalogPath();
-		if (std::filesystem::exists(catalog_path)) {
+		std::filesystem::path catalogpath = FilePathManager::GetInstance().GetSystemCatalogPath();
+		if (std::filesystem::exists(catalogpath)) {
 			LOG_TRACE("Catalog file exists! Loading from disk...");
-			auto catalog_fs = FileStream(catalog_path);
-			BinaryDeserializer deserializer(catalog_fs);
+			auto catalogfs = FileStream(catalogpath);
+			BinaryDeserializer deserializer(catalogfs);
 			Deserialize(deserializer);
 		} else {
 			LOG_TRACE("Catalog file not found. Creating one to disk");
@@ -60,10 +60,10 @@ public:
 	void PersistToDisk() {
 		LOG_TRACE("Persisting meta to disk");
 		// persist the meta to disk
-		std::filesystem::path catalog_path = FilePathManager::GetInstance().GetSystemCatalogPath();
-		CreateFileIfNotExists(catalog_path);
-		auto catalog_fs = FileStream(catalog_path);
-		BinarySerializer serializer(catalog_fs);
+		std::filesystem::path catalogpath = FilePathManager::GetInstance().GetSystemCatalogPath();
+		CreateFileIfNotExists(catalogpath);
+		auto catalogfs = FileStream(catalogpath);
+		BinarySerializer serializer(catalogfs);
 		Serialize(serializer);
 
 		// persist all table meta to disk

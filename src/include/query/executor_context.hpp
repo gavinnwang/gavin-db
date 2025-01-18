@@ -1,20 +1,20 @@
 #pragma once
 
 #include "storage/buffer/buffer_pool.hpp"
-#include "meta/catalog_manager.hpp"
+#include "meta/catalog.hpp"
 
 namespace db {
 class ExecutorContext {
 public:
-	ExecutorContext(CatalogManager &catalog, BufferPool &bpm) : catalog_ {catalog}, bpm_ {bpm} {
+	ExecutorContext(Catalog &catalog, BufferPool &bpm) : catalog {catalog}, bpm_ {bpm} {
 	}
 
 	~ExecutorContext() = default;
 
 	DISALLOW_COPY_AND_MOVE(ExecutorContext);
 
-	[[nodiscard]] CatalogManager &GetCatalog() const {
-		return catalog_;
+	[[nodiscard]] Catalog &GetCatalog() const {
+		return catalog;
 	}
 
 	[[nodiscard]] BufferPool &GetBufferPoolManager() const {
@@ -22,7 +22,7 @@ public:
 	}
 
 private:
-	CatalogManager &catalog_;
+	Catalog &catalog;
 	BufferPool &bpm_;
 };
 } // namespace db

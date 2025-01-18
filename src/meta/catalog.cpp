@@ -1,4 +1,4 @@
-#include "meta/catalog_manager.hpp"
+#include "meta/catalog.hpp"
 
 #include "common/exception.hpp"
 #include "common/typedef.hpp"
@@ -10,7 +10,7 @@
 
 namespace db {
 
-std::optional<table_oid_t> CatalogManager::CreateTable(const std::string &table_name, const Schema &schema) {
+std::optional<table_oid_t> Catalog::CreateTable(const std::string &table_name, const Schema &schema) {
 	if (table_names_.contains(table_name)) {
 		return std::nullopt;
 	}
@@ -29,7 +29,7 @@ std::optional<table_oid_t> CatalogManager::CreateTable(const std::string &table_
 	return table_oid;
 }
 
-std::optional<index_oid_t> CatalogManager::CreateIndex(const std::string &index_name, const std::string &table_name,
+std::optional<index_oid_t> Catalog::CreateIndex(const std::string &index_name, const std::string &table_name,
                                                        const Column &key_col, bool is_primary_key, IndexType index_type,
                                                        BufferPool &bpm) {
 	if (table_names_.find(table_name) == table_names_.end()) {

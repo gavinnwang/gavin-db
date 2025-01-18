@@ -1,6 +1,6 @@
 #include "storage/disk_manager.hpp"
 
-#include "meta/catalog_manager.hpp"
+#include "meta/catalog.hpp"
 #include "common/config.hpp"
 #include "common/fs_utils.hpp"
 #include "common/logger.hpp"

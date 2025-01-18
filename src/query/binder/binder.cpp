@@ -210,7 +210,7 @@ std::unique_ptr<BoundExpressionListRef> Binder::BindValuesList(const std::vector
 }
 
 std::unique_ptr<BoundBaseTableRef> Binder::BindBaseTableRef(const std::string &table_name) {
-	auto &table_info = catalog_manager_.GetTableByName(table_name);
+	auto &table_info = catalog_.GetTableByName(table_name);
 	return std::make_unique<BoundBaseTableRef>(table_name, table_info.table_oid_, table_info.schema_);
 }
 

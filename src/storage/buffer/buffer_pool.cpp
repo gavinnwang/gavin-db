@@ -21,7 +21,7 @@ BufferPool::BufferPool(frame_id_t pool_size, std::shared_ptr<DiskManager> disk_m
 }
 
 // PageId BufferPoolManager::AllocatePage(table_oid_t table_oid) {
-//   auto new_page_num = catalog_manager_->GetLastPageId(table_oid) + 1;
+//   auto new_page_num = catalog_->GetLastPageId(table_oid) + 1;
 // 	return {table_oid, new_page_num};
 // }
 

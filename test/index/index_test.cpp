@@ -1,6 +1,6 @@
 
 
-#include "meta/catalog_manager.hpp"
+#include "meta/catalog.hpp"
 #include "common/test_utils.hpp"
 #include "concurrency/transaction.hpp"
 #include "index/bplus_tree_index.hpp"
@@ -13,7 +13,7 @@ namespace db {
 
 TEST(IndexTest, IndexTest) {
 	const size_t buffer_pool_size = 10;
-	auto cm = std::make_unique<CatalogManager>();
+	auto cm = std::make_unique<Catalog>();
 	auto dm = std::make_shared<DiskManager>(cm);
 	auto bpm = std::make_unique<BufferPool>(buffer_pool_size, dm);
 
@@ -76,7 +76,7 @@ TEST(IndexTest, IndexTest) {
 
 TEST(IndexTest, IndexManyInsertionsTest) {
 	const size_t buffer_pool_size = 13;
-	auto cm = std::make_unique<db::CatalogManager>();
+	auto cm = std::make_unique<db::Catalog>();
 	auto dm = std::make_shared<db::DiskManager>(cm);
 	auto bpm = std::make_unique<db::BufferPool>(buffer_pool_size, dm);
 

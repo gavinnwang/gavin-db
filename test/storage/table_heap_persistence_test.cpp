@@ -1,5 +1,5 @@
 #include "storage/buffer/buffer_pool.hpp"
-#include "meta/catalog_manager.hpp"
+#include "meta/catalog.hpp"
 #include "common/logger.hpp"
 #include "common/test_utils.hpp"
 #include "common/typedef.hpp"
@@ -16,7 +16,7 @@ namespace db {
 TEST(StorageTest, TablePersistTest) {
 	// DeletePathIfExists(db::FilePathManager::GetInstance().GetDatabaseRootPath());
 	const size_t buffer_pool_size = 10;
-	auto cm = std::make_unique<CatalogManager>();
+	auto cm = std::make_unique<Catalog>();
 	auto dm = std::make_shared<DiskManager>(cm);
 	auto bpm = std::make_unique<BufferPool>(buffer_pool_size, dm);
 
@@ -50,7 +50,7 @@ TEST(StorageTest, TablePersistTest) {
 	bpm->FlushAllPages();
 	cm->PersistToDisk();
 
-	auto cm2 = std::make_unique<CatalogManager>();
+	auto cm2 = std::make_unique<Catalog>();
 	auto dm2 = std::make_shared<DiskManager>(cm);
 	auto bpm2 = std::make_unique<BufferPool>(buffer_pool_size, dm);
 

@@ -5,7 +5,7 @@
 #include "query/binder/statement/insert_statement.hpp"
 #include "query/binder/statement/select_statement.hpp"
 #include "query/binder/table_ref/bound_expression_list.hpp"
-#include "meta/catalog_manager.hpp"
+#include "meta/catalog.hpp"
 #include "query/expressions/abstract_expression.hpp"
 #include "query/plans/abstract_plan.hpp"
 
@@ -13,7 +13,7 @@
 namespace db {
 class Planner {
 public:
-	explicit Planner(CatalogManager &catalog_manager) : catalog_manager_(catalog_manager) {};
+	explicit Planner(Catalog &catalog) : catalog_(catalog) {};
 
 	void PlanQuery(const BoundStatement &statement);
 
@@ -28,6 +28,6 @@ public:
 	AbstractPlanNodeRef plan_;
 
 private:
-	CatalogManager &catalog_manager_;
+	Catalog &catalog_;
 };
 } // namespace db
