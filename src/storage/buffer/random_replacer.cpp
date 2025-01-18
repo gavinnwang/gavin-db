@@ -1,12 +1,11 @@
 #include "storage/buffer/random_replacer.h"
 namespace db {
-RandomBogoReplacer::RandomBogoReplacer() {
-}
+RandomBogoReplacer::RandomBogoReplacer() = default;
+
 auto RandomBogoReplacer::Evict(frame_id_t &frame_id) -> bool {
 	for (auto &iter : frame_store_) {
 		if (iter.second) {
 			frame_id = iter.first;
-			// frame_store_.erase(iter.first);
 			// change to not evitctable
 			iter.second = false;
 			return true;

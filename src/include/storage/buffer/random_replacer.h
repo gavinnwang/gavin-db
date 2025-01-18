@@ -22,6 +22,6 @@ public:
 	}
 
 private:
-	std::unordered_map<frame_id_t, uint16_t> frame_store_;
+	std::unordered_map<frame_id_t, bool> frame_store_;
 };
 } // namespace db
