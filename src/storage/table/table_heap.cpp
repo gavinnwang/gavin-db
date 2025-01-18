@@ -35,12 +35,12 @@ std::optional<RID> TableHeap::InsertTuple(const TupleMeta &meta, const Tuple &tu
 			break;
 		}
 		// tuple page is empty and still cannot insert
-		ENSURE(page.GetNumTuples() != 0, "tuple is too large");
+		assert(page.GetNumTuples() != 0 && "tuple is too large");
 		// allocate a new page for the tuple because the current page is full
 		// page_id_t next_page_id = INVALID_PAGE_ID;
 		PageId next_page_id {table_meta_.table_oid_};
 		auto npg = bpm_.NewPageGuarded(*this, next_page_id);
-		ENSURE(next_page_id.page_number_ != INVALID_PAGE_ID, "cannot allocate page");
+		assert(next_page_id.page_number_ != INVALID_PAGE_ID && "cannot allocate page");
 		// construct the linked list
 		page.SetNextPageId(next_page_id.page_number_);
 		// initialize the next page

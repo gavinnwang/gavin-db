@@ -1,9 +1,8 @@
 #include "storage/page/table_page.hpp"
 
 #include "common/logger.hpp"
-#include "common/macros.hpp"
 
-#include <exception>
+#include <cassert>
 
 namespace db {
 void TablePage::Init() {
@@ -19,8 +18,8 @@ std::optional<uint16_t> TablePage::GetNextTupleOffset(const Tuple &tuple) const 
 	} else {
 		slot_end_offset = PAGE_SIZE;
 	}
-	ENSURE(slot_end_offset >= TABLE_PAGE_HEADER_SIZE, "invalid slot end offset");
-	ENSURE(tuple.GetStorageSize() <= PAGE_SIZE - TABLE_PAGE_HEADER_SIZE, "tuple is too large");
+	assert(slot_end_offset >= TABLE_PAGE_HEADER_SIZE && "invalid slot end offset");
+	assert(tuple.GetStorageSize() <= PAGE_SIZE - TABLE_PAGE_HEADER_SIZE && "tuple is too large");
 
 	// if the tuple size is already too large we return early to avoid underflow
 	if (tuple.GetStorageSize() > slot_end_offset) {
@@ -32,7 +31,7 @@ std::optional<uint16_t> TablePage::GetNextTupleOffset(const Tuple &tuple) const 
 	if (tuple_offset < offset_size) {
 		return std::nullopt;
 	}
-	ASSERT(tuple_offset >= TABLE_PAGE_HEADER_SIZE && tuple_offset < PAGE_SIZE, "invalid tuple offset");
+	assert(tuple_offset >= TABLE_PAGE_HEADER_SIZE && tuple_offset < PAGE_SIZE && "invalid tuple offset");
 	return tuple_offset;
 }
 
@@ -45,7 +44,7 @@ auto TablePage::InsertTuple(const TupleMeta &meta, const Tuple &tuple) -> std::o
 	tuple_info_[tuple_id] = std::make_tuple(*tuple_offset, tuple.GetStorageSize(), meta);
 	num_tuples_++;
 	LOG_TRACE("offset={}", *tuple_offset);
-	ASSERT(*tuple_offset + tuple.GetStorageSize() <= PAGE_SIZE, "tuple out of range");
+	assert(*tuple_offset + tuple.GetStorageSize() <= PAGE_SIZE && "tuple out of range");
 	tuple.SerializeTo(page_start_ + *tuple_offset);
 	return tuple_id;
 }
@@ -71,7 +70,7 @@ auto TablePage::GetTuple(const RID &rid) const -> std::optional<std::pair<TupleM
 	const auto &[offset, size, meta] = tuple_info_[tuple_id];
 	Tuple tuple;
 	tuple.data_.resize(size);
-	ASSERT(offset + size <= PAGE_SIZE, "tuple out of range");
+	assert(offset + size <= PAGE_SIZE && "tuple out of range");
 	tuple.DeserializeFrom(page_start_ + offset, size);
 	// memmove(tuple.data_.data(), page_start_ + offset, size);
 	tuple.rid_ = rid;

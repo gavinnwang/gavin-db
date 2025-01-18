@@ -12,7 +12,10 @@ class TableHeap : public PageAllocator {
 	friend class TableIterator;
 	// in memory representation of table heap
 public:
-	DISALLOW_COPY_AND_MOVE(TableHeap);
+	TableHeap(const TableHeap &) = delete;
+	TableHeap &operator=(const TableHeap &) = delete;
+	TableHeap(TableHeap &&) = delete;
+	TableHeap &operator=(TableHeap &&) = delete;
 	explicit TableHeap(BufferPool &bpm, TableMeta &table_meta);
 	// doesn't ensure the tuple is the same schema as the table
 	[[nodiscard]] std::optional<RID> InsertTuple(const TupleMeta &meta, const Tuple &tuple);

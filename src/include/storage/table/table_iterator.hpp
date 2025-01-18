@@ -18,8 +18,11 @@ class TableIterator {
 	friend class Cursor;
 
 public:
-	DISALLOW_COPY_AND_MOVE(TableIterator);
-
+	TableIterator(const TableIterator &) = delete;
+	TableIterator &operator=(const TableIterator &) = delete;
+	TableIterator(TableIterator &&) = delete;
+TableIterator &operator=(TableIterator &&) = delete;
+	
 	TableIterator(const TableHeap &table_heap, RID rid, RID stop_at_rid)
 	    : table_heap_(table_heap), rid_(rid), stop_at_rid_(stop_at_rid) {};
 
