@@ -26,30 +26,19 @@ void DB::ExecuteQuery([[maybe_unused]] Transaction &txn, const std::string &quer
 		auto bound_stmt = binder.Bind(parsed_stmt);
 		LOG_DEBUG("Bound statement: {}", bound_stmt->ToString());
 		switch (bound_stmt->type_) {
-		case StatementType::SELECT_STATEMENT: {
-			auto planner = Planner {*catalog_};
-			planner.PlanQuery(*bound_stmt);
-			std::vector<Tuple> result_set;
-			auto context = std::make_unique<ExecutorContext>(*catalog_, *bpm_);
-			execution_engine_->Execute(std::move(planner.plan_), result_set, txn, *context);
-			bpm_->FlushAllPages();
-			catalog_->PersistToDisk();
-			continue;
-		}
+		case StatementType::SELECT_STATEMENT:
 		case StatementType::INSERT_STATEMENT: {
-			// plan
 			auto planner = Planner {*catalog_};
 			planner.PlanQuery(*bound_stmt);
 			std::vector<Tuple> result_set;
-			auto context = std::make_unique<ExecutorContext>(*catalog_, *bpm_);
-			execution_engine_->Execute(std::move(planner.plan_), result_set, txn, *context);
+			auto context = ExecutorContext {*catalog_, *bpm_};
+			execution_engine_->Execute(std::move(planner.plan_), result_set, txn, context);
 			bpm_->FlushAllPages();
 			catalog_->PersistToDisk();
 			continue;
 		}
 		case StatementType::CREATE_STATEMENT: {
-			auto *raw_create_stmt = static_cast<CreateStatement *>(bound_stmt.release());
-			std::unique_ptr<CreateStatement> create_stmt(raw_create_stmt);
+			auto create_stmt = *static_cast<CreateStatement *>(bound_stmt.release());
 			HandleCreateStatement(txn, create_stmt);
 			continue;
 		}
@@ -61,19 +50,19 @@ void DB::ExecuteQuery([[maybe_unused]] Transaction &txn, const std::string &quer
 	LOG_INFO("Query {} executed success.", query);
 }
 
-void DB::HandleCreateStatement([[maybe_unused]] Transaction &txn, const std::unique_ptr<CreateStatement> &stmt) {
+void DB::HandleCreateStatement([[maybe_unused]] Transaction &txn, const CreateStatement &stmt) {
 	std::unique_lock<std::shared_mutex> l(catalog_lock_);
-	const auto schema = Schema {stmt->columns_};
-	const auto &table_oid_opt = catalog_->CreateTable(stmt->table_name_, schema);
+	const auto schema = Schema {stmt.columns_};
+	const auto &table_oid_opt = catalog_->CreateTable(stmt.table_name_, schema);
 	if (!table_oid_opt.has_value()) {
-		const auto &table_meta = catalog_->GetTableByName(stmt->table_name_);
+		const auto &table_meta = catalog_->GetTableByName(stmt.table_name_);
 		throw RuntimeException(
 		    fmt::format("Failed to create table: table already exists with schema: {}", table_meta.schema_));
 	}
-	const auto &table_name = stmt->table_name_;
-	if (!stmt->primary_key_.empty()) {
-		assert(stmt->primary_key_.size() == 1 && "Only support one primary key");
-		const auto &primary_key = stmt->primary_key_.at(0);
+	const auto &table_name = stmt.table_name_;
+	if (!stmt.primary_key_.empty()) {
+		assert(stmt.primary_key_.size() == 1 && "Only support one primary key");
+		const auto &primary_key = stmt.primary_key_.at(0);
 		const auto key_col_it =
 		    std::ranges::find_if(schema.GetColumns(), [&](const Column &col) { return col.GetName() == primary_key; });
 		assert(key_col_it != schema.GetColumns().end() && "Broken invariant pk col not found");

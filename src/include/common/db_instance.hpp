@@ -1,12 +1,12 @@
 #pragma once
 
-#include "query/binder/statement/create_statement.hpp"
-#include "storage/buffer/buffer_pool.hpp"
-#include "meta/catalog.hpp"
 #include "common/config.hpp"
 #include "concurrency/transaction.hpp"
 #include "concurrency/transaction_manager.hpp"
+#include "meta/catalog.hpp"
+#include "query/binder/statement/create_statement.hpp"
 #include "query/execution_engine.hpp"
+#include "storage/buffer/buffer_pool.hpp"
 
 #include <memory>
 #include <string>
@@ -15,17 +15,15 @@ namespace db {
 class DB {
 public:
 	explicit DB([[maybe_unused]] const std::string &db_file_name)
-	    : catalog_(std::make_unique<Catalog>()),
-	      disk_manager_(std::make_shared<DiskManager>(*catalog_)),
+	    : catalog_(std::make_unique<Catalog>()), disk_manager_(std::make_shared<DiskManager>(*catalog_)),
 	      bpm_(std::make_unique<BufferPool>(DEFAULT_POOL_SIZE, *disk_manager_)),
-	      execution_engine_(std::make_unique<ExecutionEngine>()),
-	      txn_manager_(std::make_unique<TransactionManager>()) {
-	          // DeletePathIfExists(db::FilePathManager::GetInstance().GetDatabaseRootPath());
+	      execution_engine_(std::make_unique<ExecutionEngine>()), txn_manager_(std::make_unique<TransactionManager>()) {
+		      // DeletePathIfExists(db::FilePathManager::GetInstance().GetDatabaseRootPath());
 	      };
 	~DB() = default;
 	;
 
-	void HandleCreateStatement(Transaction &txn, const std::unique_ptr<CreateStatement> &stmt);
+	void HandleCreateStatement(Transaction &txn, const CreateStatement &stmt);
 	void ExecuteQuery([[maybe_unused]] Transaction &txn, const std::string &query);
 
 private:
